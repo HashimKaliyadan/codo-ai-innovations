@@ -18,7 +18,7 @@ const config: Config = {
           blue: "#00203F",     
           haze: "#F0F3FF",     
           dark: "#0A0A0B",     
-          logoGreen: "#01b667", 
+          logoGreen: "#008764", 
         }
       },
       fontFamily: {

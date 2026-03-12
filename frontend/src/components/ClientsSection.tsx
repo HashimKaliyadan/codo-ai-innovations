@@ -100,7 +100,7 @@ export default function ClientsSection() {
                   transition: "all 0.4s ease",
                   filter: "grayscale(100%)",
                 }}
-                className="group-hover:grayscale-0 group-hover:opacity-100 group-hover:text-[#01b667] group-hover:scale-105"
+                className="group-hover:grayscale-0 group-hover:opacity-100 group-hover:text-[#008764] group-hover:scale-105"
               >
                 {client.name}
               </div>

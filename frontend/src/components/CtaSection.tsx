@@ -31,7 +31,7 @@ export default function CtaSection() {
           transform: "translate(-50%, -50%)",
           width: "100%",
           height: "100%",
-          background: "radial-gradient(circle at center, rgba(0,182,103,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(circle at center, rgba(0,135,100,0.08) 0%, transparent 70%)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -87,7 +87,7 @@ export default function CtaSection() {
                 style={{
                   padding: "1.25rem 3.5rem",
                   borderRadius: "999px",
-                  background: "#01b667",
+                  background: "#008764",
                   color: "#ffffff",
                   fontWeight: 900,
                   fontSize: "1rem",
@@ -97,7 +97,7 @@ export default function CtaSection() {
                   alignItems: "center",
                   gap: "0.75rem",
                   transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
-                  boxShadow: hovered ? "0 20px 40px rgba(1,182,103,0.3)" : "none",
+                  boxShadow: hovered ? "0 20px 40px rgba(0,135,100,0.3)" : "none",
                   transform: hovered ? "scale(1.05) translateY(-4px)" : "scale(1)",
                 }}
               >

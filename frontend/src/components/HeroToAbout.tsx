@@ -15,7 +15,7 @@ export default function HeroToAbout() {
   }, [inView, setOpacity]);
 
   const heroOpacity = useTransform(scrollYProgress, [0, 0.4, 0.8], [1, 1, 0]);
-  const heroScale  = useTransform(scrollYProgress, [0, 0.8], [1, 2.2]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 2.2]);
 
   const scrollIndOp = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
@@ -28,7 +28,7 @@ export default function HeroToAbout() {
           opacity: heroOpacity, scale: heroScale,
         }}>
           <div style={{ fontSize: "clamp(3.5rem, 16vw, 13rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "white", lineHeight: 0.85 }}>
-            COD<span style={{ color: "#01b667" }}>O</span>
+            COD<span style={{ color: "#008764" }}>O</span>
           </div>
           <div style={{ fontSize: "clamp(0.9rem, 4vw, 4rem)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.1em", marginTop: "0.2em" }}>
             AI INNOVATIONS

@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from "react";
@@ -18,216 +16,214 @@ const menuLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
+// Wave Animation Component for the Action Button
+const WaveLoader = () => (
+  <div className="flex gap-1 justify-center items-center h-full">
+    {[0, 1, 2].map((i) => (
+      <motion.span
+        key={i}
+        className="w-1.5 h-1.5 bg-[var(--brand-green)] rounded-full"
+        animate={{ y: [0, -6, 0] }}
+        transition={{
+          duration: 0.6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: i * 0.1,
+        }}
+      />
+    ))}
+  </div>
+);
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isTalking, setIsTalking] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [ripple, setRipple] = useState(false);
 
   const isDark = theme === "dark";
 
-  const handleTalkClick = () => {
-    if (isTalking) return;
-    setIsTalking(true);
-    setTimeout(() => {
-      
-      setIsTalking(false);
-    }, 1000);
+  const handleActionClick = () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setTimeout(() => setIsSubmitting(false), 2000);
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 py-4 pointer-events-none" style={{ paddingLeft: 'clamp(1.5rem, 6vw, 6rem)', paddingRight: 'clamp(1.5rem, 6vw, 6rem)' }}>
+    <nav
+      className="fixed top-0 left-0 w-full z-50 pointer-events-none"
+      style={{
+        paddingLeft: 'clamp(1.5rem, 6vw, 6rem)',
+        paddingRight: 'clamp(1.5rem, 6vw, 6rem)',
+        paddingTop: '1rem',
+        paddingBottom: '1rem'
+      }}
+    >
+      <div className="flex justify-between items-start w-full max-w-[1400px] mx-auto">
 
-      <div className="flex justify-between items-center w-full max-w-[1400px] mx-auto">
-
-        <div className="pointer-events-auto shrink-0">
-          <Link href="/" className="hover:opacity-80 transition-opacity block w-[100px] sm:w-[120px] md:w-[150px]">
+        {/* LOGO PILL */}
+        <div className="shrink-0 pointer-events-auto flex items-center">
+          <Link
+            href="/"
+            className="flex items-center justify-center h-11 px-4 sm:px-6 rounded-2xl backdrop-blur-2xl shadow-lg hover:opacity-80 transition-opacity"
+            style={{
+              background: "var(--glass-bg)",
+              border: "1px solid var(--glass-border)",
+            }}
+          >
             <Image
               src={isDark ? "/logo-white.png" : "/logo.png"}
               alt="CODO Academy"
-              width={150}
-              height={50}
-              className="w-full h-auto object-contain"
+              width={120}
+              height={32}
+              className="h-8 sm:h-10 w-auto object-contain"
               priority
             />
           </Link>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-4 pointer-events-auto">
+        {/* RIGHT SIDE BUTTONS */}
+        <div className="flex flex-col items-end pointer-events-auto gap-3 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4">
 
-          <button
-            onClick={() => {
-              toggleTheme();
-              setRipple(true);
-              setTimeout(() => setRipple(false), 440);
-            }}
-            className="w-11 h-11 flex items-center justify-center rounded-full transition-all shadow-lg shrink-0 cursor-pointer relative overflow-hidden"
-            style={{
-              background: "var(--glass-bg)",
-              border: "1px solid var(--glass-border)",
-              minWidth: "44px",
-              minHeight: "44px",
-            }}
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            aria-pressed={isDark ? "true" : "false"}
-          >
-            {/* Law 5: Ripple effect */}
-            {ripple && (
-              <motion.span
-                initial={{ scale: 0, opacity: 0.5 }}
-                animate={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  background: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
-                  borderRadius: "50%",
-                  zIndex: 0,
-                }}
-              />
-            )}
+            {/* THEME TOGGLE (Square Fixed Size) */}
+            <button
+              onClick={() => {
+                toggleTheme();
+                setRipple(true);
+                setTimeout(() => setRipple(false), 440);
+              }}
+              className="w-11 h-11 flex items-center justify-center rounded-2xl transition-all shadow-lg shrink-0 cursor-pointer relative overflow-hidden hover:opacity-90 backdrop-blur-2xl"
+              style={{
+                background: "var(--glass-bg)",
+                border: "1px solid var(--glass-border)",
+              }}
+            >
+              {ripple && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0.5 }}
+                  animate={{ scale: 2, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="absolute w-full h-full rounded-full z-0"
+                  style={{ background: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}
+                />
+              )}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={theme}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  {isDark ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-primary)" }}><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </button>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={theme}
-                initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-                animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}
-              >
-                {isDark ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                  </svg>
+            {/* ACTION BUTTON (Fixed Width to prevent shaking) */}
+            <button
+              onClick={handleActionClick}
+              disabled={isSubmitting}
+              className={`h-11 hidden xs:flex items-center justify-center text-[var(--text-primary)] rounded-2xl transition-all shadow-lg backdrop-blur-2xl min-w-[160px] sm:min-w-[180px] ${isSubmitting ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:opacity-90"
+                }`}
+              style={{
+                background: "var(--glass-bg)",
+                border: "1px solid var(--glass-border)",
+              }}
+            >
+              <AnimatePresence mode="wait">
+                {isSubmitting ? (
+                  <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <WaveLoader />
+                  </motion.div>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-primary)" }}>
-                    <circle cx="12" cy="12" r="5" />
-                    <line x1="12" y1="1" x2="12" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="23" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                    <line x1="1" y1="12" x2="3" y2="12" />
-                    <line x1="21" y1="12" x2="23" y2="12" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                  </svg>
+                  <motion.div key="text" className="flex items-center gap-2 sm:gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase whitespace-nowrap">
+                      Book a Call
+                    </span>
+                    <span className="w-1.5 h-1.5 bg-[var(--brand-green)] rounded-full shrink-0"></span>
+                  </motion.div>
                 )}
-              </motion.div>
-            </AnimatePresence>
-          </button>
+              </AnimatePresence>
+            </button>
 
-          <button
-            onClick={handleTalkClick}
-            disabled={isTalking}
-            className={`h-11 hidden xs:flex items-center gap-2 sm:gap-3 text-[var(--text-primary)] px-4 sm:px-6 rounded-2xl transition-all shadow-lg ${isTalking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-            style={{
-              background: "var(--glass-bg)",
-              border: "1px solid var(--glass-border)",
-            }}
+            {/* MENU BUTTON (Fixed Width to prevent shaking) */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="h-11 min-w-[110px] sm:min-w-[140px] flex items-center justify-center gap-2 sm:gap-3 text-[var(--text-primary)] rounded-2xl transition-all shadow-lg group cursor-pointer hover:opacity-90 backdrop-blur-2xl"
+              style={{
+                background: "var(--glass-bg)",
+                border: "1px solid var(--glass-border)",
+              }}
+            >
+              <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase w-10 sm:w-12 text-center">
+                {isOpen ? "Close" : "Menu"}
+              </span>
+
+              <div className="relative w-5 h-1.5 flex items-center justify-center">
+                <motion.span
+                  animate={{
+                    x: isOpen ? 0 : -4,
+                    backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="w-1.5 h-1.5 rounded-full absolute"
+                />
+                <motion.span
+                  animate={{
+                    x: isOpen ? 0 : 4,
+                    backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="w-1.5 h-1.5 rounded-full absolute"
+                />
+              </div>
+            </button>
+          </div>
+
+          {/* DROPDOWN MENU */}
+          <div
+            className={`
+              w-full sm:max-w-sm ml-auto backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden origin-top-right
+              transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]
+              ${isOpen
+                ? "opacity-100 scale-100 max-h-[500px] p-6 sm:p-8 border-[1px] border-[var(--glass-border)] pointer-events-auto"
+                : "opacity-0 scale-95 max-h-0 p-0 border-none pointer-events-none"
+              }
+            `}
+            style={{ background: "var(--glass-bg)" }}
           >
-            {isTalking ? (
-              <svg className="animate-spin h-4 w-4 text-[var(--brand-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <>
-                <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase">
-                  Let&apos;s Talk
-                </span>
-                <span className="w-1.5 h-1.5 bg-[var(--brand-green)] rounded-full"></span>
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="h-11 min-w-[100px] sm:min-w-[130px] flex items-center justify-center gap-2 sm:gap-3 text-[var(--text-primary)] px-4 sm:px-6 rounded-2xl transition-all shadow-lg group cursor-pointer"
-            style={{
-              background: "var(--glass-bg)",
-              border: "1px solid var(--glass-border)",
-            }}
-          >
-            <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase">
-              {isOpen ? "Close" : "Menu"}
-            </span>
-            <div className="flex gap-1">
-              <span
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  isOpen ? "rotate-45 translate-x-[3px]" : "group-hover:scale-125"
-                }`}
-                style={{ background: "var(--text-primary)" }}
-              ></span>
-              <span
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  isOpen ? "-rotate-45 -translate-x-[3px]" : "group-hover:scale-125"
-                }`}
-                style={{ background: "var(--text-primary)" }}
-              ></span>
-            </div>
-          </button>
-
+            <ul className="flex flex-col gap-0.5 sm:gap-1">
+              {menuLinks.map((link, index) => {
+                const isActive = pathname === link.href;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 rounded-xl text-base sm:text-lg font-bold uppercase tracking-wider transition-all duration-300 hover:opacity-80"
+                      style={{
+                        transitionDelay: isOpen ? `${index * 60}ms` : "0ms",
+                        color: isActive ? "var(--text-primary)" : "color-mix(in srgb, var(--text-primary) 60%, transparent)",
+                        background: isActive ? "var(--glass-bg)" : "transparent",
+                      }}
+                    >
+                      <span>{link.label}</span>
+                      {isActive && <span className="w-2 h-2 rounded-full" style={{ background: "var(--brand-green)" }}></span>}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
-
-      <div
-        className={`
-          pointer-events-auto mt-3 sm:mt-4 mx-auto max-w-[1400px]
-          w-full sm:max-w-sm ml-auto
-          backdrop-blur-2xl
-          rounded-2xl shadow-2xl
-          overflow-hidden
-          transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
-          origin-top-right
-          ${isOpen
-            ? "opacity-100 scale-100 max-h-[500px] p-6 sm:p-8"
-            : "opacity-0 scale-95 max-h-0 p-0 pointer-events-none"
-          }
-        `}
-        style={{
-          background: "var(--glass-bg)",
-          border: isOpen ? "1px solid var(--glass-border)" : "none",
-        }}
-      >
-        <ul className="flex flex-col gap-0.5 sm:gap-1">
-          {menuLinks.map((link, index) => {
-            const isActive = pathname === link.href;
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`
-                    flex items-center justify-between
-                    px-3 py-3 sm:px-4 sm:py-4 rounded-xl
-                    text-base sm:text-lg font-bold uppercase tracking-wider
-                    transition-all duration-300
-                    cursor-pointer
-                    ${isOpen
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4"
-                    }
-                  `}
-                  style={{
-                    transitionDelay: isOpen ? `${index * 60}ms` : "0ms",
-                    color: isActive ? "var(--text-primary)" : "color-mix(in srgb, var(--text-primary) 60%, transparent)",
-                    background: isActive ? "var(--glass-bg)" : "transparent",
-                  }}
-                >
-                  <span>{link.label}</span>
-                  {isActive && (
-                    <span className="w-2 h-2 rounded-full" style={{ background: "var(--brand-green)" }}></span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
     </nav>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Scene,
   OrthographicCamera,
@@ -13,14 +13,18 @@ import {
   Clock
 } from 'three';
 
-const vertexShader = `
+// ============================================================================
+// SHADER DEFINITIONS - Extracted for reusability and memoization
+// ============================================================================
+
+const VERTEX_SHADER = `
 precision highp float;
 void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
-const fragmentShader = `
+const FRAGMENT_SHADER = `
 precision highp float;
 
 uniform float iTime;
@@ -182,7 +186,40 @@ void main() {
 
 const MAX_GRADIENT_STOPS = 8;
 
-type WavePosition = { x: number; y: number; rotate: number; };
+// ============================================================================
+// COLOR UTILITY - With memoization
+// ============================================================================
+
+const COLOR_CACHE = new Map<string, Vector3>();
+
+function hexToVec3(hex: string): Vector3 {
+  if (COLOR_CACHE.has(hex)) {
+    return COLOR_CACHE.get(hex)!.clone();
+  }
+
+  let value = hex.trim();
+  if (value.startsWith('#')) value = value.slice(1);
+  let r = 255, g = 255, b = 255;
+  if (value.length === 3) {
+    r = parseInt(value[0] + value[0], 16);
+    g = parseInt(value[1] + value[1], 16);
+    b = parseInt(value[2] + value[2], 16);
+  } else if (value.length === 6) {
+    r = parseInt(value.slice(0, 2), 16);
+    g = parseInt(value.slice(2, 4), 16);
+    b = parseInt(value.slice(4, 6), 16);
+  }
+
+  const color = new Vector3(r / 255, g / 255, b / 255);
+  COLOR_CACHE.set(hex, color);
+  return color.clone();
+}
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+type WavePosition = { x: number; y: number; rotate: number };
 
 type FloatingLinesProps = {
   linesGradient?: string[];
@@ -204,21 +241,9 @@ type FloatingLinesProps = {
   opacity?: number;
 };
 
-function hexToVec3(hex: string): Vector3 {
-  let value = hex.trim();
-  if (value.startsWith('#')) value = value.slice(1);
-  let r = 255, g = 255, b = 255;
-  if (value.length === 3) {
-    r = parseInt(value[0] + value[0], 16);
-    g = parseInt(value[1] + value[1], 16);
-    b = parseInt(value[2] + value[2], 16);
-  } else if (value.length === 6) {
-    r = parseInt(value.slice(0, 2), 16);
-    g = parseInt(value.slice(2, 4), 16);
-    b = parseInt(value.slice(4, 6), 16);
-  }
-  return new Vector3(r / 255, g / 255, b / 255);
-}
+// ============================================================================
+// MAIN COMPONENT - Optimized
+// ============================================================================
 
 export default function FloatingLines({
   linesGradient,
@@ -240,62 +265,91 @@ export default function FloatingLines({
   opacity = 1
 }: FloatingLinesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  
-    const targetMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
+  const rendererRef = useRef<WebGLRenderer | null>(null);
+  const uniformsRef = useRef<Record<string, any> | null>(null);
+  const rafRef = useRef<number>(0);
+
+  // Input smoothing refs
+  const targetMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
   const currentMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
-  
-    const targetInfluenceRef = useRef<number>(0);
+  const targetInfluenceRef = useRef<number>(0);
   const currentInfluenceRef = useRef<number>(0);
-  
-    const targetParallaxRef = useRef<Vector2>(new Vector2(0, 0));
+  const targetParallaxRef = useRef<Vector2>(new Vector2(0, 0));
   const currentParallaxRef = useRef<Vector2>(new Vector2(0, 0));
-  
-    const targetBgColorRef = useRef<Vector3>(hexToVec3(backgroundColor));
+  const targetBgColorRef = useRef<Vector3>(hexToVec3(backgroundColor));
   const currentBgColorRef = useRef<Vector3>(hexToVec3(backgroundColor));
 
+  // Throttle pointer updates to 60fps max
+  const pointerUpdateTimeRef = useRef<number>(0);
+  const POINTER_UPDATE_THROTTLE = 16;
+
+  // Debounce resize
+  let resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Calculate static line configuration once
+  const getLineCount = useCallback((waveType: 'top' | 'middle' | 'bottom'): number => {
+    if (typeof lineCount === 'number') return lineCount;
+    if (!enabledWaves.includes(waveType)) return 0;
+    const index = enabledWaves.indexOf(waveType);
+    return lineCount[index] ?? 6;
+  }, [lineCount, enabledWaves]);
+
+  const getLineDistance = useCallback((waveType: 'top' | 'middle' | 'bottom'): number => {
+    if (typeof lineDistance === 'number') return lineDistance;
+    if (!enabledWaves.includes(waveType)) return 0.1;
+    const index = enabledWaves.indexOf(waveType);
+    return lineDistance[index] ?? 0.1;
+  }, [lineDistance, enabledWaves]);
+
+  const topLineCount = useMemo(() => enabledWaves.includes('top') ? getLineCount('top') : 0, [enabledWaves, getLineCount]);
+  const middleLineCount = useMemo(() => enabledWaves.includes('middle') ? getLineCount('middle') : 0, [enabledWaves, getLineCount]);
+  const bottomLineCount = useMemo(() => enabledWaves.includes('bottom') ? getLineCount('bottom') : 0, [enabledWaves, getLineCount]);
+
+  const topLineDistance = useMemo(() => enabledWaves.includes('top') ? getLineDistance('top') * 0.01 : 0.01, [enabledWaves, getLineDistance]);
+  const middleLineDistance = useMemo(() => enabledWaves.includes('middle') ? getLineDistance('middle') * 0.01 : 0.01, [enabledWaves, getLineDistance]);
+  const bottomLineDistance = useMemo(() => enabledWaves.includes('bottom') ? getLineDistance('bottom') * 0.01 : 0.01, [enabledWaves, getLineDistance]);
+
+  // Update background color target
   useEffect(() => {
     const newColor = hexToVec3(backgroundColor);
     targetBgColorRef.current.set(newColor.x, newColor.y, newColor.z);
   }, [backgroundColor]);
 
-  const getLineCount = (waveType: 'top' | 'middle' | 'bottom'): number => {
-    if (typeof lineCount === 'number') return lineCount;
-    if (!enabledWaves.includes(waveType)) return 0;
-    const index = enabledWaves.indexOf(waveType);
-    return lineCount[index] ?? 6;
-  };
-
-  const getLineDistance = (waveType: 'top' | 'middle' | 'bottom'): number => {
-    if (typeof lineDistance === 'number') return lineDistance;
-    if (!enabledWaves.includes(waveType)) return 0.1;
-    const index = enabledWaves.indexOf(waveType);
-    return lineDistance[index] ?? 0.1;
-  };
-
-  const topLineCount = enabledWaves.includes('top') ? getLineCount('top') : 0;
-  const middleLineCount = enabledWaves.includes('middle') ? getLineCount('middle') : 0;
-  const bottomLineCount = enabledWaves.includes('bottom') ? getLineCount('bottom') : 0;
-
-  const topLineDistance = enabledWaves.includes('top') ? getLineDistance('top') * 0.01 : 0.01;
-  const middleLineDistance = enabledWaves.includes('middle') ? getLineDistance('middle') * 0.01 : 0.01;
-  const bottomLineDistance = enabledWaves.includes('bottom') ? getLineDistance('bottom') * 0.01 : 0.01;
+  // =========================================================================
+  // SCENE INITIALIZATION - Happens once, never recreated
+  // =========================================================================
 
   useEffect(() => {
     if (!containerRef.current) return;
+
     const scene = new Scene();
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 1;
 
-    const renderer = new WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    // Optimized renderer settings
+    const renderer = new WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      precision: 'highp',
+      powerPreference: 'high-performance',
+      stencil: false,
+      depth: false,
+      logarithmicDepthBuffer: false,
+      preserveDrawingBuffer: false,
+    });
+
+    rendererRef.current = renderer;
+
+    // Optimize pixel ratio
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    renderer.setPixelRatio(dpr);
+
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     containerRef.current.appendChild(renderer.domElement);
 
-    const uniforms = {
-      iTime: { value: 0 },
-      iResolution: { value: new Vector3(1, 1, 1) },
-      animationSpeed: { value: animationSpeed },
+    // Static uniforms (set once, never change)
+    const staticUniforms = {
       enableTop: { value: enabledWaves.includes('top') },
       enableMiddle: { value: enabledWaves.includes('middle') },
       enableBottom: { value: enabledWaves.includes('bottom') },
@@ -308,19 +362,31 @@ export default function FloatingLines({
       topWavePosition: { value: new Vector3(topWavePosition?.x ?? 10.0, topWavePosition?.y ?? 0.5, topWavePosition?.rotate ?? -0.4) },
       middleWavePosition: { value: new Vector3(middleWavePosition?.x ?? 5.0, middleWavePosition?.y ?? 0.0, middleWavePosition?.rotate ?? 0.2) },
       bottomWavePosition: { value: new Vector3(bottomWavePosition?.x ?? 2.0, bottomWavePosition?.y ?? -0.7, bottomWavePosition?.rotate ?? 0.4) },
-      iMouse: { value: new Vector2(-1000, -1000) },
       interactive: { value: interactive },
       bendRadius: { value: bendRadius },
       bendStrength: { value: bendStrength },
-      bendInfluence: { value: 0 },
       parallax: { value: parallax },
       parallaxStrength: { value: parallaxStrength },
+    };
+
+    // Dynamic uniforms (update every frame)
+    const dynamicUniforms = {
+      iTime: { value: 0 },
+      iResolution: { value: new Vector3(1, 1, 1) },
+      animationSpeed: { value: animationSpeed },
+      iMouse: { value: new Vector2(-1000, -1000) },
+      bendInfluence: { value: 0 },
       parallaxOffset: { value: new Vector2(0, 0) },
       lineGradient: { value: Array.from({ length: MAX_GRADIENT_STOPS }, () => new Vector3(1, 1, 1)) },
       lineGradientCount: { value: 0 },
       bgColor: { value: hexToVec3(backgroundColor) }
     };
 
+    // Merge uniforms
+    const uniforms = { ...staticUniforms, ...dynamicUniforms };
+    uniformsRef.current = uniforms;
+
+    // Setup gradient if provided
     if (linesGradient && linesGradient.length > 0) {
       const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
       uniforms.lineGradientCount.value = stops.length;
@@ -330,15 +396,25 @@ export default function FloatingLines({
       });
     }
 
-    const material = new ShaderMaterial({ uniforms, vertexShader, fragmentShader });
+    // Create material with optimized settings
+    const material = new ShaderMaterial({
+      uniforms,
+      vertexShader: VERTEX_SHADER,
+      fragmentShader: FRAGMENT_SHADER,
+      side: 1, // FrontSide only
+      glslVersion: '300es',
+    });
+
     const geometry = new PlaneGeometry(2, 2);
     const mesh = new Mesh(geometry, material);
     scene.add(mesh);
 
     const clock = new Clock();
 
+    // Handle size changes with debounce
     const setSize = () => {
-      const el = containerRef.current!;
+      if (!containerRef.current) return;
+      const el = containerRef.current;
       const width = el.clientWidth || 1;
       const height = el.clientHeight || 1;
       renderer.setSize(width, height, false);
@@ -347,11 +423,23 @@ export default function FloatingLines({
       uniforms.iResolution.value.set(canvasWidth, canvasHeight, 1);
     };
 
+    const debouncedSetSize = () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
+      resizeTimeoutRef.current = setTimeout(setSize, 150);
+    };
+
     setSize();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(setSize) : null;
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(debouncedSetSize) : null;
     if (ro && containerRef.current) ro.observe(containerRef.current);
 
+    // Pointer handlers with throttling
     const handlePointerMove = (event: PointerEvent) => {
+      const now = performance.now();
+      if (now - pointerUpdateTimeRef.current < POINTER_UPDATE_THROTTLE) {
+        return;
+      }
+      pointerUpdateTimeRef.current = now;
+
       const rect = renderer.domElement.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
@@ -377,51 +465,103 @@ export default function FloatingLines({
       renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
     }
 
-    const opacityRef = { current: opacity };
-    // Maintain a reference to the current opacity for the render loop to 
-    // prevent premature pausing during transitions.
-    (containerRef.current as any).renderOpacity = opacityRef;
+    let isRenderingEnabled = opacity > 0;
 
-    let raf = 0;
+    // Optimized render loop
     const renderLoop = () => {
-      const currentOpacity = (containerRef.current as any)?.renderOpacity?.current;
-      if (currentOpacity !== undefined && currentOpacity > 0) {
+      const currentOpacity = (containerRef.current as any)?.renderOpacity?.current ?? opacity;
+
+      // Only render if visible
+      if (currentOpacity > 0.001) {
+        isRenderingEnabled = true;
+
+        const uniforms = uniformsRef.current!;
         uniforms.iTime.value = clock.getElapsedTime();
-        if (interactive) {
+
+        // Update only dynamic values
+        if (interactive && uniforms.bendInfluence.value > 0.001) {
           currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
           uniforms.iMouse.value.copy(currentMouseRef.current);
+
           currentInfluenceRef.current += (targetInfluenceRef.current - currentInfluenceRef.current) * mouseDamping;
           uniforms.bendInfluence.value = currentInfluenceRef.current;
         }
-        if (parallax) {
+
+        if (parallax && currentParallaxRef.current.length() > 0.001) {
           currentParallaxRef.current.lerp(targetParallaxRef.current, mouseDamping);
           uniforms.parallaxOffset.value.copy(currentParallaxRef.current);
         }
-        
+
         currentBgColorRef.current.lerp(targetBgColorRef.current, 0.07);
         uniforms.bgColor.value.copy(currentBgColorRef.current);
+
+        renderer.render(scene, camera);
+      } else if (isRenderingEnabled) {
+        // One last render at opacity 0 for smooth fade
+        isRenderingEnabled = false;
         renderer.render(scene, camera);
       }
-      raf = requestAnimationFrame(renderLoop);
+
+      rafRef.current = requestAnimationFrame(renderLoop);
     };
+
     renderLoop();
 
+    // =====================================================================
+    // CLEANUP
+    // =====================================================================
+
     return () => {
-      cancelAnimationFrame(raf);
-      if (ro && containerRef.current) ro.disconnect();
+      cancelAnimationFrame(rafRef.current);
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
+
       if (interactive) {
         renderer.domElement.removeEventListener('pointermove', handlePointerMove);
         renderer.domElement.removeEventListener('pointerleave', handlePointerLeave);
       }
+
+      if (ro) ro.disconnect();
+
       geometry.dispose();
       material.dispose();
       renderer.dispose();
-      if (renderer.domElement.parentElement) {
+
+      if (renderer.domElement.parentElement?.contains(renderer.domElement)) {
         renderer.domElement.parentElement.removeChild(renderer.domElement);
       }
+
+      rendererRef.current = null;
+      uniformsRef.current = null;
     };
-  
-  }, [linesGradient, enabledWaves, lineCount, lineDistance, topWavePosition, middleWavePosition, bottomWavePosition, animationSpeed, interactive, bendRadius, bendStrength, mouseDamping, parallax, parallaxStrength]);
+  }, []); // Empty dependency array - scene setup happens once
+
+  // =========================================================================
+  // FINE-GRAINED UPDATES - Only recreate when properties actually change
+  // =========================================================================
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.animationSpeed.value = animationSpeed;
+    }
+  }, [animationSpeed]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.bendRadius.value = bendRadius;
+    }
+  }, [bendRadius]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.bendStrength.value = bendStrength;
+    }
+  }, [bendStrength]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.parallaxStrength.value = parallaxStrength;
+    }
+  }, [parallaxStrength]);
 
   useEffect(() => {
     if (containerRef.current && (containerRef.current as any).renderOpacity) {

@@ -23,8 +23,8 @@ const projects: Project[] = [
     name: "Europecalling CRM",
     description:
       "A full-scale recruitment CRM built for European hiring pipelines — featuring AI-powered candidate matching, smart dashboards, and end-to-end workflow automation.",
-    gradient: "linear-gradient(135deg, #008764 0%, #01b667 60%, #00203F 100%)",
-    accentColor: "#01b667",
+    gradient: "linear-gradient(135deg, #008764 0%, #008764 60%, #00203F 100%)",
+    accentColor: "#008764",
     tags: ["Next.js", "AI Integration", "CRM"],
     year: "2024",
   },
@@ -45,8 +45,8 @@ const projects: Project[] = [
     name: "Albedo ERP",
     description:
       "An enterprise resource planning system tailored for educational institutions — managing admissions, billing, staff, and student performance in one unified platform.",
-    gradient: "linear-gradient(135deg, #1a3c5e 0%, #00203F 60%, #01b667 100%)",
-    accentColor: "#01b667",
+    gradient: "linear-gradient(135deg, #1a3c5e 0%, #00203F 60%, #008764 100%)",
+    accentColor: "#008764",
     tags: ["Enterprise", "ERP", "Education"],
     year: "2025",
   },
@@ -56,7 +56,7 @@ const projects: Project[] = [
     name: "CODO AI Assistant",
     description:
       "An intelligent conversational AI assistant deployed across CODO's internal tools — automating repetitive workflows, surfacing insights, and accelerating team velocity.",
-    gradient: "linear-gradient(135deg, #008764 0%, #00203F 80%, #01b667 100%)",
+    gradient: "linear-gradient(135deg, #008764 0%, #00203F 80%, #008764 100%)",
     accentColor: "#008764",
     tags: ["LLM", "Automation", "AI"],
     year: "2025",
@@ -237,7 +237,7 @@ function ProjectCard({
               fontWeight: 800,
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "#01b667",
+              color: "#008764",
               marginBottom: "0.75rem",
             }}
           >
@@ -330,15 +330,15 @@ function PortfolioCta() {
         flex items-center justify-center gap-3
         focus-visible:outline focus-visible:outline-2
         focus-visible:outline-offset-3
-        focus-visible:outline-[#01b667]
+        focus-visible:outline-[#008764]
         ${loading ? "opacity-50 cursor-not-allowed" : ""}
       `}
       style={{
         padding: "1rem 3rem",
         borderRadius: "999px",
-        background: hovered ? "#01b667" : "transparent",
-        border: `2px solid #01b667`,
-        color: hovered ? "#ffffff" : "#01b667",
+        background: hovered ? "#008764" : "transparent",
+        border: `2px solid #008764`,
+        color: hovered ? "#ffffff" : "#008764",
         fontWeight: 800,
         fontSize: "0.85rem",
         letterSpacing: "0.15em",
@@ -394,14 +394,13 @@ export default function PortfolioSection() {
     <section
       ref={sectionRef}
       aria-label="CODO Agency Portfolio Highlights"
-      className="light"
       style={{
         position: "relative",
         zIndex: 2,
         overflow: "hidden",
         padding: "clamp(5rem, 10vw, 12rem) clamp(1.5rem, 6vw, 6rem)",
         fontFamily: "'DM Sans', sans-serif",
-        background: "#F0F3FF",
+        background: "#008764",
         marginTop: "-60px",
         marginBottom: "-60px",
         borderRadius: "60px",

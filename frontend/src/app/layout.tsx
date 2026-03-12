@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#01b667" />
+        <meta name="theme-color" content="#008764" />
         {/* Law 1: Zero flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{

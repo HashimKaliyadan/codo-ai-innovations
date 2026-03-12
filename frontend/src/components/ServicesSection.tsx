@@ -126,7 +126,7 @@ function ServiceRow({
             setExpanded(!expanded);
           }
         }}
-        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#01b667]"
+        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008764]"
         style={{
           display: "grid",
           gridTemplateColumns: "4rem 1fr auto",
