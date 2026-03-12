@@ -309,11 +309,56 @@ export default function FloatingLines({
   const middleLineDistance = useMemo(() => enabledWaves.includes('middle') ? getLineDistance('middle') * 0.01 : 0.01, [enabledWaves, getLineDistance]);
   const bottomLineDistance = useMemo(() => enabledWaves.includes('bottom') ? getLineDistance('bottom') * 0.01 : 0.01, [enabledWaves, getLineDistance]);
 
+  // Event handlers defined at component scope
+  const handlePointerMove = useCallback((event: PointerEvent) => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    const now = performance.now();
+    if (now - pointerUpdateTimeRef.current < POINTER_UPDATE_THROTTLE) {
+      return;
+    }
+    pointerUpdateTimeRef.current = now;
+
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const dpr = renderer.getPixelRatio();
+    targetMouseRef.current.set(x * dpr, (rect.height - y) * dpr);
+    targetInfluenceRef.current = 1.0;
+
+    if (parallax) {
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const offsetX = (x - centerX) / rect.width;
+      const offsetY = -(y - centerY) / rect.height;
+      targetParallaxRef.current.set(offsetX * parallaxStrength, offsetY * parallaxStrength);
+    }
+  }, [parallax, parallaxStrength]);
+
+  const handlePointerLeave = useCallback(() => {
+    targetInfluenceRef.current = 0.0;
+  }, []);
+
   // Update background color target
   useEffect(() => {
     const newColor = hexToVec3(backgroundColor);
     targetBgColorRef.current.set(newColor.x, newColor.y, newColor.z);
   }, [backgroundColor]);
+
+  // Interactivity toggle effect
+  useEffect(() => {
+    const el = rendererRef.current?.domElement;
+    if (!el || !interactive) return;
+
+    el.addEventListener('pointermove', handlePointerMove);
+    el.addEventListener('pointerleave', handlePointerLeave);
+
+    return () => {
+      el.removeEventListener('pointermove', handlePointerMove);
+      el.removeEventListener('pointerleave', handlePointerLeave);
+    };
+  }, [interactive, handlePointerMove, handlePointerLeave]);
 
   // =========================================================================
   // SCENE INITIALIZATION - Happens once, never recreated
@@ -402,7 +447,7 @@ export default function FloatingLines({
       vertexShader: VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
       side: 1, // FrontSide only
-      glslVersion: '300es',
+      glslVersion: '300 es',
     });
 
     const geometry = new PlaneGeometry(2, 2);
@@ -432,39 +477,6 @@ export default function FloatingLines({
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(debouncedSetSize) : null;
     if (ro && containerRef.current) ro.observe(containerRef.current);
 
-    // Pointer handlers with throttling
-    const handlePointerMove = (event: PointerEvent) => {
-      const now = performance.now();
-      if (now - pointerUpdateTimeRef.current < POINTER_UPDATE_THROTTLE) {
-        return;
-      }
-      pointerUpdateTimeRef.current = now;
-
-      const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const dpr = renderer.getPixelRatio();
-      targetMouseRef.current.set(x * dpr, (rect.height - y) * dpr);
-      targetInfluenceRef.current = 1.0;
-
-      if (parallax) {
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const offsetX = (x - centerX) / rect.width;
-        const offsetY = -(y - centerY) / rect.height;
-        targetParallaxRef.current.set(offsetX * parallaxStrength, offsetY * parallaxStrength);
-      }
-    };
-
-    const handlePointerLeave = () => {
-      targetInfluenceRef.current = 0.0;
-    };
-
-    if (interactive) {
-      renderer.domElement.addEventListener('pointermove', handlePointerMove);
-      renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
-    }
-
     let isRenderingEnabled = opacity > 0;
 
     // Optimized render loop
@@ -479,12 +491,14 @@ export default function FloatingLines({
         uniforms.iTime.value = clock.getElapsedTime();
 
         // Update only dynamic values
-        if (interactive && uniforms.bendInfluence.value > 0.001) {
-          currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
-          uniforms.iMouse.value.copy(currentMouseRef.current);
-
+        if (interactive) {
           currentInfluenceRef.current += (targetInfluenceRef.current - currentInfluenceRef.current) * mouseDamping;
           uniforms.bendInfluence.value = currentInfluenceRef.current;
+
+          if (uniforms.bendInfluence.value > 0.001) {
+            currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
+            uniforms.iMouse.value.copy(currentMouseRef.current);
+          }
         }
 
         if (parallax && currentParallaxRef.current.length() > 0.001) {
@@ -515,11 +529,6 @@ export default function FloatingLines({
       cancelAnimationFrame(rafRef.current);
       if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
 
-      if (interactive) {
-        renderer.domElement.removeEventListener('pointermove', handlePointerMove);
-        renderer.domElement.removeEventListener('pointerleave', handlePointerLeave);
-      }
-
       if (ro) ro.disconnect();
 
       geometry.dispose();
@@ -536,8 +545,63 @@ export default function FloatingLines({
   }, []); // Empty dependency array - scene setup happens once
 
   // =========================================================================
-  // FINE-GRAINED UPDATES - Only recreate when properties actually change
+  // FINE-GRAINED UPDATES - Re-sync uniforms when props change
   // =========================================================================
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.enableTop.value = enabledWaves.includes('top');
+      uniformsRef.current.enableMiddle.value = enabledWaves.includes('middle');
+      uniformsRef.current.enableBottom.value = enabledWaves.includes('bottom');
+    }
+  }, [enabledWaves]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.topLineCount.value = topLineCount;
+      uniformsRef.current.middleLineCount.value = middleLineCount;
+      uniformsRef.current.bottomLineCount.value = bottomLineCount;
+    }
+  }, [topLineCount, middleLineCount, bottomLineCount]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.topLineDistance.value = topLineDistance;
+      uniformsRef.current.middleLineDistance.value = middleLineDistance;
+      uniformsRef.current.bottomLineDistance.value = bottomLineDistance;
+    }
+  }, [topLineDistance, middleLineDistance, bottomLineDistance]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.topWavePosition.value.set(topWavePosition?.x ?? 10.0, topWavePosition?.y ?? 0.5, topWavePosition?.rotate ?? -0.4);
+      uniformsRef.current.middleWavePosition.value.set(middleWavePosition?.x ?? 5.0, middleWavePosition?.y ?? 0.0, middleWavePosition?.rotate ?? 0.2);
+      uniformsRef.current.bottomWavePosition.value.set(bottomWavePosition?.x ?? 2.0, bottomWavePosition?.y ?? -0.7, bottomWavePosition?.rotate ?? 0.4);
+    }
+  }, [topWavePosition, middleWavePosition, bottomWavePosition]);
+
+  useEffect(() => {
+    if (uniformsRef.current && linesGradient && linesGradient.length > 0) {
+      const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
+      uniformsRef.current.lineGradientCount.value = stops.length;
+      stops.forEach((hex, i) => {
+        const color = hexToVec3(hex);
+        uniformsRef.current!.lineGradient.value[i].set(color.x, color.y, color.z);
+      });
+    }
+  }, [linesGradient]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.interactive.value = interactive;
+    }
+  }, [interactive]);
+
+  useEffect(() => {
+    if (uniformsRef.current) {
+      uniformsRef.current.parallax.value = parallax;
+    }
+  }, [parallax]);
 
   useEffect(() => {
     if (uniformsRef.current) {
