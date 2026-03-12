@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
+import { motion, AnimatePresence } from "framer-motion";
 
 const menuLinks = [
   { label: "Home", href: "/" },
@@ -22,6 +23,7 @@ export default function Navbar() {
   const [isTalking, setIsTalking] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const [ripple, setRipple] = useState(false);
 
   const isDark = theme === "dark";
 
@@ -55,33 +57,66 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 sm:gap-4 pointer-events-auto">
 
           <button
-            onClick={toggleTheme}
-            className="w-11 h-11 flex items-center justify-center rounded-full transition-all shadow-lg shrink-0 cursor-pointer"
+            onClick={() => {
+              toggleTheme();
+              setRipple(true);
+              setTimeout(() => setRipple(false), 440);
+            }}
+            className="w-11 h-11 flex items-center justify-center rounded-full transition-all shadow-lg shrink-0 cursor-pointer relative overflow-hidden"
             style={{
               background: "var(--glass-bg)",
               border: "1px solid var(--glass-border)",
+              minWidth: "44px",
+              minHeight: "44px",
             }}
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={isDark ? "true" : "false"}
           >
-            <div className={`transition-transform duration-500 ${isDark ? "rotate-0" : "rotate-180"}`}>
-              {isDark ? (
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                 </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-primary)" }}>
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              )}
-            </div>
+            {/* Law 5: Ripple effect */}
+            {ripple && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0.5 }}
+                animate={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  background: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+                  borderRadius: "50%",
+                  zIndex: 0,
+                }}
+              />
+            )}
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={theme}
+                initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}
+              >
+                {isDark ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-primary)" }}>
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </button>
 
           <button

@@ -18,6 +18,7 @@ function AnimatedBlock({
   return (
     <motion.div
       ref={ref}
+      className="no-transition"
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{
@@ -83,6 +84,7 @@ export default function AboutSection() {
             </div>
 
             <motion.div
+              className="no-transition"
               initial={{ height: 0 }}
               whileInView={{ height: 80 }}
               transition={{ duration: 1, ease: "easeOut" }}
@@ -103,7 +105,7 @@ export default function AboutSection() {
                 fontSize: "clamp(4rem, 8vw, 7rem)",
                 fontWeight: 900,
                 color: "transparent",
-                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                WebkitTextStroke: "1px var(--glass-border)",
                 pointerEvents: "none",
                 transformOrigin: "center",
                 whiteSpace: "nowrap",
@@ -114,6 +116,7 @@ export default function AboutSection() {
             </div>
 
             <motion.svg
+              className="no-transition"
               animate={{ rotate: 360 }}
               transition={{ duration: 18, ease: "linear", repeat: Infinity }}
               width="100"
@@ -131,7 +134,7 @@ export default function AboutSection() {
                 style={{
                   fontSize: "0.5rem",
                   letterSpacing: "0.15em",
-                  fill: "rgba(255,255,255,0.25)",
+                  fill: "color-mix(in srgb, var(--text-primary) 25%, transparent)",
                 }}
               >
                 <textPath href="#textPath" startOffset="0%">
@@ -151,6 +154,7 @@ export default function AboutSection() {
               style={{ marginBottom: "1.5rem" }}
             >
               <motion.div
+                className="no-transition"
                 initial={{ width: 0 }}
                 whileInView={{ width: 40 }}
                 transition={{ duration: 1, ease: "easeOut" }}

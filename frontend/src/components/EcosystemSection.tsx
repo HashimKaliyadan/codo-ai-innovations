@@ -16,6 +16,7 @@ function AnimatedBlock({
   return (
     <motion.div
       ref={ref}
+      className="no-transition"
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{
@@ -106,7 +107,7 @@ export default function EcosystemSection() {
             fontSize: "clamp(4.5rem, 14vw, 11rem)",
             fontWeight: 900,
             color: "transparent",
-            WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+            WebkitTextStroke: "1px var(--glass-border)",
             pointerEvents: "none",
             whiteSpace: "nowrap",
             userSelect: "none",
@@ -125,6 +126,7 @@ export default function EcosystemSection() {
             >
               <div className="flex items-center gap-3">
                 <motion.div
+                  className="no-transition"
                   initial={{ width: 0 }}
                   whileInView={{ width: 40 }}
                   transition={{ duration: 1, ease: "easeOut" }}
@@ -145,6 +147,7 @@ export default function EcosystemSection() {
                   Ecosystem
                 </span>
                 <motion.div
+                  className="no-transition"
                   initial={{ width: 0 }}
                   whileInView={{ width: 40 }}
                   transition={{ duration: 1, ease: "easeOut" }}
@@ -197,25 +200,25 @@ export default function EcosystemSection() {
               style={{ marginTop: "3.5rem" }}
             >
               {ecosystem.map((item, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
-                  className="group"
-                  style={{
-                    padding: "2.75rem 2.25rem",
-                    border: "1px solid var(--glass-border)",
-                    borderRadius: "20px",
-                    background: "var(--glass-bg)",
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    backfaceVisibility: "hidden",
-                    transform: "translateZ(0)",
-                  }}
-                >
+                  <motion.div
+                    key={i}
+                    whileHover={{ y: -8 }}
+                    transition={{ duration: 0.3 }}
+                    className="group no-transition"
+                    style={{
+                      padding: "2.75rem 2.25rem",
+                      border: "1px solid var(--glass-border)",
+                      borderRadius: "20px",
+                      background: "var(--glass-bg)",
+                      backdropFilter: "blur(10px)",
+                      WebkitBackdropFilter: "blur(10px)",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      backfaceVisibility: "hidden",
+                      transform: "translateZ(0)",
+                    }}
+                  >
                   <div
                     style={{
                       fontSize: "0.72rem",

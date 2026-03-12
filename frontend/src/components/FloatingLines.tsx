@@ -201,6 +201,7 @@ type FloatingLinesProps = {
   parallaxStrength?: number;
   mixBlendMode?: React.CSSProperties['mixBlendMode'];
   backgroundColor?: string;
+  opacity?: number;
 };
 
 function hexToVec3(hex: string): Vector3 {
@@ -235,7 +236,8 @@ export default function FloatingLines({
   parallax = true,
   parallaxStrength = 0.2,
   mixBlendMode = 'screen',
-  backgroundColor = '#0A0A0B'
+  backgroundColor = '#0A0A0B',
+  opacity = 1
 }: FloatingLinesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   
@@ -375,23 +377,31 @@ export default function FloatingLines({
       renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
     }
 
+    const opacityRef = { current: opacity };
+    // Maintain a reference to the current opacity for the render loop to 
+    // prevent premature pausing during transitions.
+    (containerRef.current as any).renderOpacity = opacityRef;
+
     let raf = 0;
     const renderLoop = () => {
-      uniforms.iTime.value = clock.getElapsedTime();
-      if (interactive) {
-        currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
-        uniforms.iMouse.value.copy(currentMouseRef.current);
-        currentInfluenceRef.current += (targetInfluenceRef.current - currentInfluenceRef.current) * mouseDamping;
-        uniforms.bendInfluence.value = currentInfluenceRef.current;
+      const currentOpacity = (containerRef.current as any)?.renderOpacity?.current;
+      if (currentOpacity !== undefined && currentOpacity > 0) {
+        uniforms.iTime.value = clock.getElapsedTime();
+        if (interactive) {
+          currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
+          uniforms.iMouse.value.copy(currentMouseRef.current);
+          currentInfluenceRef.current += (targetInfluenceRef.current - currentInfluenceRef.current) * mouseDamping;
+          uniforms.bendInfluence.value = currentInfluenceRef.current;
+        }
+        if (parallax) {
+          currentParallaxRef.current.lerp(targetParallaxRef.current, mouseDamping);
+          uniforms.parallaxOffset.value.copy(currentParallaxRef.current);
+        }
+        
+        currentBgColorRef.current.lerp(targetBgColorRef.current, 0.07);
+        uniforms.bgColor.value.copy(currentBgColorRef.current);
+        renderer.render(scene, camera);
       }
-      if (parallax) {
-        currentParallaxRef.current.lerp(targetParallaxRef.current, mouseDamping);
-        uniforms.parallaxOffset.value.copy(currentParallaxRef.current);
-      }
-      
-      currentBgColorRef.current.lerp(targetBgColorRef.current, 0.07);
-      uniforms.bgColor.value.copy(currentBgColorRef.current);
-      renderer.render(scene, camera);
       raf = requestAnimationFrame(renderLoop);
     };
     renderLoop();
@@ -412,6 +422,12 @@ export default function FloatingLines({
     };
   
   }, [linesGradient, enabledWaves, lineCount, lineDistance, topWavePosition, middleWavePosition, bottomWavePosition, animationSpeed, interactive, bendRadius, bendStrength, mouseDamping, parallax, parallaxStrength]);
+
+  useEffect(() => {
+    if (containerRef.current && (containerRef.current as any).renderOpacity) {
+      (containerRef.current as any).renderOpacity.current = opacity;
+    }
+  }, [opacity]);
 
   return (
     <div

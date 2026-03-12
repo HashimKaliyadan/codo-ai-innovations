@@ -34,12 +34,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#01b667" />
+        {/* Law 1: Zero flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('codo-theme');
+                  var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ? 'dark' : 'light';
+                  var theme = (saved === 'dark' || saved === 'light') ? saved : preferred;
+                  document.documentElement.classList.add(theme);
+                } catch(e) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
       </head>
-      <body className={`${dmSans.className} antialiased`}>
+      <body className={`${dmSans.className} antialiased no-js-transition`}>
         <ReactLenis root>
           <ThemeProvider>
             <FloatingLinesController>

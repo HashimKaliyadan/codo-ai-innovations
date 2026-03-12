@@ -7,7 +7,7 @@ import { useFloatingLines } from "@/components/FloatingLinesController";
 export default function HeroToAbout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
-  const inView = useInView(containerRef, { margin: "-40% 0px -40% 0px" });
+  const inView = useInView(containerRef, { margin: "-40% 0px -25% 0px" });
   const { setOpacity } = useFloatingLines();
 
   useEffect(() => {

@@ -19,37 +19,44 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  // Law 3: Initial state from classList to avoid SSR/hydration mismatch
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  });
 
+  // Law 8: Prevent transition on first page load
   useEffect(() => {
-    const saved = localStorage.getItem("codo-theme") as Theme | null;
-    if (saved === "light" || saved === "dark") {
-      setTheme(saved);
-    }
-    setMounted(true);
+    const timer = requestAnimationFrame(() => {
+      document.body.classList.remove('no-js-transition');
+    });
+    return () => cancelAnimationFrame(timer);
   }, []);
 
+  // Law 3 & 4: Initial sync and system preference listener
   useEffect(() => {
-    if (!mounted) return;
     const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("codo-theme", theme);
-  }, [theme, mounted]);
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+    localStorage.setItem('codo-theme', theme);
+  }, [theme]);
+
+  // Law 4: System preference sync
+  useEffect(() => {
+    const saved = localStorage.getItem('codo-theme');
+    if (saved) return; // user has manual preference, don't override
+    
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? 'dark' : 'light');
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

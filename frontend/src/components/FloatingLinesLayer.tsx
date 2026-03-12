@@ -15,12 +15,28 @@ export default function FloatingLinesLayer() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { opacity } = useFloatingLines();
+  const [isRenderEnabled, setIsRenderEnabled] = React.useState(opacity > 0);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+    <div 
+      style={{ 
+        position: "fixed", 
+        inset: 0, 
+        zIndex: 0, 
+        pointerEvents: "none",
+        display: isRenderEnabled || opacity > 0 ? "block" : "none" 
+      }}
+    >
       <motion.div
+        initial={false}
         animate={{ opacity }}
-        transition={{ duration: 0.9, ease: "easeInOut" }}
+        transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+        onAnimationStart={() => {
+          if (opacity > 0) setIsRenderEnabled(true);
+        }}
+        onAnimationComplete={() => {
+          if (opacity === 0) setIsRenderEnabled(false);
+        }}
         style={{ width: "100%", height: "100%", willChange: "opacity" }}
       >
         <FloatingLines
@@ -32,6 +48,7 @@ export default function FloatingLinesLayer() {
           interactive={false}
           parallax={true}
           backgroundColor={isDark ? "#0A0A0B" : "#F0F3FF"}
+          opacity={isRenderEnabled ? 1 : 0}
         />
       </motion.div>
     </div>
