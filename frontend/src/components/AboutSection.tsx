@@ -52,61 +52,14 @@ export default function AboutSection() {
     <section
       aria-label="About CODO AI Innovations"
       style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom, transparent 0%, var(--glass-bg-solid) 8%, var(--glass-bg-solid) 92%, transparent 100%)",
         position: "relative",
         zIndex: 1,
-        overflow: "hidden",
-        padding: "clamp(6rem, 12vw, 10rem) clamp(1.5rem, 6vw, 6rem)",
+        padding: "clamp(6rem, 12vw, 8rem) clamp(1.5rem, 6vw, 6rem) clamp(3rem, 6vw, 4rem)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
       
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          backgroundImage:
-            "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')",
-          opacity: 0.03,
-        }}
-      />
-      
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "-10%",
-          right: "-15%",
-          width: "500px",
-          height: "500px",
-          background: "var(--shadow-glow)",
-          filter: "blur(120px)",
-          borderRadius: "50%",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-      />
-      
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: "10%",
-          left: "-10%",
-          width: "400px",
-          height: "400px",
-          background: "rgba(0,32,63,0.15)",
-          filter: "blur(100px)",
-          borderRadius: "50%",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-      />
+
 
       <div
         className="max-w-[1400px] mx-auto flex flex-col md:flex-row relative z-10"
@@ -167,7 +120,7 @@ export default function AboutSection() {
               height="100"
               viewBox="0 0 100 100"
               aria-hidden="true"
-              style={{ overflow: "visible" }}
+              style={{ overflow: "visible", willChange: "transform" }}
             >
               <path
                 id="textPath"
@@ -197,11 +150,13 @@ export default function AboutSection() {
               className="flex md:hidden items-center gap-3"
               style={{ marginBottom: "1.5rem" }}
             >
-              <div
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: 40 }}
+                transition={{ duration: 1, ease: "easeOut" }}
                 style={{
-                  height: "1px",
-                  width: "32px",
-                  background: "rgba(1,182,103,0.5)",
+                  height: "2px",
+                  background: "var(--brand-green)",
                 }}
               />
               <span
@@ -304,7 +259,10 @@ export default function AboutSection() {
                     border: "1px solid var(--glass-border)",
                     borderRadius: "16px",
                     background: "var(--glass-bg)",
-                    backdropFilter: "blur(12px)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    backfaceVisibility: "hidden",
+                    transform: "translateZ(0)",
                   }}
                 >
                   <div

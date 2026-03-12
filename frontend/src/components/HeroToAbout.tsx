@@ -16,8 +16,6 @@ export default function HeroToAbout() {
 
   const heroOpacity = useTransform(scrollYProgress, [0, 0.4, 0.8], [1, 1, 0]);
   const heroScale  = useTransform(scrollYProgress, [0, 0.8], [1, 2.2]);
-  const heroBlur   = useTransform(scrollYProgress, [0.1, 0.8], [0, 30]);
-  const heroFilter = useMotionTemplate`blur(${heroBlur}px)`;
 
   const scrollIndOp = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
@@ -27,7 +25,7 @@ export default function HeroToAbout() {
 
         <motion.div style={{
           position: "absolute", textAlign: "center",
-          opacity: heroOpacity, scale: heroScale, filter: heroFilter,
+          opacity: heroOpacity, scale: heroScale,
         }}>
           <div style={{ fontSize: "clamp(3.5rem, 16vw, 13rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "white", lineHeight: 0.85 }}>
             COD<span style={{ color: "#01b667" }}>O</span>
