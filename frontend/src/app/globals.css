@@ -1,0 +1,94 @@
+
+@import "tailwindcss";
+
+@config "../../tailwind.config.ts";
+
+:root,
+.dark {
+  --bg-primary: #0A0A0B;
+  --bg-secondary: #111113;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --brand-green: #01b667;
+  --brand-dark: #0A0A0B;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-bg-solid: #0A0A0B; 
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-hover: rgba(255, 255, 255, 0.2);
+  --shadow-glow: rgba(0, 135, 100, 0.3);
+  --shadow-glow-hover: rgba(0, 135, 100, 0.5);
+  --cta-bg: rgba(0, 135, 100, 0.45);
+  --cta-border: rgba(0, 135, 100, 0.6);
+  --cta-hover: rgba(0, 135, 100, 0.6);
+}
+
+.light {
+  --bg-primary: #F0F3FF;
+  --bg-secondary: #E8ECFA;
+  --text-primary: #00203F;
+  --text-secondary: #4a5568;
+  --brand-green: #01b667;
+  --brand-dark: #0A0A0B;
+  --glass-bg: rgba(0, 0, 0, 0.06);
+  --glass-bg-solid: #F0F3FF;
+  --glass-border: rgba(0, 32, 63, 0.12);
+  --glass-hover: rgba(0, 0, 0, 0.1);
+  --shadow-glow: rgba(0, 135, 100, 0.2);
+  --shadow-glow-hover: rgba(0, 135, 100, 0.4);
+  --cta-bg: rgba(0, 0, 0, 0.06);
+  --cta-border: rgba(0, 32, 63, 0.12);
+  --cta-hover: rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+*, *::before, *::after {
+  transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  nav {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--cta-bg) 50%, transparent);
+  border-radius: 20px;
+  border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cta-bg);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--cta-bg) 50%, transparent) var(--bg-primary);
+}
