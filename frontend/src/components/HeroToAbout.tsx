@@ -11,10 +11,10 @@ export default function HeroToAbout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
   const isTablet = useMediaQuery(MEDIA_QUERIES.tablet);
-  
-  const { scrollYProgress } = useScroll({ 
-    target: containerRef, 
-    offset: ["start start", "end end"] 
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
   });
   const inView = useInView(containerRef, { margin: "-40% 0px -25% 0px" });
   const { setOpacity } = useFloatingLines();
@@ -30,12 +30,21 @@ export default function HeroToAbout() {
 
   const scrollIndOp = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
-  const heroHeight = isMobile ? "80vh" : isTablet ? "100vh" : "115vh";
+  const heroHeight = isMobile ? "100vh" : isTablet ? "100vh" : "115vh";
   const finalScale = isMobile ? 1.8 : 2.2;
   const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, finalScale]);
 
   return (
-    <div ref={containerRef} style={{ height: heroHeight, background: "transparent", fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div 
+      ref={containerRef} 
+      style={{ 
+        height: heroHeight, 
+        background: "transparent",
+        position: "relative",
+        zIndex: 1,
+        fontFamily: "'DM Sans', system-ui, sans-serif" 
+      }}
+    >
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
         <motion.div style={{
@@ -44,21 +53,21 @@ export default function HeroToAbout() {
           filter,
           padding: isMobile ? "0 1.5rem" : "0"
         }}>
-          <div style={{ 
-            fontSize: getResponsiveFont(56, 208), 
-            fontWeight: 900, 
-            letterSpacing: "-0.02em", 
-            color: "white", 
-            lineHeight: 0.85 
+          <div style={{
+            fontSize: getResponsiveFont(56, 208),
+            fontWeight: 900,
+            letterSpacing: "-0.02em",
+            color: "white",
+            lineHeight: 0.85
           }}>
             COD<span style={{ color: "#008764" }}>O</span>
           </div>
-          <div style={{ 
-            fontSize: getResponsiveFont(14, 64), 
-            fontWeight: 800, 
-            color: "rgba(255,255,255,0.9)", 
-            letterSpacing: "0.1em", 
-            marginTop: "0.2em" 
+          <div style={{
+            fontSize: getResponsiveFont(14, 64),
+            fontWeight: 800,
+            color: "rgba(255,255,255,0.9)",
+            letterSpacing: "0.1em",
+            marginTop: "0.2em"
           }}>
             AI INNOVATIONS
           </div>
