@@ -2,6 +2,9 @@
 
 import { useRef } from "react";
 import { useInView, motion } from "framer-motion";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 function AnimatedBlock({
   children,
@@ -49,62 +52,28 @@ const ecosystem = [
 ];
 
 export default function EcosystemSection() {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
+
   return (
     <section
       aria-label="CODO Ecosystem"
       style={{
         position: "relative",
         zIndex: 1,
-        // ── Small continuity tweak: matching top padding from AboutSection
-        padding: "clamp(6rem, 12vw, 10rem) clamp(1.5rem, 6vw, 6rem) clamp(6rem, 12vw, 8rem)",
+        padding: `${getResponsiveSpacing(60, 100, 120)} ${getResponsiveSpacing(24, 40, 60)} ${getResponsiveSpacing(40, 80, 100)}`,
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
-      {/* ── Re-added subtle ambient glows (same as AboutSection) for visual continuity */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "-10%",
-          right: "-15%",
-          width: "420px",
-          height: "420px",
-          background: "var(--shadow-glow)",
-          filter: "blur(90px)",
-          borderRadius: "50%",
-          zIndex: 0,
-          pointerEvents: "none",
-          willChange: "transform, filter",
-          opacity: 0.6,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: "15%",
-          left: "-12%",
-          width: "360px",
-          height: "360px",
-          background: "rgba(0,32,63,0.15)",
-          filter: "blur(80px)",
-          borderRadius: "50%",
-          zIndex: 0,
-          pointerEvents: "none",
-          willChange: "transform, filter",
-        }}
-      />
-
       <div className="max-w-[1400px] mx-auto flex flex-col relative z-10">
         {/* Huge ambient text - slightly refined for better mobile scaling */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: "-120px",
+            top: "-80px",
             left: "50%",
             transform: "translateX(-50%)",
-            fontSize: "clamp(4.5rem, 14vw, 11rem)",
+            fontSize: getResponsiveFont(56, 176),
             fontWeight: 900,
             color: "transparent",
             WebkitTextStroke: "1px var(--glass-border)",
@@ -163,8 +132,8 @@ export default function EcosystemSection() {
           {/* Heading & content */}
           <AnimatedBlock index={1}>
             <h2
-              className="text-[clamp(2.2rem,6vw,3.5rem)]"
               style={{
+                fontSize: getResponsiveFont(32, 56),
                 fontWeight: 900,
                 lineHeight: 1.1,
                 letterSpacing: "-0.02em",
@@ -181,7 +150,7 @@ export default function EcosystemSection() {
           <AnimatedBlock index={2}>
             <p
               style={{
-                fontSize: "clamp(1rem, 1.6vw, 1.15rem)",
+                fontSize: getResponsiveFont(16, 18.5),
                 lineHeight: 1.8,
                 color: "var(--text-secondary)",
                 fontWeight: 400,
@@ -234,7 +203,7 @@ export default function EcosystemSection() {
 
                   <div
                     style={{
-                      fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+                      fontSize: getResponsiveFont(24, 36),
                       fontWeight: 900,
                       lineHeight: 1.05,
                       color: "var(--text-primary)",
@@ -246,7 +215,7 @@ export default function EcosystemSection() {
 
                   <p
                     style={{
-                      fontSize: "clamp(0.95rem, 1.4vw, 1.05rem)",
+                      fontSize: getResponsiveFont(15, 17),
                       lineHeight: 1.85,
                       color: "var(--text-secondary)",
                       flex: 1,

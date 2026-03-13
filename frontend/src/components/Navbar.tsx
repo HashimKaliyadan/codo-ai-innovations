@@ -6,6 +6,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
 
 const menuLinks = [
   { label: "Home", href: "/" },
@@ -54,10 +57,7 @@ export default function Navbar() {
     <nav
       className="fixed top-0 left-0 w-full z-50 pointer-events-none"
       style={{
-        paddingLeft: 'clamp(1.5rem, 6vw, 6rem)',
-        paddingRight: 'clamp(1.5rem, 6vw, 6rem)',
-        paddingTop: '1rem',
-        paddingBottom: '1rem'
+        padding: `${getResponsiveSpacing(12, 16, 20)} ${getResponsiveSpacing(24, 40, 60)}`,
       }}
     >
       <div className="flex justify-between items-start w-full max-w-[1400px] mx-auto">
@@ -207,8 +207,9 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 rounded-xl text-base sm:text-lg font-bold uppercase tracking-wider transition-all duration-300 hover:opacity-80"
+                      className="flex items-center justify-between px-4 py-4 rounded-xl font-bold uppercase tracking-wider transition-all duration-300 hover:opacity-80"
                       style={{
+                        fontSize: getResponsiveFont(16, 18),
                         transitionDelay: isOpen ? `${index * 60}ms` : "0ms",
                         color: isActive ? "var(--text-primary)" : "color-mix(in srgb, var(--text-primary) 60%, transparent)",
                         background: isActive ? "var(--glass-bg)" : "transparent",

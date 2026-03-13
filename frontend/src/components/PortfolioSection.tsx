@@ -2,6 +2,9 @@
 
 import { useRef, useState, useMemo } from "react";
 import { motion, useInView, useScroll, useTransform, useSpring } from "framer-motion";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Project {
@@ -212,7 +215,7 @@ function ProjectCard({
               position: "absolute",
               bottom: "-0.5rem",
               left: "1.5rem",
-              fontSize: "clamp(5rem, 10vw, 9rem)",
+              fontSize: getResponsiveFont(80, 144),
               fontWeight: 900,
               lineHeight: 1,
               color: "transparent",
@@ -227,7 +230,7 @@ function ProjectCard({
         </div>
 
         {/* ── Card content ── */}
-        <div style={{ padding: "clamp(1.5rem, 3vw, 2.25rem)" }}>
+        <div style={{ padding: getResponsiveSpacing(24, 32, 40) }}>
 
           {/* Category */}
           <span
@@ -247,7 +250,7 @@ function ProjectCard({
           {/* Project name */}
           <h3
             style={{
-              fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
+              fontSize: getResponsiveFont(22.5, 32),
               fontWeight: 900,
               lineHeight: 1.1,
               letterSpacing: "-0.01em",
@@ -262,7 +265,7 @@ function ProjectCard({
           {/* Description */}
           <p
             style={{
-              fontSize: "clamp(0.875rem, 1.2vw, 1rem)",
+              fontSize: getResponsiveFont(14, 16),
               lineHeight: 1.8,
               color: "var(--text-secondary)",
               fontWeight: 400,
@@ -398,7 +401,7 @@ export default function PortfolioSection() {
         position: "relative",
         zIndex: 2,
         overflow: "hidden",
-        padding: "clamp(5rem, 10vw, 12rem) clamp(1.5rem, 6vw, 6rem)",
+        padding: `${getResponsiveSpacing(80, 120, 192)} ${getResponsiveSpacing(24, 40, 60)}`,
         fontFamily: "'DM Sans', sans-serif",
         background: "#008764",
         marginTop: "-60px",
@@ -427,7 +430,7 @@ export default function PortfolioSection() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-end",
-            marginBottom: "clamp(3rem, 6vw, 5rem)",
+            marginBottom: getResponsiveSpacing(48, 64, 80),
             flexWrap: "wrap",
             gap: "2rem",
           }}
@@ -457,7 +460,7 @@ export default function PortfolioSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
               style={{
-                fontSize: "clamp(2.2rem, 4.5vw, 4.5rem)",
+                fontSize: getResponsiveFont(35, 72),
                 fontWeight: 900,
                 lineHeight: 1.05,
                 letterSpacing: "-0.03em",
@@ -488,7 +491,7 @@ export default function PortfolioSection() {
               Selected Works
             </div>
             <div style={{
-              fontSize: "clamp(2rem, 4vw, 3.5rem)",
+              fontSize: getResponsiveFont(32, 56),
               fontWeight: 900,
               color: "var(--glass-border)",
               lineHeight: 1,
@@ -537,7 +540,7 @@ export default function PortfolioSection() {
             height: "1px",
             background: "linear-gradient(to right, transparent, var(--glass-border), transparent)",
             transformOrigin: "center",
-            marginBottom: "clamp(2.5rem, 5vw, 4rem)",
+            marginBottom: getResponsiveSpacing(40, 60, 64),
           }}
           aria-hidden="true"
         />
@@ -558,7 +561,7 @@ export default function PortfolioSection() {
           }}
         >
           <p style={{
-            fontSize: "clamp(0.85rem, 1.2vw, 1rem)",
+            fontSize: getResponsiveFont(13.5, 16),
             color: "var(--text-secondary)",
             fontWeight: 400,
             maxWidth: "44ch",

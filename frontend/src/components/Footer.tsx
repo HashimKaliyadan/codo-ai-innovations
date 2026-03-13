@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Linkedin, Twitter, Github, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,7 +12,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        padding: "clamp(4rem, 8vw, 7rem) clamp(1.5rem, 6vw, 6rem) 2rem",
+        padding: `${getResponsiveSpacing(64, 80, 112)} ${getResponsiveSpacing(24, 40, 60)} 2rem`,
         background: "var(--bg-primary)",
         borderTop: "1px solid var(--glass-border)",
         fontFamily: "'DM Sans', sans-serif",
@@ -23,7 +26,7 @@ export default function Footer() {
           <div>
             <div
               style={{
-                fontSize: "1.5rem",
+                fontSize: getResponsiveFont(22, 24),
                 fontWeight: 900,
                 letterSpacing: "-0.03em",
                 color: "#ffffff",

@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Service {
@@ -86,6 +89,7 @@ function ServiceRow({
   rowIndex: number;
   inView: boolean;
 }) {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
   const [hovered, setHovered] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const isOpen = hovered || expanded;
@@ -129,10 +133,10 @@ function ServiceRow({
         className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008764]"
         style={{
           display: "grid",
-          gridTemplateColumns: "4rem 1fr auto",
+          gridTemplateColumns: isMobile ? "2rem 1fr auto" : "4rem 1fr auto",
           alignItems: "center",
-          gap: "clamp(1rem, 3vw, 2.5rem)",
-          padding: "clamp(1.25rem, 2.5vw, 1.75rem) 0",
+          gap: getResponsiveSpacing(16, 24, 40),
+          padding: `${getResponsiveSpacing(20, 24, 28)} 0`,
           cursor: "pointer",
           userSelect: "none",
           transition: "gap 0.3s ease",
@@ -157,12 +161,12 @@ function ServiceRow({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", minWidth: 0 }}>
           <span
             style={{
-              fontSize: "clamp(1.1rem, 2.5vw, 2rem)",
+              fontSize: getResponsiveFont(17.5, 32),
               fontWeight: 900,
               letterSpacing: "-0.01em",
               color: isOpen ? "var(--text-primary)" : "var(--text-secondary)",
               transition: "color 0.3s ease, transform 0.3s ease",
-              transform: isOpen ? "translateX(8px)" : "translateX(0)",
+              transform: isOpen ? (isMobile ? "translateX(4px)" : "translateX(8px)") : "translateX(0)",
               display: "block",
               lineHeight: 1.1,
               whiteSpace: "nowrap",
@@ -170,7 +174,7 @@ function ServiceRow({
               textOverflow: "ellipsis",
             }}
           >
-            {service.name}
+            {isMobile ? service.shortName : service.name}
           </span>
 
           {/* Badge */}
@@ -228,9 +232,9 @@ function ServiceRow({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "4rem 1fr",
-                gap: "clamp(1rem, 3vw, 2.5rem)",
-                paddingBottom: "clamp(1.5rem, 3vw, 2.5rem)",
+                gridTemplateColumns: isMobile ? "2rem 1fr" : "4rem 1fr",
+                gap: getResponsiveSpacing(16, 24, 40),
+                paddingBottom: getResponsiveSpacing(24, 32, 40),
               }}
             >
               {/* Empty first column — aligns with index */}
@@ -248,7 +252,7 @@ function ServiceRow({
                 <div>
                   <p
                     style={{
-                      fontSize: "clamp(0.9rem, 1.3vw, 1rem)",
+                      fontSize: getResponsiveFont(14.5, 16.5),
                       lineHeight: 1.85,
                       color: "var(--text-secondary)",
                       fontWeight: 400,
@@ -270,6 +274,7 @@ function ServiceRow({
 
 // ── Main Section ──────────────────────────────────────────────────────────────
 export default function ServicesSection() {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
   const sectionRef = useRef(null);
   const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
 
@@ -281,7 +286,7 @@ export default function ServicesSection() {
         position: "relative",
         zIndex: 1,
         overflow: "hidden",
-        padding: "clamp(5rem, 10vw, 9rem) clamp(1.5rem, 6vw, 6rem)",
+        padding: `${getResponsiveSpacing(80, 100, 144)} ${getResponsiveSpacing(24, 40, 60)}`,
         fontFamily: "'DM Sans', sans-serif",
         background:
           "linear-gradient(to bottom, transparent 0%, var(--bg-primary) 6%, var(--bg-primary) 94%, transparent 100%)",
@@ -293,9 +298,9 @@ export default function ServicesSection() {
         style={{
           position: "absolute",
           top: "50%",
-          right: "-2rem",
+          right: "-1rem",
           transform: "translateY(-50%)",
-          fontSize: "clamp(12rem, 28vw, 26rem)",
+          fontSize: getResponsiveFont(192, 416),
           fontWeight: 900,
           lineHeight: 1,
           color: "transparent",
@@ -342,16 +347,14 @@ export default function ServicesSection() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
             style={{
-              fontSize: "clamp(2.2rem, 4.5vw, 3.8rem)",
+              fontSize: getResponsiveFont(35, 60),
               fontWeight: 900,
               lineHeight: 1.05,
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
             }}
           >
-            What We{" "}
-            <span style={{ color: "var(--brand-green)" }}>Build</span>{" "}
-            for You.
+            What We <span style={{ color: "var(--brand-green)" }}>Build</span> for You.
           </motion.h2>
         </div>
 

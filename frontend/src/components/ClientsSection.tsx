@@ -2,6 +2,9 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 // ── Dummy Client Data ─────────────────────────────────────────────────────────
 const clients = [
@@ -24,7 +27,7 @@ export default function ClientsSection() {
       ref={sectionRef}
       aria-label="Our Clients and Partners"
       style={{
-        padding: "clamp(4rem, 8vw, 6rem) clamp(1.5rem, 6vw, 6rem)",
+        padding: `${getResponsiveSpacing(64, 80, 100)} ${getResponsiveSpacing(24, 40, 60)}`,
         background: "var(--bg-primary)",
         position: "relative",
         zIndex: 1,
@@ -35,7 +38,7 @@ export default function ClientsSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          style={{ marginBottom: "clamp(3rem, 5vw, 4rem)" }}
+          style={{ marginBottom: getResponsiveSpacing(48, 64, 80) }}
         >
           <span
             style={{
@@ -52,7 +55,7 @@ export default function ClientsSection() {
           </span>
           <h2
             style={{
-              fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
+              fontSize: getResponsiveFont(24, 40),
               fontWeight: 900,
               color: "var(--text-primary)",
               letterSpacing: "-0.02em",
@@ -78,7 +81,7 @@ export default function ClientsSection() {
               animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.5, delay: i * 0.05 }}
               style={{
-                height: "clamp(100px, 15vw, 160px)",
+                height: getResponsiveSpacing(100, 130, 160),
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

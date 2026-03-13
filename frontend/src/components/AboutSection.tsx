@@ -4,6 +4,9 @@
 
 import { useRef } from "react";
 import { useInView, motion } from "framer-motion";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 function AnimatedBlock({
   children,
@@ -49,13 +52,15 @@ const stats = [
 ];
 
 export default function AboutSection() {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
+
   return (
     <section
       aria-label="About CODO AI Innovations"
       style={{
         position: "relative",
         zIndex: 1,
-        padding: "clamp(6rem, 12vw, 8rem) clamp(1.5rem, 6vw, 6rem) clamp(3rem, 6vw, 4rem)",
+        padding: `${getResponsiveSpacing(60, 80, 100)} ${getResponsiveSpacing(24, 40, 60)} ${getResponsiveSpacing(40, 60, 80)}`,
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
@@ -102,7 +107,7 @@ export default function AboutSection() {
                 left: "-1rem",
                 top: "50%",
                 transform: "translateY(-50%) rotate(-90deg)",
-                fontSize: "clamp(4rem, 8vw, 7rem)",
+                fontSize: getResponsiveFont(48, 112),
                 fontWeight: 900,
                 color: "transparent",
                 WebkitTextStroke: "1px var(--glass-border)",
@@ -181,6 +186,7 @@ export default function AboutSection() {
             <h2
               className="text-[clamp(2rem,8vw,2.8rem)] md:text-[clamp(2.2rem,4.5vw,3.8rem)]"
               style={{
+                fontSize: getResponsiveFont(32, 60),
                 fontWeight: 900,
                 lineHeight: 1.05,
                 letterSpacing: "-0.02em",
@@ -201,7 +207,7 @@ export default function AboutSection() {
           <AnimatedBlock index={2}>
             <p
               style={{
-                fontSize: "clamp(1rem, 1.6vw, 1.15rem)",
+                fontSize: getResponsiveFont(16, 18),
                 lineHeight: 1.9,
                 color: "var(--text-secondary)",
                 fontWeight: 400,
@@ -223,7 +229,7 @@ export default function AboutSection() {
           <AnimatedBlock index={3}>
             <p
               style={{
-                fontSize: "clamp(0.95rem, 1.4vw, 1.05rem)",
+                fontSize: getResponsiveFont(15, 17),
                 lineHeight: 1.85,
                 color: "var(--text-secondary)",
                 fontWeight: 400,

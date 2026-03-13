@@ -3,6 +3,9 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Mail, Send } from "lucide-react";
+import { getResponsiveFont, getResponsiveSpacing } from "@/utils/responsive";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 export default function CtaSection() {
   const sectionRef = useRef(null);
@@ -14,7 +17,7 @@ export default function CtaSection() {
       ref={sectionRef}
       aria-label="Contact Us Call to Action"
       style={{
-        padding: "clamp(6rem, 12vw, 10rem) clamp(1.5rem, 6vw, 6rem)",
+        padding: `${getResponsiveSpacing(80, 100, 144)} ${getResponsiveSpacing(24, 40, 60)}`,
         background: "var(--bg-primary)",
         position: "relative",
         zIndex: 1,
@@ -43,7 +46,7 @@ export default function CtaSection() {
             background: "rgba(255,255,255,0.02)",
             border: "1px solid var(--glass-border)",
             borderRadius: "48px",
-            padding: "clamp(3rem, 8vw, 6rem) clamp(1.5rem, 4vw, 4rem)",
+            padding: `${getResponsiveSpacing(48, 80, 96)} ${getResponsiveSpacing(24, 40, 64)}`,
             textAlign: "center",
             backdropFilter: "blur(20px)",
           }}
@@ -55,7 +58,7 @@ export default function CtaSection() {
           >
             <h2
               style={{
-                fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
+                fontSize: getResponsiveFont(36, 72),
                 fontWeight: 900,
                 lineHeight: 1,
                 letterSpacing: "-0.04em",
@@ -70,7 +73,7 @@ export default function CtaSection() {
             
             <p
               style={{
-                fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+                fontSize: getResponsiveFont(16, 18.5),
                 color: "var(--text-secondary)",
                 maxWidth: "60ch",
                 margin: "0 auto 3rem",
