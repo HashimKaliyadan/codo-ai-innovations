@@ -30,7 +30,7 @@ export default function HeroToAbout() {
 
   const scrollIndOp = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
-  const heroHeight = isMobile ? "80vh" : isTablet ? "100vh" : "110vh";
+  const heroHeight = isMobile ? "80vh" : isTablet ? "100vh" : "115vh";
   const finalScale = isMobile ? 1.8 : 2.2;
   const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, finalScale]);
 
