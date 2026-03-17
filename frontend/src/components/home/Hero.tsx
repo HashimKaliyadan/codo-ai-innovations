@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { motion, useInView, Variants } from "framer-motion";
+import { useInView, useScroll, useTransform, motion } from "framer-motion";
 import { useFloatingLines } from "@/components/FloatingLinesController";
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -9,46 +9,14 @@ import { MEDIA_QUERIES } from "@/constants/breakpoints";
 import { getResponsiveFont } from "@/lib/responsive";
 
 // ─── Letter config ────────────────────────────────────────────────────────────
-const LETTERS: { char: string; green: boolean; glow: boolean }[] = [
-  { char: "C", green: false, glow: false },
-  { char: "O", green: false, glow: false },
-  { char: "D", green: false, glow: false },
-  { char: "O", green: true,  glow: true  }, // final O — accent + glow pulse
+const LETTERS: { char: string; green: boolean }[] = [
+  { char: "C", green: false },
+  { char: "O", green: false },
+  { char: "D", green: false },
+  { char: "O", green: true  },
 ];
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-const letterVariants: Variants = {
-  hidden: { y: 70, opacity: 0 },
-  visible: (i: number) => ({
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.75,
-      delay: i * 0.08,
-      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
-    },
-  }),
-};
-
-const subtitleVariants: Variants = {
-  hidden:  { opacity: 0, letterSpacing: "0.05em" },
-  visible: {
-    opacity: 1,
-    letterSpacing: "0.32em",
-    transition: { duration: 1, delay: 0.55, ease: "easeOut" },
-  },
-};
-
-const ctaVariants: Variants = {
-  hidden:  { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
-  },
-};
-
-// ─── Pure-Tailwind button styles (no fighting inline objects) ─────────────────
+// ─── Pure-Tailwind button styles ──────────────────────────────────────────────
 const CTAClass = [
   "w-48 h-11 px-6",
   "flex items-center justify-center",
@@ -70,6 +38,7 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile     = useMediaQuery(MEDIA_QUERIES.mobile);
 
+  // ── Floating lines visibility ──
   const inView = useInView(containerRef, { margin: "-40% 0px -25% 0px" });
   const { setOpacity } = useFloatingLines();
 
@@ -77,39 +46,39 @@ export default function Hero() {
     setOpacity(inView ? 1 : 0);
   }, [inView, setOpacity]);
 
-  return (
-    <>
-      {/* ── Keyframe injected once into <head> ── */}
-      <style>{`
-        @keyframes glowPulse {
-          0%, 100% { text-shadow: 0 0 18px rgba(0, 182, 99, 0.25); }
-          50%       { text-shadow: 0 0 48px rgba(0, 182, 99, 0.75),
-                                   0 0 96px rgba(0, 182, 99, 0.18); }
-        }
-        .glow-o {
-          animation: glowPulse 3.2s ease-in-out 1.2s infinite;
-        }
-      `}</style>
+  // ── Parallax: track global scroll progress ──
+  const { scrollY } = useScroll();
 
+  // Text drifts upward based on absolute scroll position (pixels)
+  // When scrolled 800px down, the text will have moved -200px up
+  const y = useTransform(scrollY, [0, 800], [0, -200]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        height: "120vh",
+        background: "transparent",
+        position: "relative",
+        zIndex: 1,
+        fontFamily: "'DM Sans', system-ui, sans-serif",
+      }}
+    >
       <div
-        ref={containerRef}
         style={{
-          height: "120vh",
-          background: "transparent",
-          position: "relative",
-          zIndex: 1,
-          fontFamily: "'DM Sans', system-ui, sans-serif",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+        {/* ── Parallax wrapper — only this layer moves ── */}
+        <motion.div
+          style={{ y }}
+          transition={{ type: "tween", ease: "linear" }}
         >
           <div
             style={{
@@ -117,7 +86,6 @@ export default function Hero() {
               padding: isMobile ? "0 1.5rem" : "0",
             }}
           >
-
             {/* ── Wordmark ── */}
             <h1
               aria-label="CODO"
@@ -129,48 +97,38 @@ export default function Hero() {
                 margin: 0,
                 display: "flex",
                 justifyContent: "center",
-                overflow: "hidden",        // clip the slide-up
+                overflow: "hidden",
               }}
             >
-              {LETTERS.map(({ char, green, glow }, i) => (
-                <motion.span
+              {LETTERS.map(({ char, green }, i) => (
+                <span
                   key={i}
-                  custom={i}
-                  initial="hidden"
-                  animate="visible"
-                  variants={letterVariants}
-                  className={glow ? "glow-o" : undefined}
                   style={{
                     display: "inline-block",
                     color: green ? "#00B663" : "white",
                   }}
                 >
                   {char}
-                </motion.span>
+                </span>
               ))}
             </h1>
 
-            {/* ── Subtitle — letterSpacing expand animation ── */}
-            <motion.p
-              initial="hidden"
-              animate="visible"
-              variants={subtitleVariants}
+            {/* ── Subtitle ── */}
+            <p
               style={{
                 fontSize: getResponsiveFont(14, 28),
                 fontWeight: 500,
                 color: "rgba(255,255,255,0.55)",
                 marginTop: "1.25rem",
                 textTransform: "uppercase",
+                letterSpacing: "0.32em",
               }}
             >
               AI INNOVATIONS
-            </motion.p>
+            </p>
 
             {/* ── CTA Buttons ── */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={ctaVariants}
+            <div
               className={`flex gap-4 justify-center mt-12 ${isMobile ? "flex-col items-center" : "flex-row"}`}
             >
               <Link href="/portfolio" passHref>
@@ -188,11 +146,10 @@ export default function Hero() {
                   <span className={CTALabelClass}>Explore Academy</span>
                 </button>
               </a>
-            </motion.div>
-
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </>
+    </div>
   );
 }
