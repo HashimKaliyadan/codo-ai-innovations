@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, Variants } from "framer-motion";
 import { useFloatingLines } from "@/components/FloatingLinesController";
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -17,7 +17,7 @@ const LETTERS: { char: string; green: boolean; glow: boolean }[] = [
 ];
 
 // ─── Animation variants ───────────────────────────────────────────────────────
-const letterVariants = {
+const letterVariants: Variants = {
   hidden: { y: 70, opacity: 0 },
   visible: (i: number) => ({
     y: 0,
@@ -30,7 +30,7 @@ const letterVariants = {
   }),
 };
 
-const subtitleVariants = {
+const subtitleVariants: Variants = {
   hidden:  { opacity: 0, letterSpacing: "0.05em" },
   visible: {
     opacity: 1,
@@ -39,7 +39,7 @@ const subtitleVariants = {
   },
 };
 
-const ctaVariants = {
+const ctaVariants: Variants = {
   hidden:  { opacity: 0, y: 20 },
   visible: {
     opacity: 1,

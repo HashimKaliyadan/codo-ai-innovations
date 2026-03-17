@@ -60,8 +60,6 @@ function MobileMenu({
             display: "flex",
             flexDirection: "column",
             padding: "1.5rem",
-            flexDirection: "column",
-            padding: "1.5rem",
             background: "rgba(255, 255, 255, 0.08)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
