@@ -1,415 +1,272 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useInView, motion, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { useInView, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 
 /* ─────────────────────────────────────────────
-   Scroll-reveal wrapper
+   Animated Stat Counter Hook
 ───────────────────────────────────────────── */
-function Reveal({
-  children,
-  delay = 0,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={style}
-      initial={{ opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
-    >
-      {children}
-    </motion.div>
-  );
+function useAnimatedCounter(target: number, inView: boolean) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const start = performance.now();
+    const dur = 1600;
+    let frameId: number;
+
+    const animate = (t: number) => {
+      const p = Math.min((t - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      setCount(Math.floor(eased * target));
+      if (p < 1) frameId = requestAnimationFrame(animate);
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [target, inView]);
+
+  return count;
 }
 
 /* ─────────────────────────────────────────────
-   Data
+   Elevated Card Component with 3D Physics
 ───────────────────────────────────────────── */
-const divisions = [
-  {
-    id: "academy",
-    label: "Academy",
-    name: "CODO Academy",
-    tagline: "We train those who build tomorrow.",
-    description:
-      "Training, internships, and skill development programs that bridge industry demand with human potential. Hands-on AI, web, and emerging tech education for the next generation of innovators.",
-    cta: "Visit Academy",
-    link: "https://www.codoacademy.com",
-    external: true,
-    stat: "500+",
-    statLabel: "Innovators Trained",
-    features: ["AI & Emerging Tech", "Hands-on Projects", "Industry Mentors", "Placement Support"],
-    // Deep forest green gradient — rich, warm
-    gradient: "linear-gradient(145deg, #003d2b 0%, #005a3f 40%, #007a55 100%)",
-    patternColor: "rgba(255,255,255,0.045)",
-  },
-  {
-    id: "agency",
-    label: "Agency",
-    name: "CODO Agency",
-    tagline: "We build what others imagine.",
-    description:
-      "Custom web applications, enterprise software, and mobile apps powered by cutting-edge AI. From concept to deployment — we deliver scalable digital solutions that drive real business impact.",
-    cta: "View Portfolio",
-    link: "/portfolio",
-    external: false,
-    stat: "30+",
-    statLabel: "Solutions Delivered",
-    features: ["Web & Mobile Apps", "AI Integration", "Enterprise Software", "End-to-end Delivery"],
-    // Deep navy gradient — cool, technical
-    gradient: "linear-gradient(145deg, #050d1a 0%, #0a1f3d 40%, #0d2952 100%)",
-    patternColor: "rgba(0,183,100,0.055)",
-  },
-];
+type CardProps = {
+  type: "academy" | "agency";
+  label: string;
+  nameMain: string;
+  nameAccent: string;
+  tagline: string;
+  description: string;
+  features: string[];
+  statTarget: number;
+  statLabel: string;
+  ctaText: string;
+  ctaLink: string;
+  isExternal: boolean;
+  delay: number;
+};
 
-/* ─────────────────────────────────────────────
-   Division Card
-───────────────────────────────────────────── */
-function DivisionCard({
-  division,
-  index,
-  inView,
-}: {
-  division: (typeof divisions)[0];
-  index: number;
-  inView: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
+function ElevatedCard(props: CardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(cardRef, { once: true, margin: "-10%" });
+  const count = useAnimatedCounter(props.statTarget, inView);
+
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Framer Motion Springs for 3D Tilt
+  const x = useMotionValue(0.5);
+  const y = useMotionValue(0.5);
+  const rotateX = useSpring(useTransform(y, [0, 1], [14, -14]), { stiffness: 400, damping: 30 });
+  const rotateY = useSpring(useTransform(x, [0, 1], [-14, 14]), { stiffness: 400, damping: 30 });
+  const scale = useSpring(1, { stiffness: 400, damping: 30 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+
+    x.set(currentX / rect.width);
+    y.set(currentY / rect.height);
+    setMousePos({ x: currentX, y: currentY });
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    scale.set(1.018);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    x.set(0.5);
+    y.set(0.5);
+    scale.set(1);
+  };
+
+  // Theming Variables
+  const brandHex = "#00e87a"; // forced green for both
+  const brandRgb = "0, 232, 122";
+
+  const [ctaHover, setCtaHover] = useState(false);
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 48 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 0.2 + index * 0.15,
-      }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      animate-prop="custom"
-      style={{ flex: "1 1 0", minWidth: 0 }}
+      transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: props.delay }}
+      className="flex-1 w-full min-w-0 relative"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ perspective: "1100px" }}
     >
+      {/* ── 3D Card Shell ── */}
       <motion.div
-        animate={{
-          y: hovered ? -10 : 0,
-          boxShadow: hovered
-            ? "0 0 0 1px rgba(255,255,255,0.08)"
-            : "0 0 0 1px rgba(255,255,255,0.05)",
-        }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-3xl flex flex-col"
         style={{
-          background: division.gradient,
-          overflow: "hidden",
-          position: "relative",
-          minHeight: "clamp(500px, 60vw, 680px)",
-          cursor: "default",
+          rotateX,
+          rotateY,
+          scale,
+          transformStyle: "preserve-3d",
         }}
+        className="w-full h-full relative rounded-[28px]"
       >
-        {/* ── Geometric pattern overlay ── */}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 500 500"
+
+
+        {/* Static Subtle Border */}
+        <div
+          className="absolute inset-0 rounded-[28px] border z-10 pointer-events-none transition-colors duration-400"
+          style={{ borderColor: isHovered ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.08)" }}
+        />
+
+        {/* ── INNER CARD CONTAINER ── */}
+        <div
+          className="relative rounded-[27px] overflow-hidden flex flex-col w-full h-full"
           style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: "70%",
-            height: "70%",
-            opacity: 1,
-            pointerEvents: "none",
+            background: "rgba(255,255,255,0.04)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            minHeight: "clamp(400px, 50vw, 550px)",
           }}
         >
-          {/* Concentric arcs top-right corner */}
-          {[60, 120, 180, 240, 300].map((r, i) => (
-            <circle
-              key={i}
-              cx="500"
-              cy="0"
-              r={r}
-              fill="none"
-              stroke={division.patternColor}
-              strokeWidth="1"
-            />
-          ))}
-          {/* Diagonal rule */}
-          <line
-            x1="500" y1="0" x2="0" y2="500"
-            stroke={division.patternColor}
-            strokeWidth="0.8"
+          {/* Top Line Glow */}
+          <div
+            className="absolute top-0 h-[1px] rounded-[100px] z-20 transition-all duration-400"
+            style={{
+              left: isHovered ? "6%" : "12%",
+              right: isHovered ? "6%" : "12%",
+              opacity: isHovered ? 1 : 0.55,
+              background: `linear-gradient(90deg, transparent, ${brandHex}, transparent)`,
+              boxShadow: `0 0 18px 3px rgba(${brandRgb}, 0.4)`,
+            }}
           />
-        </svg>
 
-        {/* ── Noise grain ── */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 256 256\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.9\" numOctaves=\"4\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/%3E%3C/svg%3E')",
-            backgroundSize: "200px 200px",
-            opacity: 0.04,
-            mixBlendMode: "overlay",
-            pointerEvents: "none",
-          }}
-        />
+          {/* Mouse Spotlight */}
+          <div
+            className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300"
+            style={{
+              opacity: isHovered ? 1 : 0,
+              background: `radial-gradient(circle 280px at ${mousePos.x}px ${mousePos.y}px, rgba(${brandRgb}, 0.1), transparent 72%)`,
+            }}
+          />
 
-        {/* ── Bottom fade ── */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "55%",
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)",
-            pointerEvents: "none",
-          }}
-        />
+          {/* Ambient Glow */}
+          <div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              background: props.type === "academy"
+                ? `radial-gradient(circle at 20% 0%, rgba(${brandRgb}, 0.13) 0%, transparent 65%)`
+                : `radial-gradient(circle at 80% 100%, rgba(${brandRgb}, 0.12) 0%, transparent 65%)`,
+            }}
+          />
 
-        {/* ── Card content ── */}
-        <div
-          className="flex flex-col justify-between"
-          style={{
-            flex: 1,
-            padding: "clamp(1.75rem, 3.5vw, 2.5rem)",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          {/* TOP — label + stat */}
-          <div className="flex items-start justify-between">
-            {/* Division label pill */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.45rem",
-                padding: "0.32rem 0.85rem",
-                borderRadius: "100px",
-                background: "rgba(255,255,255,0.1)",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "var(--brand-green)",
-                  display: "inline-block",
-                  boxShadow: "0 0 8px var(--brand-green)",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: "0.6rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.8)",
-                }}
+
+
+          {/* SVG Geometric Pattern */}
+          <svg className="absolute top-0 right-0 w-[65%] h-[65%] pointer-events-none z-0" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="500" cy="0" r="70" fill="none" stroke="rgba(255,255,255,0.055)" strokeWidth="1" />
+            <circle cx="500" cy="0" r="140" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            <circle cx="500" cy="0" r="210" fill="none" stroke="rgba(255,255,255,0.032)" strokeWidth="1" />
+            <circle cx="500" cy="0" r="280" fill="none" stroke="rgba(255,255,255,0.024)" strokeWidth="1" />
+            <circle cx="500" cy="0" r="350" fill="none" stroke="rgba(255,255,255,0.016)" strokeWidth="1" />
+            <line x1="500" y1="0" x2="0" y2="500" stroke="rgba(255,255,255,0.045)" strokeWidth="0.8" />
+            <line x1="500" y1="0" x2="100" y2="500" stroke="rgba(255,255,255,0.02)" strokeWidth="0.6" />
+          </svg>
+
+          {/* Bottom Fade Mask */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[55%] pointer-events-none z-0"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 100%)" }}
+          />
+
+          {/* ── CARD FOREGROUND CONTENT ── */}
+          <div className="flex-1 flex flex-col justify-between relative z-20" style={{ padding: "clamp(1.8rem, 3.5vw, 2.5rem)" }}>
+            
+            {/* Top Row: Pill & Stat */}
+            <div className="flex items-start justify-between gap-4">
+              <div
+                className="inline-flex items-center gap-[0.45rem] px-[0.85rem] py-[0.32rem] rounded-full border"
+                style={{ background: "rgba(255,255,255,0.09)", borderColor: "rgba(255,255,255,0.13)" }}
               >
-                CODO {division.label}
-              </span>
+                <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: brandHex, boxShadow: `0 0 8px ${brandHex}` }} />
+                <span className="text-[0.6rem] font-bold tracking-[0.22em] uppercase text-white/80">CODO {props.label}</span>
+              </div>
+
+              <div className="text-right">
+                <div className="text-[2.6rem] font-black leading-none tracking-[-0.04em] tabular-nums" style={{ color: brandHex }}>
+                  {count}+
+                </div>
+                <div className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase text-white/40 mt-[0.2rem]">
+                  {props.statLabel}
+                </div>
+              </div>
             </div>
 
+            {/* Bottom Row: Text & CTA */}
+            <div>
+              <p className="text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-white/30 mb-[0.55rem]">
+                {props.tagline}
+              </p>
+              
+              <h3 className="text-white font-black leading-[1.04] tracking-[-0.03em] mb-[0.85rem]" style={{ fontSize: "clamp(2.1rem, 4.8vw, 3.4rem)" }}>
+                CODO <em className="not-italic" style={{ color: brandHex, fontStyle: "italic" }}>{props.nameAccent}</em>
+              </h3>
+              
+              <p className="text-white/50 leading-[1.82] max-w-[42ch] mb-[1.4rem]" style={{ fontSize: "clamp(0.85rem, 1.35vw, 0.95rem)" }}>
+                {props.description}
+              </p>
+              
 
-          </div>
+              <div className="h-[1px] w-full mb-[1.4rem]" style={{ background: "rgba(255,255,255,0.08)" }} />
 
-          {/* BOTTOM — everything else */}
-          <div>
-            {/* Tagline */}
-            <p
-              style={{
-                fontSize: "clamp(0.72rem, 1.2vw, 0.82rem)",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                color: "rgba(255,255,255,0.4)",
-                textTransform: "uppercase",
-                marginBottom: "0.75rem",
-              }}
-            >
-              {division.tagline}
-            </p>
-
-            {/* Division name */}
-            <h3
-              style={{
-                fontSize: "clamp(2rem, 4.5vw, 3.4rem)",
-                fontWeight: 900,
-                color: "#ffffff",
-                lineHeight: 1.04,
-                letterSpacing: "-0.03em",
-                marginBottom: "1rem",
-              }}
-            >
-              {division.name.split(" ")[0]}{" "}
-              <span
-                style={{
-                  color: "var(--brand-green)",
-                  fontStyle: "italic",
-                }}
-              >
-                {division.name.split(" ")[1]}
-              </span>
-            </h3>
-
-            {/* Description */}
-            <p
-              style={{
-                fontSize: "clamp(0.85rem, 1.4vw, 0.97rem)",
-                lineHeight: 1.78,
-                color: "rgba(255,255,255,0.58)",
-                maxWidth: "44ch",
-                marginBottom: "1.5rem",
-              }}
-            >
-              {division.description}
-            </p>
-
-            {/* Feature chips */}
-            <div className="flex flex-wrap" style={{ gap: "0.4rem", marginBottom: "1.75rem" }}>
-              {division.features.map((f, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={inView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{
-                    delay: 0.5 + index * 0.15 + i * 0.07,
-                    duration: 0.4,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
+              {/* Dynamic CTA Button */}
+              {props.isExternal ? (
+                <a
+                  href={props.ctaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-[0.6rem] px-[1.75rem] py-[0.85rem] rounded-full text-[0.73rem] font-extrabold tracking-[0.12em] uppercase no-underline transition-all duration-300"
                   style={{
-                    padding: "0.28rem 0.7rem",
-                    borderRadius: "8px",
-                    fontSize: "0.58rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    color: "rgba(255,255,255,0.55)",
-                    background: "rgba(255,255,255,0.06)",
+                    color: brandHex,
+                    background: ctaHover ? `rgba(${brandRgb}, 0.15)` : `rgba(${brandRgb}, 0.07)`,
+                    border: `1.5px solid rgba(${brandRgb}, 0.28)`,
+                    boxShadow: ctaHover ? `0 0 24px rgba(${brandRgb}, 0.2)` : "none",
+                    transform: ctaHover ? "translateX(5px)" : "translateX(0)",
                   }}
+                  onMouseEnter={() => setCtaHover(true)}
+                  onMouseLeave={() => setCtaHover(false)}
                 >
-                  {f}
-                </motion.span>
-              ))}
+                  {props.ctaText}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M1 11L11 1M11 1H4M11 1V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              ) : (
+                <Link
+                  href={props.ctaLink}
+                  className="inline-flex items-center gap-[0.6rem] px-[1.75rem] py-[0.85rem] rounded-full text-[0.73rem] font-extrabold tracking-[0.12em] uppercase no-underline transition-all duration-300"
+                  style={{
+                    color: brandHex,
+                    background: ctaHover ? `rgba(${brandRgb}, 0.15)` : `rgba(${brandRgb}, 0.07)`,
+                    border: `1.5px solid rgba(${brandRgb}, 0.28)`,
+                    boxShadow: ctaHover ? `0 0 24px rgba(${brandRgb}, 0.2)` : "none",
+                    transform: ctaHover ? "translateX(5px)" : "translateX(0)",
+                  }}
+                  onMouseEnter={() => setCtaHover(true)}
+                  onMouseLeave={() => setCtaHover(false)}
+                >
+                  {props.ctaText}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M1 11L11 1M11 1H4M11 1V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              )}
+
             </div>
-
-            {/* Divider */}
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(255,255,255,0.1)",
-                marginBottom: "1.5rem",
-              }}
-            />
-
-            {/* CTA */}
-            {division.external ? (
-              <a
-                href={division.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.55rem",
-                  padding: "0.8rem 1.75rem",
-                  borderRadius: "100px",
-                  fontSize: "0.72rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "#000",
-                  background: "var(--brand-green)",
-                  border: "1.5px solid var(--brand-green)",
-                  textDecoration: "none",
-                  transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.transform = "translateX(4px)";
-                  el.style.boxShadow = "0 0 24px color-mix(in srgb, var(--brand-green) 50%, transparent)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.transform = "translateX(0)";
-                  el.style.boxShadow = "none";
-                }}
-              >
-                {division.cta}
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                  <path
-                    d="M1 10L10 1M10 1H4M10 1V7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </a>
-            ) : (
-              <Link
-                href={division.link}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.55rem",
-                  padding: "0.8rem 1.75rem",
-                  borderRadius: "100px",
-                  fontSize: "0.72rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "#ffffff",
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1.5px solid rgba(255,255,255,0.2)",
-                  textDecoration: "none",
-                  transition: "background 0.25s ease, border-color 0.25s ease, transform 0.25s ease",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.background = "rgba(255,255,255,0.18)";
-                  el.style.borderColor = "rgba(255,255,255,0.35)";
-                  el.style.transform = "translateX(4px)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.background = "rgba(255,255,255,0.1)";
-                  el.style.borderColor = "rgba(255,255,255,0.2)";
-                  el.style.transform = "translateX(0)";
-                }}
-              >
-                {division.cta}
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                  <path
-                    d="M1 10L10 1M10 1H4M10 1V7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
-            )}
           </div>
         </div>
       </motion.div>
@@ -422,7 +279,7 @@ function DivisionCard({
 ───────────────────────────────────────────── */
 export default function EcosystemSection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
+  const inView = useInView(sectionRef, { once: true, margin: "-10% 0px" });
 
   return (
     <section
@@ -432,120 +289,102 @@ export default function EcosystemSection() {
       style={{
         padding: "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
         fontFamily: "'DM Sans', sans-serif",
-        overflow: "hidden",
       }}
     >
-      <div className="mx-auto max-w-[1320px] relative" style={{ zIndex: 1 }}>
+      <div className="mx-auto max-w-[1240px] relative z-10 w-full">
 
-        {/* ── Header block — Glassmorphism Box ── */}
-        <Reveal delay={0}>
-          <div
-            className="flex flex-col items-center text-center rounded-3xl"
+        {/* ── Header Block ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          className="flex flex-col items-center text-center rounded-[24px]"
+          style={{
+            marginBottom: "2.5rem",
+            padding: "clamp(2rem, 5vw, 3.5rem) 2rem",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Eyebrow */}
+          <div className="flex items-center gap-[12px] mb-[1.5rem]">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: 40 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+              style={{ height: 2, background: "#00e87a", borderRadius: 2 }}
+            />
+            <span
+              style={{
+                fontSize: "0.62rem",
+                fontWeight: 700,
+                letterSpacing: "0.35em",
+                color: "#00e87a",
+                textTransform: "uppercase",
+              }}
+            >
+              The Ecosystem
+            </span>
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: 40 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+              style={{ height: 2, background: "#00e87a", borderRadius: 2 }}
+            />
+          </div>
+
+          {/* Heading */}
+          <h2
             style={{
-              marginBottom: "clamp(3rem, 6vw, 5rem)",
-              padding: "clamp(2rem, 5vw, 4rem)",
-              background: "var(--glass-bg)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid var(--glass-border)",
-              position: "relative",
-              overflow: "hidden",
+              fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
+              fontWeight: 900,
+              lineHeight: 1.04,
+              letterSpacing: "-0.03em",
+              color: "#ffffff",
             }}
           >
-            {/* Ambient green glow — behind the box text */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                top: -80,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 360,
-                height: 360,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 10%, transparent) 0%, transparent 70%)",
-                pointerEvents: "none",
-              }}
-            />
+            One Company.<br />
+            <span style={{ color: "#00e87a" }}>Two Powerful Arms.</span>
+          </h2>
+        </motion.div>
 
-            {/* Eyebrow with extending lines */}
-            <div className="flex items-center gap-3 relative z-10" style={{ marginBottom: "2rem" }}>
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: 40 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                style={{ height: 2, background: "var(--brand-green)", borderRadius: 2 }}
-              />
-              <span
-                style={{
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.35em",
-                  color: "var(--brand-green)",
-                  textTransform: "uppercase",
-                }}
-              >
-                The Ecosystem
-              </span>
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: 40 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                style={{ height: 2, background: "var(--brand-green)", borderRadius: 2 }}
-              />
-            </div>
+        {/* ── Interactive Cards Grid ── */}
+        <div className="flex flex-col md:flex-row" style={{ gap: "1.4rem" }}>
+          <ElevatedCard
+            type="academy"
+            label="Academy"
+            nameMain="CODO"
+            nameAccent="Academy"
+            tagline="We train those who build tomorrow."
+            description="Training, internships, and skill development programs that bridge industry demand with human potential. Hands-on AI, web, and emerging tech education for the next generation of innovators."
+            features={["AI & Emerging Tech", "Hands-on Projects", "Industry Mentors", "Placement Support"]}
+            statTarget={500}
+            statLabel="Innovators Trained"
+            ctaText="Visit Academy"
+            ctaLink="https://www.codoacademy.com"
+            isExternal={true}
+            delay={0.15}
+          />
 
-            {/* Heading */}
-            <h2
-              className="relative z-10"
-              style={{
-                fontSize: "clamp(2.2rem, 6vw, 4.5rem)",
-                fontWeight: 900,
-                lineHeight: 1.04,
-                letterSpacing: "-0.03em",
-                color: "var(--text-primary)",
-                marginBottom: "1.25rem",
-              }}
-            >
-              One Company.
-              <br />
-              <span style={{ color: "var(--brand-green)" }}>Two Powerful Arms.</span>
-            </h2>
-
-            {/* Subtext */}
-            <p
-              className="relative z-10"
-              style={{
-                fontSize: "clamp(0.9rem, 1.5vw, 1.05rem)",
-                lineHeight: 1.82,
-                color: "var(--text-secondary)",
-                maxWidth: "58ch",
-                opacity: 0.75,
-              }}
-            >
-              CODO AI Innovations operates through two specialized verticals — each with
-              a distinct mission, united by the same commitment to innovation, quality,
-              and lasting impact.
-            </p>
-          </div>
-        </Reveal>
-
-        {/* ── Two Division Cards — floating, no outer container ── */}
-        <div
-          className="flex flex-col md:flex-row"
-          style={{ gap: "clamp(1rem, 2vw, 1.5rem)" }}
-        >
-          {divisions.map((division, i) => (
-            <DivisionCard
-              key={division.id}
-              division={division}
-              index={i}
-              inView={inView}
-            />
-          ))}
+          <ElevatedCard
+            type="agency"
+            label="Agency"
+            nameMain="CODO"
+            nameAccent="Agency"
+            tagline="We build what others imagine."
+            description="Custom web applications, enterprise software, and mobile apps powered by cutting-edge AI. From concept to deployment — scalable digital solutions that drive real business impact."
+            features={["Web & Mobile Apps", "AI Integration", "Enterprise Software", "End-to-end Delivery"]}
+            statTarget={30}
+            statLabel="Solutions Delivered"
+            ctaText="View Portfolio"
+            ctaLink="/portfolio"
+            isExternal={false}
+            delay={0.3}
+          />
         </div>
 
       </div>
