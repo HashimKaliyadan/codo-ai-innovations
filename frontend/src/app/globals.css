@@ -6,8 +6,8 @@
   --foreground: #ededed;
   
   --brand-green: #22c55e;
-  --glass-bg: rgba(10, 10, 10, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.2);
   --text-primary: #ededed;
 }
 
@@ -22,8 +22,8 @@
 .dark {
   --background: #0a0a0a;
   --foreground: #ededed;
-  --glass-bg: rgba(10, 10, 10, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.2);
   --text-primary: #ededed;
 }
 

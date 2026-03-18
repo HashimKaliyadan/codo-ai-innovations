@@ -2,12 +2,11 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { getResponsiveFont, getResponsiveSpacing } from "@/lib/responsive";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { MEDIA_QUERIES } from "@/constants/breakpoints";
+import Link from "next/link";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────
+   Types & Data
+───────────────────────────────────────────── */
 interface Project {
   id: number;
   category: string;
@@ -16,9 +15,10 @@ interface Project {
   gradient: string;
   tags: string[];
   year: string;
+  stat: string;
+  statLabel: string;
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────────
 const projects: Project[] = [
   {
     id: 1,
@@ -26,9 +26,11 @@ const projects: Project[] = [
     name: "Europecalling CRM",
     description:
       "A full-scale recruitment CRM built for European hiring pipelines — featuring AI-powered candidate matching, smart dashboards, and end-to-end workflow automation.",
-    gradient: "linear-gradient(135deg, #005a42 0%, #003366 60%, #001f3f 100%)",
+    gradient: "linear-gradient(135deg, #005a42 0%, #003366 55%, #001f3f 100%)",
     tags: ["Next.js", "AI Integration", "CRM"],
     year: "2024",
+    stat: "3×",
+    statLabel: "Faster Hiring",
   },
   {
     id: 2,
@@ -36,19 +38,23 @@ const projects: Project[] = [
     name: "Evoka Learning",
     description:
       "A cross-platform mobile learning app delivering personalized AI-driven study paths, live sessions, and progress tracking for students across skill levels.",
-    gradient: "linear-gradient(135deg, #001f3f 0%, #1a3c5e 60%, #005a42 100%)",
+    gradient: "linear-gradient(135deg, #001f3f 0%, #1a3c5e 55%, #005a42 100%)",
     tags: ["React Native", "AI", "EdTech"],
     year: "2024",
+    stat: "10K+",
+    statLabel: "Active Learners",
   },
   {
     id: 3,
-    category: "Software",
+    category: "Enterprise Software",
     name: "Albedo ERP",
     description:
       "An enterprise resource planning system tailored for educational institutions — managing admissions, billing, staff, and student performance in one unified platform.",
-    gradient: "linear-gradient(135deg, #1a3c5e 0%, #001f3f 60%, #005a42 100%)",
+    gradient: "linear-gradient(135deg, #1a3c5e 0%, #003366 55%, #005a42 100%)",
     tags: ["Enterprise", "ERP", "Education"],
     year: "2025",
+    stat: "100%",
+    statLabel: "Unified Ops",
   },
   {
     id: 4,
@@ -56,185 +62,310 @@ const projects: Project[] = [
     name: "CODO AI Assistant",
     description:
       "An intelligent conversational AI assistant deployed across CODO's internal tools — automating repetitive workflows, surfacing insights, and accelerating team velocity.",
-    gradient: "linear-gradient(135deg, #005a42 0%, #001f3f 80%, #00B663 100%)",
+    gradient: "linear-gradient(135deg, #005a42 0%, #001f3f 70%, #00a855 100%)",
     tags: ["LLM", "Automation", "AI"],
     year: "2025",
+    stat: "60%",
+    statLabel: "Less Manual Work",
   },
 ];
 
-// 3 copies gives enough runway for both drag directions and auto-scroll
-const INFINITE_ITEMS = [...projects, ...projects, ...projects];
-
-// ── Colour tokens (green bg context) ─────────────────────────────────────────
-const C = {
-  textPrimary:   "#ffffff",
-  textSecondary: "rgba(255,255,255,0.65)",
-  glassBorder:   "rgba(255,255,255,0.12)",
-  glassBg:       "rgba(0,0,0,0.22)",
-  divider:       "linear-gradient(to right, transparent, rgba(255,255,255,0.18), transparent)",
-};
-
-// Card / scroll constants
-const CARD_W    = 340;  // px
-const CARD_GAP  = 20;   // px
-const CARD_STEP = CARD_W + CARD_GAP;
-const AUTO_PX   = 0.55; // px per rAF frame (~33px/s at 60fps)
-
-// ── Spinner ───────────────────────────────────────────────────────────────────
-function Spinner() {
+/* ─────────────────────────────────────────────
+   Scroll-reveal wrapper
+───────────────────────────────────────────── */
+function Reveal({
+  children,
+  delay = 0,
+  className,
+  style,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
   return (
-    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-      fill="none" viewBox="0 0 24 24" aria-hidden="true">
-      <circle className="opacity-25" cx="12" cy="12" r="10"
-        stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962
-           7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-    </svg>
+    <motion.div
+      ref={ref}
+      className={className}
+      style={style}
+      initial={{ opacity: 0, y: 28 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
-// ── Project Card ──────────────────────────────────────────────────────────────
-function ProjectCard({ project }: { project: Project }) {
-  const [hovered, setHovered] = useState(false);
+/* ─────────────────────────────────────────────
+   Layout & animation constants
+───────────────────────────────────────────── */
+const CARD_H = 340; // front card height in px
 
+// How many px of each peek card are visible above the front card
+const PEEK_1_STRIP = 16; // 1st behind card — visible strip height
+const PEEK_2_STRIP = 14; // 2nd behind card — visible strip height
+
+// How far above the front card top each strip sits
+const PEEK_1_OFFSET = PEEK_1_STRIP;                      // 16px above front top
+const PEEK_2_OFFSET = PEEK_1_STRIP + PEEK_2_STRIP;       // 30px above front top
+
+// Wrapper paddingTop = total space above the front card
+const TOP_SPACE = PEEK_2_OFFSET; // 30px
+
+/*
+  clipPath helper — controls exactly which vertical slice is visible.
+  `inset(top right bottom left round radius)`
+  We clip from the bottom to keep only `stripPx` of the card's top visible,
+  and inset sides to match the visual scaleX narrowing.
+*/
+function peekClip(stripPx: number, hInsetPc: number) {
+  return `inset(0% ${hInsetPc}% ${CARD_H - stripPx}px ${hInsetPc}% round 14px 14px 0px 0px)`;
+}
+
+/*
+  Full visible clip — used when a card is the front card.
+  No inset, full height, rounded on all corners.
+*/
+const FULL_CLIP = "inset(0% 0% 0px 0% round 24px)";
+
+/*
+  Off-screen clip — used for cards that are fully hidden (neither peeking nor front).
+  Clips to 0 height so nothing is visible.
+*/
+const HIDDEN_CLIP = `inset(0% 8% ${CARD_H}px 8% round 14px)`;
+
+/*
+  Spring preset — buttery smooth, slight overshoot on position,
+  critically damped on scale/opacity.
+*/
+const SPRING = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 36,
+  mass: 1,
+};
+
+const SPRING_FAST = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 40,
+  mass: 0.9,
+};
+
+/*
+  Per-card animated state based on relative position in the stack.
+  rel 0  → front (active)
+  rel 1  → peek 1 (one behind, narrower strip visible)
+  rel 2  → peek 2 (two behind, even narrower)
+  rel -1 → just exited (falls down below)
+  other  → fully hidden (waiting to cycle in)
+*/
+function getState(rel: number) {
+  switch (rel) {
+    case 0:
+      return {
+        y: TOP_SPACE,
+        scaleX: 1,
+        scaleY: 1,
+        rotate: 0,
+        opacity: 1,
+        clipPath: FULL_CLIP,
+        zIndex: 20,
+        filter: "blur(0px)",
+      };
+    case 1:
+      return {
+        y: TOP_SPACE - PEEK_1_OFFSET,      // peeks above front card top
+        scaleX: 0.90,
+        scaleY: 1,
+        rotate: 0,
+        opacity: 0.80,
+        clipPath: peekClip(PEEK_1_STRIP, 5),
+        zIndex: 12,
+        filter: "blur(0px)",
+      };
+    case 2:
+      return {
+        y: TOP_SPACE - PEEK_2_OFFSET,      // peeks above peek-1 top
+        scaleX: 0.82,
+        scaleY: 1,
+        rotate: 0,
+        opacity: 0.55,
+        clipPath: peekClip(PEEK_2_STRIP, 9),
+        zIndex: 11,
+        filter: "blur(0px)",
+      };
+    case -1:
+      // Falling card — drops below the front card with a slight tilt
+      return {
+        y: CARD_H + TOP_SPACE + 80,        // way below the slot
+        scaleX: 0.93,
+        scaleY: 0.93,
+        rotate: 3,
+        opacity: 0,
+        clipPath: FULL_CLIP,
+        zIndex: 30,                        // above everything so it visually drops over
+        filter: "blur(6px)",
+      };
+    default:
+      // Hidden — sitting at peek-2 position but fully clipped
+      return {
+        y: TOP_SPACE - PEEK_2_OFFSET,
+        scaleX: 0.82,
+        scaleY: 1,
+        rotate: 0,
+        opacity: 0,
+        clipPath: HIDDEN_CLIP,
+        zIndex: 10,
+        filter: "blur(0px)",
+      };
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Card content
+───────────────────────────────────────────── */
+function CardContent({ project }: { project: Project }) {
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
-        flex: `0 0 ${CARD_W}px`,
-        height: "420px",
-        borderRadius: "28px",
+        width: "100%",
+        height: "100%",
+        borderRadius: "24px",
         overflow: "hidden",
-        background: C.glassBg,
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.22)" : C.glassBorder}`,
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        cursor: "pointer",
+        background: project.gradient,
+        border: "1px solid rgba(255,255,255,0.1)",
         display: "flex",
         flexDirection: "column",
-        transition: "all 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
-        transform: hovered ? "translateY(-14px) scale(1.02)" : "translateY(0) scale(1)",
-        boxShadow: hovered
-          ? "0 48px 96px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)"
-          : "0 12px 32px rgba(0,0,0,0.18)",
-        userSelect: "none",
+        justifyContent: "space-between",
+        padding: "2rem",
+        position: "relative",
       }}
     >
-      {/* Gradient image area */}
-      <div style={{
-        width: "100%", height: "220px",
-        background: project.gradient,
-        position: "relative", overflow: "hidden", flexShrink: 0,
-      }}>
-        {/* Noise texture */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.75\" numOctaves=\"4\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/%3E%3C/svg%3E')",
-          opacity: 0.07, mixBlendMode: "overlay",
-        }} />
+      {/* Noise texture */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.75\" numOctaves=\"4\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/%3E%3C/svg%3E')",
+          opacity: 0.07,
+          mixBlendMode: "overlay",
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* Bottom fade into card body */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "80px",
-          background: `linear-gradient(to top, ${C.glassBg}, transparent)`,
-        }} />
+      {/* Subtle inner glow */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse at 70% 0%, rgba(255,255,255,0.07) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* Year badge */}
-        <div style={{
-          position: "absolute", top: "1.1rem", right: "1.1rem",
-          padding: "0.3rem 0.7rem", borderRadius: "8px",
-          background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
-          border: `1px solid ${C.glassBorder}`,
-          color: C.textSecondary, fontSize: "0.6rem",
-          fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
-        }}>
+      {/* Top row */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "0.26rem 0.65rem",
+            borderRadius: "8px",
+            background: "rgba(0,0,0,0.3)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            fontSize: "0.56rem",
+            fontWeight: 800,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.78)",
+          }}
+        >
+          {project.category}
+        </div>
+        <div
+          style={{
+            fontSize: "0.56rem",
+            fontWeight: 700,
+            letterSpacing: "0.2em",
+            color: "rgba(255,255,255,0.36)",
+            textTransform: "uppercase",
+            padding: "0.26rem 0.65rem",
+            borderRadius: "8px",
+            background: "rgba(0,0,0,0.18)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
           {project.year}
-        </div>
-
-        {/* Ghost number */}
-        <div style={{
-          position: "absolute", bottom: "-0.5rem", left: "1.25rem",
-          fontSize: "96px", fontWeight: 900, lineHeight: 1,
-          color: "transparent",
-          WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-          userSelect: "none", pointerEvents: "none",
-          letterSpacing: "-0.04em",
-        }}>
-          0{project.id}
-        </div>
-
-        {/* Hover overlay */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "rgba(0,0,0,0.28)",
-          backdropFilter: "blur(2px)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          opacity: hovered ? 1 : 0,
-          pointerEvents: hovered ? "auto" : "none",
-          transition: "opacity 0.35s ease",
-        }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: "0.5rem",
-            padding: "0.65rem 1.5rem", borderRadius: "999px",
-            background: "rgba(0,0,0,0.4)", border: `1px solid ${C.glassBorder}`,
-            backdropFilter: "blur(12px)", color: C.textPrimary,
-            fontWeight: 700, fontSize: "0.75rem",
-            letterSpacing: "0.15em", textTransform: "uppercase",
-            transform: hovered ? "translateY(0)" : "translateY(10px)",
-            transition: "transform 0.35s ease",
-          }}>
-            View Project
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-              <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor"
-                strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
         </div>
       </div>
 
-      {/* Card body */}
-      <div style={{ padding: "1.5rem 1.5rem 1.75rem", display: "flex", flexDirection: "column", flex: 1 }}>
-        <span style={{
-          display: "inline-flex", alignSelf: "flex-start",
-          fontSize: "0.6rem", fontWeight: 800,
-          letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "rgba(255,255,255,0.5)",
-          background: "rgba(255,255,255,0.09)",
-          padding: "0.2rem 0.6rem", borderRadius: "5px",
-          border: `1px solid ${C.glassBorder}`,
-          marginBottom: "0.7rem",
-        }}>
-          {project.category}
-        </span>
+      {/* Diagonal link arrow — centred */}
+      <div
+        style={{
+          width: 40, height: 40,
+          borderRadius: "12px",
+          background: "rgba(255,255,255,0.08)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "absolute",
+          top: "2rem", left: "50%",
+          transform: "translateX(-50%)",
+          opacity: 0.45,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h10M12 2v10M2 12L12 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </div>
 
-        <h3 style={{
-          fontSize: "1.2rem", fontWeight: 900, lineHeight: 1.15,
-          letterSpacing: "-0.01em", color: C.textPrimary, marginBottom: "0.65rem",
-        }}>
+      {/* Bottom content */}
+      <div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "0.65rem" }}>
+          <span style={{ fontSize: "2.4rem", fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: "-0.04em" }}>
+            {project.stat}
+          </span>
+          <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            {project.statLabel}
+          </span>
+        </div>
+
+        <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", lineHeight: 1.15, letterSpacing: "-0.025em", marginBottom: "0.55rem" }}>
           {project.name}
         </h3>
 
-        <p style={{
-          fontSize: "0.82rem", lineHeight: 1.75, color: C.textSecondary, flex: 1,
-          display: "-webkit-box", WebkitLineClamp: 3,
-          WebkitBoxOrient: "vertical", overflow: "hidden",
-          marginBottom: "1rem",
-        }}>
+        <p
+          style={{
+            fontSize: "0.81rem", lineHeight: 1.72, color: "rgba(255,255,255,0.58)",
+            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+            overflow: "hidden", marginBottom: "1rem",
+          }}
+        >
           {project.description}
         </p>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
           {project.tags.map((tag, i) => (
-            <span key={i} style={{
-              padding: "0.2rem 0.6rem", borderRadius: "5px",
-              fontSize: "0.58rem", fontWeight: 700,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              border: `1px solid ${hovered ? "rgba(255,255,255,0.2)" : C.glassBorder}`,
-              color: C.textSecondary, background: "rgba(255,255,255,0.06)",
-              transition: "border-color 0.3s ease",
-            }}>
+            <span
+              key={i}
+              style={{
+                padding: "0.18rem 0.55rem", borderRadius: "6px",
+                fontSize: "0.54rem", fontWeight: 700, letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                border: "1px solid rgba(255,255,255,0.14)",
+                color: "rgba(255,255,255,0.5)",
+                background: "rgba(255,255,255,0.05)",
+              }}
+            >
               {tag}
             </span>
           ))}
@@ -244,415 +375,383 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-// ── Infinite Strip ────────────────────────────────────────────────────────────
-function InfiniteStrip() {
-  const trackRef   = useRef<HTMLDivElement>(null);
-  const posRef     = useRef<number>(0);
-  const rafRef     = useRef<number>(0);
-  const pausedRef  = useRef<boolean>(false);
-  const animating  = useRef<boolean>(false);
+/* ─────────────────────────────────────────────
+   Autoplay progress bar (animated fill)
+───────────────────────────────────────────── */
+const AUTOPLAY_MS = 4000;
 
-  const isDragging    = useRef(false);
-  const dragStartX    = useRef(0);
-  const dragStartPos  = useRef(0);
-
-  // Width of a single full set of cards
-  const SINGLE = projects.length * CARD_STEP;
-
-  // Teleport silently if we drift outside the middle copy
-  const normalise = useCallback((pos: number) => {
-    if (pos >= SINGLE * 2) return pos - SINGLE;
-    if (pos <  SINGLE)     return pos + SINGLE;
-    return pos;
-  }, [SINGLE]);
-
-  const commit = useCallback((pos: number) => {
-    if (!trackRef.current) return;
-    trackRef.current.style.transform = `translateX(${-pos}px)`;
-  }, []);
-
-  // Auto-scroll loop
-  useEffect(() => {
-    posRef.current = SINGLE; // start mid-copy
-    commit(posRef.current);
-
-    const tick = () => {
-      if (!pausedRef.current && !isDragging.current && !animating.current) {
-        posRef.current = normalise(posRef.current + AUTO_PX);
-        commit(posRef.current);
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [commit, normalise, SINGLE]);
-
-  // Smooth jump (arrows)
-  const jumpBy = (delta: number) => {
-    if (animating.current) return;
-    animating.current = true;
-
-    const start  = posRef.current;
-    const end    = normalise(start + delta);
-    const startT = performance.now();
-    const dur    = 560;
-    const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
-
-    const frame = (now: number) => {
-      const t = Math.min((now - startT) / dur, 1);
-      posRef.current = normalise(start + delta * easeOut(t));
-      commit(posRef.current);
-      if (t < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        animating.current = false;
-      }
-    };
-    requestAnimationFrame(frame);
-  };
-
-  // Pointer drag
-  const onPointerDown = (e: React.PointerEvent) => {
-    isDragging.current   = true;
-    dragStartX.current   = e.clientX;
-    dragStartPos.current = posRef.current;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging.current) return;
-    const dx = e.clientX - dragStartX.current;
-    posRef.current = normalise(dragStartPos.current - dx);
-    commit(posRef.current);
-  };
-  const onPointerUp = () => { isDragging.current = false; };
-
-  return (
-    <div style={{ position: "relative" }}>
-      {/* Left fade mask */}
-      <div aria-hidden="true" style={{
-        position: "absolute", top: 0, left: 0, bottom: 0, width: "100px", zIndex: 2,
-        background: "linear-gradient(to right, #008764 0%, transparent 100%)",
-        pointerEvents: "none",
-      }} />
-      {/* Right fade mask */}
-      <div aria-hidden="true" style={{
-        position: "absolute", top: 0, right: 0, bottom: 0, width: "100px", zIndex: 2,
-        background: "linear-gradient(to left, #008764 0%, transparent 100%)",
-        pointerEvents: "none",
-      }} />
-
-      {/* Overflow viewport */}
-      <div
-        style={{ overflow: "hidden", cursor: "grab" }}
-        onMouseEnter={() => { pausedRef.current = true; }}
-        onMouseLeave={() => { pausedRef.current = false; isDragging.current = false; }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <div
-          ref={trackRef}
-          style={{
-            display: "flex",
-            gap: `${CARD_GAP}px`,
-            willChange: "transform",
-            paddingBottom: "16px",  // room for hover lift shadow
-          }}
-        >
-          {INFINITE_ITEMS.map((project, i) => (
-            <ProjectCard key={`${project.id}-${i}`} project={project} />
-          ))}
-        </div>
-      </div>
-
-      {/* Arrow navigation */}
-      <div style={{
-        display: "flex", gap: "0.75rem",
-        marginTop: "2rem", justifyContent: "center",
-      }}>
-        {([
-          { dir: -1 as const, label: "Previous projects", icon: "←" },
-          { dir:  1 as const, label: "Next projects",     icon: "→" },
-        ]).map(({ dir, label, icon }) => (
-          <button
-            key={dir}
-            onClick={() => jumpBy(dir * CARD_STEP * 1.5)}
-            aria-label={label}
-            className="group"
-            style={{
-              width: "48px", height: "48px", borderRadius: "50%",
-              background: "rgba(255,255,255,0.07)",
-              border: "1px solid rgba(255,255,255,0.14)",
-              color: "#fff", fontSize: "18px",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer",
-              transition: "all 0.25s ease",
-            }}
-            onMouseEnter={e => {
-              const el = e.currentTarget as HTMLButtonElement;
-              el.style.background    = "rgba(255,255,255,0.15)";
-              el.style.borderColor   = "rgba(255,255,255,0.3)";
-              el.style.transform     = `scale(1.1)`;
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLButtonElement;
-              el.style.background    = "rgba(255,255,255,0.07)";
-              el.style.borderColor   = "rgba(255,255,255,0.14)";
-              el.style.transform     = `scale(1)`;
-            }}
-          >
-            {icon}
-          </button>
-        ))}
-      </div>
-
-      {/* Drag hint */}
-      <p style={{
-        textAlign: "center", marginTop: "0.85rem",
-        fontSize: "0.65rem", letterSpacing: "0.15em",
-        color: "rgba(255,255,255,0.28)", textTransform: "uppercase",
-      }}>
-        ← drag to explore · auto-scrolling →
-      </p>
-    </div>
-  );
-}
-
-// ── CTA ───────────────────────────────────────────────────────────────────────
-function PortfolioCta() {
-  const router              = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
-  const handleClick = async () => {
-    if (loading) return;
-    setLoading(true);
-    try { await router.push("/portfolio"); }
-    finally { setLoading(false); }
-  };
-
+function ProgressBar({
+  index,
+  active,
+  isActive,
+  onClick,
+  paused,
+}: {
+  index: number;
+  active: number;
+  isActive: boolean;
+  onClick: () => void;
+  paused: boolean;
+}) {
   return (
     <button
-      onClick={handleClick}
-      disabled={loading}
-      aria-label="View the full CODO Agency portfolio"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#008764]"
+      onClick={onClick}
+      aria-label={`View project ${index + 1}`}
       style={{
-        padding: "1rem 3rem",
-        borderRadius: "999px",
-        background: hovered ? "#ffffff" : "transparent",
-        border: "2px solid #ffffff",
-        color: hovered ? "#008764" : "#ffffff",
-        fontWeight: 800, fontSize: "0.85rem",
-        letterSpacing: "0.15em", textTransform: "uppercase",
-        cursor: loading ? "not-allowed" : "pointer",
-        opacity: loading ? 0.5 : 1,
-        transform: hovered && !loading ? "scale(1.05)" : "scale(1)",
-        transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
-        display: "flex", alignItems: "center", gap: "0.75rem",
-        minHeight: "44px", outline: "none",
-        fontFamily: "'DM Sans', sans-serif",
+        flex: 1,
+        height: "3px",
+        borderRadius: "2px",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        position: "relative",
+        background: "color-mix(in srgb, var(--text-primary) 12%, transparent)",
+        overflow: "hidden",
       }}
     >
-      {loading ? (
-        <><Spinner /> Loading...</>
-      ) : (
-        <>
-          View All Projects
-          <motion.span
-            animate={{ x: hovered ? 6 : 0 }}
-            transition={{ duration: 0.25 }}
-            style={{ display: "inline-flex" }}
-          >
-            →
-          </motion.span>
-        </>
+      {/* Static fill for already-passed segments */}
+      {index < active && (
+        <div style={{ position: "absolute", inset: 0, background: "var(--brand-green)", borderRadius: "2px" }} />
+      )}
+
+      {/* Animated fill for the currently active segment */}
+      {isActive && (
+        <motion.div
+          key={active} // re-mounts on each advance to restart the animation
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: paused ? undefined : 1 }}
+          transition={{ duration: AUTOPLAY_MS / 1000, ease: "linear" }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "var(--brand-green)",
+            transformOrigin: "left center",
+            borderRadius: "2px",
+          }}
+        />
       )}
     </button>
   );
 }
 
-// ── Main Section ──────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────
+   Stacked carousel
+───────────────────────────────────────────── */
+function StackedCarousel() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = projects.length;
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setActive((p) => (p + 1) % total), AUTOPLAY_MS);
+    return () => clearInterval(id);
+  }, [paused, total]);
+
+  const go = useCallback((next: number) => {
+    setActive((next + total) % total);
+    setPaused(true);
+  }, [total]);
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%", maxWidth: "520px" }}
+    >
+
+      {/* ── Stack area ───────────────────────────────────────────────── */}
+      {/*
+        No overflow:hidden here — we use clipPath on each card individually
+        so the peek strips are pixel-perfect without any container clipping
+        accidentally cutting into the front card's rounded corners.
+      */}
+      <div
+        style={{
+          position: "relative",
+          height: `${CARD_H + TOP_SPACE}px`,
+        }}
+      >
+        {projects.map((project, i) => {
+          // Relative position in the stack cycle
+          let rel = (i - active + total) % total;
+          // Cards that are "behind" in cycle but have wrapped around
+          // should be treated as hidden, not as falling
+          if (rel > 2) rel = -2; // fully hidden — not falling, not peeking
+
+          // Only the card that just got replaced is "falling" (rel === total-1 after modulo)
+          // We need to track the actual previous active card
+          // Simple approach: rel === total-1 means it just exited
+          let relActual = (i - active + total) % total;
+          if (relActual === total - 1) relActual = -1; // the card just behind in cycle = exiting
+
+          const state = getState(relActual);
+
+          return (
+            <motion.div
+              key={project.id}
+              initial={false}
+              animate={{
+                y: state.y,
+                scaleX: state.scaleX,
+                scaleY: state.scaleY,
+                rotate: state.rotate,
+                opacity: state.opacity,
+                clipPath: state.clipPath,
+                zIndex: state.zIndex,
+                filter: state.filter,
+              }}
+              transition={{
+                y: { ...SPRING },
+                scaleX: { ...SPRING_FAST },
+                scaleY: { ...SPRING_FAST },
+                rotate: { ...SPRING_FAST },
+                opacity: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+                clipPath: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                filter: { duration: 0.35, ease: "easeOut" },
+                zIndex: { duration: 0 }, // snap instantly
+              }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: `${CARD_H}px`,
+                transformOrigin: "top center",
+                pointerEvents: relActual === 0 ? "auto" : "none",
+                willChange: "transform, opacity, clip-path",
+              }}
+            >
+              <CardContent project={project} />
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* ── Animated progress indicators ─────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        {projects.map((_, i) => (
+          <ProgressBar
+            key={i}
+            index={i}
+            active={active}
+            isActive={i === active}
+            onClick={() => go(i)}
+            paused={paused}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main Section
+───────────────────────────────────────────── */
 export default function PortfolioSection() {
   const sectionRef = useRef(null);
-  const inView     = useInView(sectionRef, { once: true, margin: "-8% 0px" });
-  const isMobile   = useMediaQuery(MEDIA_QUERIES.mobile);
+  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
 
   return (
     <section
       ref={sectionRef}
-      aria-label="CODO Agency Portfolio Highlights"
+      aria-label="CODO Agency Portfolio"
+      className="relative z-10 w-full"
       style={{
-        position: "relative",
-        zIndex: 2,
-        overflow: "hidden",
-        paddingTop:    getResponsiveSpacing(80, 120, 160),
-        paddingBottom: getResponsiveSpacing(80, 120, 160),
+        padding: "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem)",
         fontFamily: "'DM Sans', sans-serif",
-        background: "#008764",
-        marginTop:  "-60px",
-        marginBottom: "-60px",
-        borderRadius: "60px",
-        boxShadow: "0 0 80px rgba(0,0,0,0.12)",
       }}
     >
-      {/* Ambient blobs */}
-      <div aria-hidden="true" style={{
-        position: "absolute", inset: 0, zIndex: 0,
-        pointerEvents: "none", overflow: "hidden",
-      }}>
-        <div style={{
-          position: "absolute", top: "-10%", right: "-5%",
-          width: "700px", height: "700px",
-          background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)",
-          filter: "blur(80px)",
-        }} />
-        <div style={{
-          position: "absolute", bottom: "5%", left: "-5%",
-          width: "500px", height: "500px",
-          background: "radial-gradient(circle, rgba(0,0,0,0.1) 0%, transparent 70%)",
-          filter: "blur(80px)",
-        }} />
-      </div>
-
-      <div className="relative z-10">
-
-        {/* ── Header ── */}
-        <div
-          className="max-w-[1400px] mx-auto"
-          style={{
-            paddingLeft:  getResponsiveSpacing(24, 40, 60),
-            paddingRight: getResponsiveSpacing(24, 40, 60),
-          }}
-        >
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            alignItems: "flex-end", flexWrap: "wrap", gap: "2rem",
-            marginBottom: getResponsiveSpacing(48, 64, 72),
-          }}>
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem" }}
-              >
-                <div style={{ height: "1px", width: "36px", background: "rgba(255,255,255,0.35)" }} />
-                <span style={{
-                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.3em",
-                  color: "rgba(255,255,255,0.4)", textTransform: "uppercase",
-                }}>
-                  04 — Portfolio
-                </span>
-              </motion.div>
-
-              <motion.h2
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
-                style={{
-                  fontSize: getResponsiveFont(35, 68),
-                  fontWeight: 900, lineHeight: 1.05,
-                  letterSpacing: "-0.03em", color: "#ffffff",
-                }}
-              >
-                Work That{" "}
-                <span style={{
-                  color: "rgba(255,255,255,0.88)",
-                  textDecoration: "underline",
-                  textDecorationColor: "rgba(255,255,255,0.22)",
-                  textUnderlineOffset: "6px",
-                }}>
-                  Speaks
-                </span>
-                <br />
-                for Itself.
-              </motion.h2>
-            </div>
-
-            {!isMobile && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
-                style={{ textAlign: "right" }}
-              >
-                <div style={{
-                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.25em",
-                  textTransform: "uppercase", color: "rgba(255,255,255,0.35)",
-                  marginBottom: "0.4rem",
-                }}>
-                  Selected Works
-                </div>
-                <div style={{
-                  fontSize: getResponsiveFont(32, 52), fontWeight: 900,
-                  color: "rgba(255,255,255,0.1)", lineHeight: 1, letterSpacing: "-0.04em",
-                }}>
-                  {String(projects.length).padStart(2, "0")}
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Infinite strip (full-bleed with left padding start) ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-          style={{ paddingLeft: getResponsiveSpacing(24, 40, 60) }}
-        >
-          <InfiniteStrip />
-        </motion.div>
-
-        {/* ── Divider + CTA ── */}
-        <div
-          className="max-w-[1400px] mx-auto"
-          style={{
-            paddingLeft:  getResponsiveSpacing(24, 40, 60),
-            paddingRight: getResponsiveSpacing(24, 40, 60),
-          }}
-        >
-          <motion.div
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={inView ? { scaleX: 1, opacity: 1 } : {}}
-            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1], delay: 0.6 }}
+      <div className="mx-auto max-w-[1320px]">
+        {/* ── Optional Eyebrow (consistent with other sections) ── */}
+        <Reveal delay={0} className="mb-8 flex items-center gap-3">
+          <span
             style={{
-              height: "1px",
-              background: C.divider,
-              transformOrigin: "center",
-              margin: `${getResponsiveSpacing(48, 64, 72)} 0 ${getResponsiveSpacing(40, 56, 64)}`,
+              display: "inline-block",
+              width: 28,
+              height: 2,
+              background: "var(--brand-green)",
+              borderRadius: 2,
             }}
-            aria-hidden="true"
           />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          <span
             style={{
-              display: "flex", flexDirection: "column",
-              alignItems: "center", gap: "1.25rem", textAlign: "center",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              letterSpacing: "0.35em",
+              color: "var(--brand-green)",
+              textTransform: "uppercase",
             }}
           >
-            <p style={{
-              fontSize: getResponsiveFont(13.5, 16),
-              color: "rgba(255,255,255,0.6)",
-              fontWeight: 400, maxWidth: "44ch", lineHeight: 1.7,
-            }}>
-              These are just the highlights. The full portfolio spans{" "}
-              <strong style={{ color: "#ffffff", fontWeight: 700 }}>
-                websites, apps, software & AI systems.
-              </strong>
-            </p>
-            <PortfolioCta />
-          </motion.div>
-        </div>
+            Our Work
+          </span>
+        </Reveal>
 
+        <div
+          className="flex flex-col md:grid"
+          style={{
+            gridTemplateColumns: "1fr 1.2fr",
+            gridTemplateRows: "auto auto",
+            gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
+          }}
+        >
+
+          {/* ════════════════════════════════
+              BOX 1 — Introduction
+              top-left
+          ════════════════════════════════ */}
+          <Reveal delay={0.1} style={{ gridColumn: "1", gridRow: "1" }}>
+            <div
+              className="rounded-3xl flex flex-col h-full"
+              style={{
+                background: "var(--glass-bg)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                padding: "clamp(1.75rem, 3.5vw, 2.5rem)",
+                border: "1px solid var(--glass-border)",
+                overflow: "hidden",
+                position: "relative",
+              }}
+            >
+              {/* Corner glow */}
+              <div aria-hidden="true" style={{ position: "absolute", top: -50, left: -50, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 10%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
+              
+              <div className="flex flex-col gap-5 h-full relative z-10">
+                <h2
+                  style={{
+                    fontSize: "clamp(2rem, 4vw, 3.2rem)",
+                    fontWeight: 900,
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.03em",
+                    color: "var(--text-primary)",
+                    margin: 0,
+                  }}
+                >
+                  Work That <span style={{ color: "var(--brand-green)" }}>Speaks</span>
+                  <br />for <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>Itself.</span>
+                </h2>
+
+                <p
+                  style={{
+                    fontSize: "clamp(0.85rem, 1.4vw, 1rem)",
+                    lineHeight: 1.85,
+                    color: "var(--text-secondary)",
+                    maxWidth: "42ch",
+                  }}
+                >
+                  From AI-powered CRMs to cross-platform mobile apps and enterprise ERP systems — every product we ship is built to last and designed to perform.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ════════════════════════════════
+              BOX 2 — Tech Stack & Metrics
+              bottom-left
+          ════════════════════════════════ */}
+          <Reveal delay={0.18} style={{ gridColumn: "1", gridRow: "2", display: "flex", flexDirection: "column", height: "100%" }}>
+            <div
+              className="rounded-3xl flex flex-col justify-center h-full flex-1"
+              style={{
+                background: "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                padding: "clamp(1.5rem, 3vw, 2.25rem)",
+                border: "1px solid color-mix(in srgb, var(--brand-green) 18%, var(--glass-border))",
+                overflow: "hidden",
+                position: "relative",
+              }}
+            >
+              {/* Bottom-right glow */}
+              <div aria-hidden="true" style={{ position: "absolute", bottom: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 14%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+              <div className="relative z-10 flex flex-col gap-6">
+                <div>
+                  <div
+                    style={{
+                      fontSize: "clamp(2rem, 4vw, 2.8rem)",
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      color: "var(--brand-green)",
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    40+
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.67rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      color: "var(--text-primary)",
+                      marginTop: "0.3rem",
+                    }}
+                  >
+                    Digital Products Built
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "0.82rem",
+                      lineHeight: 1.75,
+                      color: "var(--text-secondary)",
+                      maxWidth: "38ch",
+                      marginTop: "0.6rem",
+                    }}
+                  >
+                    These are just the highlights — our full portfolio spans scalable websites, native applications, and complex AI integrations.
+                  </p>
+                </div>
+
+
+
+                {/* CTA Button */}
+                <div className="mt-2">
+                  <Link
+                    href="/portfolio"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", padding: "0.85rem 1.75rem", borderRadius: "100px", fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--brand-green)", background: "color-mix(in srgb, var(--brand-green) 8%, transparent)", border: "1.5px solid color-mix(in srgb, var(--brand-green) 30%, transparent)", textDecoration: "none", transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)" }}
+                    onMouseEnter={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.background = "color-mix(in srgb, var(--brand-green) 18%, transparent)"; el.style.borderColor = "color-mix(in srgb, var(--brand-green) 55%, transparent)"; el.style.transform = "translateX(4px)"; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.background = "color-mix(in srgb, var(--brand-green) 8%, transparent)"; el.style.borderColor = "color-mix(in srgb, var(--brand-green) 30%, transparent)"; el.style.transform = "translateX(0)"; }}
+                  >
+                    View All Projects
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M1 11L11 1M11 1H4M11 1V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ════════════════════════════════
+              BOX 3 — Sliding Stacked Carousel
+              right column, spans both rows
+          ════════════════════════════════ */}
+          <Reveal delay={0.26} className="h-full" style={{ gridColumn: "2", gridRow: "1 / span 2" }}>
+            <div
+              className="rounded-3xl h-full flex flex-col"
+              style={{
+                position: "relative",
+                background: "var(--glass-bg)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid var(--glass-border)",
+                padding: "clamp(1.5rem, 3vw, 2.5rem)",
+                overflow: "hidden",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {/* Ambient right-side glow */}
+              <div aria-hidden="true" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 7%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
+              
+              <div className="relative z-10 w-full flex justify-center">
+                <StackedCarousel />
+              </div>
+            </div>
+          </Reveal>
+
+        </div>
       </div>
     </section>
   );

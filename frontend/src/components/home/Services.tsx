@@ -1,374 +1,470 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { getResponsiveFont, getResponsiveSpacing } from "@/lib/responsive";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { MEDIA_QUERIES } from "@/constants/breakpoints";
+import { useInView, motion } from "framer-motion";
+import Image from "next/image";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────
+   Types & Data
+───────────────────────────────────────────── */
 interface Service {
+  id: number;
   index: string;
   name: string;
-  shortName: string;
   description: string;
-  capabilities: string[];
-  badge?: string;
+  accentFrom: string;
+  accentTo: string;
+  stat: string;
+  statLabel: string;
+  highlights: string[];
+  image: string;
 }
 
-// ── Services data ─────────────────────────────────────────────────────────────
 const services: Service[] = [
   {
+    id: 1,
     index: "01",
     name: "Custom Website Development",
-    shortName: "Web Development",
     description:
-      "We craft high-performance websites that go beyond aesthetics — built on modern frameworks, optimized for speed, and engineered to convert. From marketing sites to complex web applications, every pixel is intentional.",
-    capabilities: [],
-    badge: "Most Requested",
+      "We craft high-performance websites that go beyond aesthetics — built on modern frameworks, optimized for speed, and engineered to convert.",
+    accentFrom: "#005a42",
+    accentTo: "#003366",
+    stat: "98%",
+    statLabel: "Lighthouse Score",
+    highlights: ["Next.js & React", "SEO-optimised", "Sub-2s Load"],
+    image: "/images/services/web_dev_preview.png",
   },
   {
+    id: 2,
     index: "02",
     name: "Software Development",
-    shortName: "Software",
     description:
-      "End-to-end software engineering for businesses that need scalable, maintainable, and secure systems. We design architecture, write clean code, and deliver production-ready products that grow with your business.",
-    capabilities: [],
+      "End-to-end software engineering for businesses that need scalable, maintainable, and secure systems. We design, write clean code, and deliver.",
+    accentFrom: "#001f3f",
+    accentTo: "#1a3c5e",
+    stat: "40+",
+    statLabel: "Systems Shipped",
+    highlights: ["System Architecture", "API Design", "Cloud-native"],
+    image: "/images/services/software_dev_preview.png",
   },
   {
+    id: 3,
     index: "03",
-    name: "Mobile Application Development",
-    shortName: "Mobile Apps",
+    name: "Mobile App Development",
     description:
-      "Native-quality mobile experiences built for iOS and Android. We use React Native and modern cross-platform tooling to ship apps that feel fast, look premium, and work offline-first.",
-    capabilities: [],
+      "Native-quality mobile experiences built for iOS and Android. We use React Native to ship apps that feel fast, look premium, and work offline-first.",
+    accentFrom: "#1a3c5e",
+    accentTo: "#005a42",
+    stat: "15+",
+    statLabel: "Apps Launched",
+    highlights: ["iOS & Android", "React Native", "Offline-first"],
+    image: "/images/services/mobile_app_preview.png",
   },
   {
+    id: 4,
     index: "04",
     name: "AI-Based Solutions",
-    shortName: "AI Solutions",
     description:
-      "We integrate AI into your workflows, products, and customer experiences. From LLM-powered interfaces and intelligent automation to predictive analytics — we turn AI from a buzzword into a business advantage.",
-    capabilities: [],
-    badge: "New",
+      "We integrate AI into your workflows, products, and customer experiences. From LLM interfaces to predictive analytics.",
+    accentFrom: "#005a42",
+    accentTo: "#008040",
+    stat: "60%",
+    statLabel: "Less Manual Work",
+    highlights: ["LLM Integration", "AI Automation", "Predictive Analytics"],
+    image: "/images/services/ai_solutions_preview.png",
   },
 ];
 
-// ── Arrow icon ────────────────────────────────────────────────────────────────
-function ArrowIcon({ rotated }: { rotated: boolean }) {
-  return (
-    <motion.svg
-      animate={{ rotate: rotated ? 45 : 0 }}
-      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-      className="no-transition"
-      style={{ flexShrink: 0 }}
-    >
-      <path
-        d="M4 10h12M10 4l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </motion.svg>
-  );
-}
-
-// ── Service Row ───────────────────────────────────────────────────────────────
-function ServiceRow({
-  service,
-  rowIndex,
-  inView,
+/* ─────────────────────────────────────────────
+   Scroll-reveal wrapper
+───────────────────────────────────────────── */
+function Reveal({
+  children,
+  delay = 0,
+  className,
+  style,
 }: {
-  service: Service;
-  rowIndex: number;
-  inView: boolean;
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+  style?: React.CSSProperties;
 }) {
-  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
-  const [hovered, setHovered] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const isOpen = hovered || expanded;
-
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   return (
     <motion.div
+      ref={ref}
+      className={className}
+      style={style}
       initial={{ opacity: 0, y: 32 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.65,
-        ease: [0.25, 0.1, 0.25, 1],
-        delay: rowIndex * 0.12,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="no-transition"
-      style={{ position: "relative" }}
+      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] as any, delay }}
     >
-      {/* ── Top divider line ── */}
-      <div
-        style={{
-          height: "1px",
-          background: isOpen ? "var(--brand-green)" : "var(--glass-border)",
-          transition: "background 0.4s ease",
-        }}
-      />
-
-      {/* ── Row trigger ── */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-expanded={expanded}
-        aria-label={`${service.name} — click to expand details`}
-        onClick={() => setExpanded(!expanded)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setExpanded(!expanded);
-          }
-        }}
-        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008764]"
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "2rem 1fr auto" : "4rem 1fr auto",
-          alignItems: "center",
-          gap: getResponsiveSpacing(16, 24, 40),
-          padding: `${getResponsiveSpacing(20, 24, 28)} 0`,
-          cursor: "pointer",
-          userSelect: "none",
-          transition: "gap 0.3s ease",
-        }}
-      >
-        {/* Index number */}
-        <span
-          style={{
-            fontSize: "0.65rem",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            color: isOpen ? "var(--brand-green)" : "var(--text-secondary)",
-            transition: "color 0.3s ease",
-            fontVariantNumeric: "tabular-nums",
-            opacity: isOpen ? 1 : 0.5,
-          }}
-        >
-          {service.index}
-        </span>
-
-        {/* Service name */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", minWidth: 0 }}>
-          <span
-            style={{
-              fontSize: getResponsiveFont(17.5, 32),
-              fontWeight: 900,
-              letterSpacing: "-0.01em",
-              color: isOpen ? "var(--text-primary)" : "var(--text-secondary)",
-              transition: "color 0.3s ease, transform 0.3s ease",
-              transform: isOpen ? (isMobile ? "translateX(4px)" : "translateX(8px)") : "translateX(0)",
-              display: "block",
-              lineHeight: 1.1,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {isMobile ? service.shortName : service.name}
-          </span>
-
-          {/* Badge */}
-          {service.badge && (
-            <span
-              style={{
-                display: "inline-flex",
-                padding: "0.2rem 0.6rem",
-                borderRadius: "6px",
-                fontSize: "0.55rem",
-                fontWeight: 700,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                background: "color-mix(in srgb, var(--brand-green) 15%, transparent)",
-                border: "1px solid color-mix(in srgb, var(--brand-green) 30%, transparent)",
-                color: "var(--brand-green)",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
-              {service.badge}
-            </span>
-          )}
-        </div>
-
-        {/* Arrow icon */}
-        <div
-          style={{
-            color: isOpen ? "var(--brand-green)" : "var(--text-secondary)",
-            transition: "color 0.3s ease",
-            opacity: isOpen ? 1 : 0.4,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "44px",
-            minHeight: "44px",
-          }}
-        >
-          <ArrowIcon rotated={isOpen} />
-        </div>
-      </div>
-
-      {/* ── Expanded detail panel ── */}
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            key="panel"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
-            className="no-transition"
-            style={{ overflow: "hidden" }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "2rem 1fr" : "4rem 1fr",
-                gap: getResponsiveSpacing(16, 24, 40),
-                paddingBottom: getResponsiveSpacing(24, 32, 40),
-              }}
-            >
-              {/* Empty first column — aligns with index */}
-              <div />
-
-              {/* Content */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr",
-                  gap: "clamp(1.5rem, 4vw, 4rem)",
-                  alignItems: "start",
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      fontSize: getResponsiveFont(14.5, 16.5),
-                      lineHeight: 1.85,
-                      color: "var(--text-secondary)",
-                      fontWeight: 400,
-                      maxWidth: "80ch",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {children}
     </motion.div>
   );
 }
 
-// ── Main Section ──────────────────────────────────────────────────────────────
-export default function ServicesSection() {
-  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
-  const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
+/* ─────────────────────────────────────────────
+   3D Flip Card
+───────────────────────────────────────────── */
+function FlipCard({ service, delay }: { service: Service; delay: number }) {
+  const [flipped, setFlipped] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  /* Live tilt while hovering (front face only) */
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (flipped) return;
+    const el = cardRef.current;
+    if (!el) return;
+    const { left, top, width, height } = el.getBoundingClientRect();
+    const px = (e.clientX - left) / width - 0.5;   // -0.5 → +0.5
+    const py = (e.clientY - top) / height - 0.5;
+    setTilt({ x: -py * 14, y: px * 14 });             // max ±7 deg
+  };
+
+  const handleMouseEnter = () => {
+    setFlipped(true);
+    setTilt({ x: 0, y: 0 });
+  };
+
+  const handleMouseLeave = () => {
+    setFlipped(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
+  /* Accent gradient string */
+  const grad = `linear-gradient(135deg, ${service.accentFrom}, ${service.accentTo})`;
 
   return (
-    <section
-      ref={sectionRef}
-      aria-label="CODO Agency Services"
-      style={{
-        position: "relative",
-        zIndex: 1,
-        overflow: "hidden",
-        padding: `${getResponsiveSpacing(80, 100, 144)} ${getResponsiveSpacing(24, 40, 60)}`,
-        fontFamily: "'DM Sans', sans-serif",
-        background:
-          "linear-gradient(to bottom, transparent 0%, var(--bg-primary) 6%, var(--bg-primary) 94%, transparent 100%)",
-      }}
-    >
-      {/* ── LARGE BACKGROUND NUMBER ── */}
+    <Reveal delay={delay} style={{ height: "100%" }}>
+      {/* ── Outer perspective wrapper ── */}
       <div
-        aria-hidden="true"
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
-          position: "absolute",
-          top: "50%",
-          right: "-1rem",
-          transform: "translateY(-50%)",
-          fontSize: getResponsiveFont(192, 416),
-          fontWeight: 900,
-          lineHeight: 1,
-          color: "transparent",
-          WebkitTextStroke: "1px var(--glass-border)",
-          pointerEvents: "none",
-          userSelect: "none",
-          zIndex: 0,
-          letterSpacing: "-0.05em",
+          perspective: "1100px",
+          height: "100%",
+          cursor: "pointer",
         }}
       >
-        03
-      </div>
+        {/* ── Rotating inner scene ── */}
+        <motion.div
+          animate={{
+            rotateY: flipped ? 180 : tilt.y,
+            rotateX: flipped ? 0 : tilt.x,
+          }}
+          transition={{
+            rotateY: {
+              duration: 0.7,
+              ease: [0.4, 0, 0.2, 1],
+            },
+            rotateX: {
+              duration: flipped ? 0.7 : 0.12,
+              ease: flipped ? [0.4, 0, 0.2, 1] : "linear",
+            },
+          }}
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            transformStyle: "preserve-3d",
+          }}
+        >
 
-      <div className="max-w-[1400px] mx-auto relative z-10">
-        <div style={{ marginBottom: "clamp(3rem, 6vw, 5rem)" }}>
-          <motion.div
-            className="no-transition"
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          {/* ════════════════════════════
+              FRONT — image + index badge
+          ════════════════════════════ */}
+          <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              marginBottom: "1.5rem",
+              position: "absolute",
+              inset: 0,
+              borderRadius: "24px",
+              overflow: "hidden",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              background: "#0d0d12",
+              border: "1px solid var(--glass-border, rgba(255,255,255,0.08))",
             }}
           >
-            <span
+            {/* Full-bleed image */}
+            <Image
+              src={service.image}
+              alt={service.name}
+              fill
+              style={{ objectFit: "cover", objectPosition: "center" }}
+            />
+
+            {/* Bottom gradient — title always readable */}
+            <div
+              aria-hidden
               style={{
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                color: "var(--brand-green)",
-                textTransform: "uppercase",
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(to top, rgba(4,4,8,0.92) 0%, rgba(4,4,8,0.3) 50%, transparent 100%)",
+                zIndex: 1,
+              }}
+            />
+
+
+
+            {/* Service name — bottom left */}
+            <div style={{ position: "absolute", bottom: "1.4rem", left: "1.4rem", zIndex: 3 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(1.1rem, 2vw, 1.55rem)",
+                  fontWeight: 900,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.15,
+                  color: "#f5f5f7",
+                  fontFamily: "'DM Sans', sans-serif",
+                  maxWidth: "14ch",
+                }}
+              >
+                {service.name}
+              </p>
+
+            </div>
+
+            {/* Subtle shimmer vignette overlay */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.04), transparent 65%)",
+                zIndex: 2,
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+
+          {/* ════════════════════════════
+              BACK — content
+          ════════════════════════════ */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "24px",
+              overflow: "hidden",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)",
+              border: "1px solid var(--glass-border, rgba(255,255,255,0.1))",
+              background: "var(--glass-bg, rgba(15,15,20,0.95))",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              display: "flex",
+              flexDirection: "column",
+              padding: "clamp(1.4rem, 3vw, 2rem)",
+            }}
+          >
+
+            {/* Top row — index + stat */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: "1.4rem",
               }}
             >
-              Services
-            </span>
-          </motion.div>
+              {/* Stat pill */}
+              <div style={{ textAlign: "right", marginLeft: "auto" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "2rem",
+                    fontWeight: 900,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                    color: "var(--brand-green, #00c88c)",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {service.stat}
+                </p>
+                <p
+                  style={{
+                    margin: "0.15rem 0 0",
+                    fontSize: "0.55rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--text-secondary, rgba(255,255,255,0.45))",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {service.statLabel}
+                </p>
+              </div>
+            </div>
 
-          <motion.h2
-            className="no-transition"
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
+            {/* Service name */}
+            <h3
+              style={{
+                margin: "0 0 0.75rem",
+                fontSize: "clamp(1.2rem, 2.2vw, 1.65rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.12,
+                color: "var(--text-primary, #f5f5f7)",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {service.name}
+            </h3>
+
+            {/* Description */}
+            <p
+              style={{
+                margin: "0 0 auto",
+                fontSize: "0.82rem",
+                lineHeight: 1.72,
+                color: "var(--text-secondary, rgba(255,255,255,0.55))",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {service.description}
+            </p>
+
+            {/* Highlight tags */}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.4rem",
+                marginTop: "1.4rem",
+              }}
+            >
+              {service.highlights.map((h, i) => (
+                <span
+                  key={i}
+                  style={{
+                    padding: "0.2rem 0.6rem",
+                    borderRadius: "6px",
+                    fontSize: "0.52rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    border: "1px solid var(--glass-border, rgba(255,255,255,0.1))",
+                    color: "rgba(255,255,255,0.65)",
+                    background: "rgba(255,255,255,0.04)",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {h}
+                </span>
+              ))}
+          </div>
+          </div>
+        </motion.div>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main Section
+───────────────────────────────────────────── */
+export default function ServicesSection() {
+  return (
+    <section
+      aria-label="CODO Agency Services"
+      className="relative z-10 w-full"
+      style={{
+        padding:
+          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      <div className="mx-auto max-w-[1320px]">
+
+        {/* ── Header Block — Glassmorphism Box ── */}
+        <Reveal delay={0}>
+          <div
+            className="rounded-[2rem] p-8 md:p-12 mb-12"
             style={{
-              fontSize: getResponsiveFont(35, 60),
-              fontWeight: 900,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              color: "var(--text-primary)",
+              background: "var(--glass-bg)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--glass-border)",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            What We <span style={{ color: "var(--brand-green)" }}>Build</span> for You.
-          </motion.h2>
-        </div>
+            {/* Ambient glows */}
+            <div aria-hidden="true" style={{ position: "absolute", top: -80, right: -40, width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 12%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
+            
+            <div className="relative z-10">
+              {/* ── Section eyebrow ── */}
+              <div className="mb-8 flex items-center gap-3">
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 28,
+                    height: 2,
+                    background: "var(--brand-green)",
+                    borderRadius: 2,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "0.65rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.35em",
+                    color: "var(--brand-green)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  What We Build
+                </span>
+              </div>
 
-        <div>
+              {/* ── Heading Row ── */}
+              <h2
+                style={{
+                  fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.03em",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                Capabilities That <br />
+                <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
+                  Drive Impact.
+                </span>
+              </h2>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* ── Cards grid — equal-height rows via grid ── */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+          style={{
+            gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
+            gridAutoRows: "420px",  /* fixed height so flip looks stable */
+          }}
+        >
           {services.map((service, i) => (
-            <ServiceRow
-              key={service.index}
+            <FlipCard
+              key={service.id}
               service={service}
-              rowIndex={i}
-              inView={inView}
+              delay={0.15 + i * 0.1}
             />
           ))}
-          <div style={{ height: "1px", background: "var(--glass-border)" }} />
         </div>
+
       </div>
     </section>
   );
