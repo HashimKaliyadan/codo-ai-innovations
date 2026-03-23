@@ -85,15 +85,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -558,33 +557,94 @@ export default function PortfolioSection() {
       aria-label="CODO Agency Portfolio"
       className="relative z-10 w-full"
       style={{
-        padding: "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem)",
+        padding: "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
       <div className="mx-auto max-w-[1320px]">
-        {/* ── Optional Eyebrow (consistent with other sections) ── */}
-        <Reveal delay={0} className="mb-8 flex items-center gap-3">
-          <span
+        {/* ── Header Block ── */}
+        <Reveal delay={0}>
+          <div
+            className="rounded-[2rem] p-8 md:p-12 mb-12"
             style={{
-              display: "inline-block",
-              width: 28,
-              height: 2,
-              background: "var(--brand-green)",
-              borderRadius: 2,
-            }}
-          />
-          <span
-            style={{
-              fontSize: "0.65rem",
-              fontWeight: 700,
-              letterSpacing: "0.35em",
-              color: "var(--brand-green)",
-              textTransform: "uppercase",
+              background: "var(--glass-bg)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--glass-border)",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            Our Work
-          </span>
+            {/* Ambient glow — top right */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -80,
+                right: -40,
+                width: 320,
+                height: 320,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 12%, transparent) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* ── PORTFOLIO watermark ── */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  whiteSpace: "nowrap",
+                  userSelect: "none",
+                  background:
+                    "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0,200,140,0.072) 45%, rgba(255,255,255,0.022) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  WebkitTextStroke: "1px rgba(255,255,255,0.06)",
+                  filter: "blur(0.3px)",
+                  transform: "translateY(4%)",
+                }}
+              >
+                PORTFOLIO
+              </span>
+            </div>
+
+            {/* ── Heading ── */}
+            <div className="relative z-10">
+              <h2
+                style={{
+                  fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.03em",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                Work That <span style={{ color: "var(--brand-green)" }}>Speaks</span>
+                <br />for <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>Itself.</span>
+              </h2>
+            </div>
+          </div>
         </Reveal>
 
         <div
@@ -602,12 +662,11 @@ export default function PortfolioSection() {
           ════════════════════════════════ */}
           <Reveal delay={0.1} style={{ gridColumn: "1", gridRow: "1" }}>
             <div
-              className="rounded-3xl flex flex-col h-full"
+              className="rounded-[2rem] p-8 md:p-12 flex flex-col h-full"
               style={{
                 background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                padding: "clamp(1.75rem, 3.5vw, 2.5rem)",
                 border: "1px solid var(--glass-border)",
                 overflow: "hidden",
                 position: "relative",
@@ -616,20 +675,17 @@ export default function PortfolioSection() {
               {/* Corner glow */}
               <div aria-hidden="true" style={{ position: "absolute", top: -50, left: -50, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 10%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
               
-              <div className="flex flex-col gap-5 h-full relative z-10">
-                <h2
+              <div className="flex flex-col gap-5 h-full relative z-10 justify-center">
+                <p
                   style={{
-                    fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                    fontWeight: 900,
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.03em",
+                    fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
+                    lineHeight: 1.5,
                     color: "var(--text-primary)",
-                    margin: 0,
+                    fontWeight: 500,
                   }}
                 >
-                  Work That <span style={{ color: "var(--brand-green)" }}>Speaks</span>
-                  <br />for <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>Itself.</span>
-                </h2>
+                  We don't just build software. We engineer <span style={{ color: "var(--brand-green)" }}>scalable engines of growth</span>.
+                </p>
 
                 <p
                   style={{
@@ -639,7 +695,7 @@ export default function PortfolioSection() {
                     maxWidth: "42ch",
                   }}
                 >
-                  From AI-powered CRMs to cross-platform mobile apps and enterprise ERP systems — every product we ship is built to last and designed to perform.
+                  From AI-powered CRMs to cross-platform mobile apps and enterprise ERP systems — every product we ship is built to last, designed to perform, and strategically crafted to push your business forward.
                 </p>
               </div>
             </div>
@@ -651,12 +707,11 @@ export default function PortfolioSection() {
           ════════════════════════════════ */}
           <Reveal delay={0.18} style={{ gridColumn: "1", gridRow: "2", display: "flex", flexDirection: "column", height: "100%" }}>
             <div
-              className="rounded-3xl flex flex-col justify-center h-full flex-1"
+              className="rounded-[2rem] p-8 md:p-12 flex flex-col justify-center h-full flex-1"
               style={{
                 background: "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                padding: "clamp(1.5rem, 3vw, 2.25rem)",
                 border: "1px solid color-mix(in srgb, var(--brand-green) 18%, var(--glass-border))",
                 overflow: "hidden",
                 position: "relative",
@@ -729,14 +784,13 @@ export default function PortfolioSection() {
           ════════════════════════════════ */}
           <Reveal delay={0.26} className="h-full" style={{ gridColumn: "2", gridRow: "1 / span 2" }}>
             <div
-              className="rounded-3xl h-full flex flex-col"
+              className="rounded-[2rem] p-8 md:p-12 h-full flex flex-col"
               style={{
                 position: "relative",
                 background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid var(--glass-border)",
-                padding: "clamp(1.5rem, 3vw, 2.5rem)",
                 overflow: "hidden",
                 alignItems: "center",
                 justifyContent: "center",

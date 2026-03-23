@@ -32,15 +32,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -173,7 +172,7 @@ export default function ClientsSection() {
       className="relative w-full"
       style={{
         padding:
-          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem)",
+          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
         fontFamily: "'DM Sans', sans-serif",
         overflow: "hidden",
       }}
@@ -184,7 +183,7 @@ export default function ClientsSection() {
         ═══════════════════════════════════════════ */}
         <Reveal delay={0.06}>
           <div
-            className="rounded-3xl"
+            className="rounded-[2rem] p-8 md:p-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
@@ -192,8 +191,6 @@ export default function ClientsSection() {
               border: "1px solid var(--glass-border)",
               position: "relative",
               overflow: "hidden",
-              padding: "clamp(2rem, 5vw, 3.5rem)",
-              marginBottom: "clamp(0.75rem, 1.5vw, 1.2rem)",
             }}
           >
             {/* Ambient glow */}
@@ -214,36 +211,6 @@ export default function ClientsSection() {
             />
 
             <div style={{ position: "relative", zIndex: 1 }}>
-              {/* Eyebrow */}
-              <div
-                className="flex items-center"
-                style={{ gap: "0.75rem", marginBottom: "0.6rem" }}
-              >
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={inView ? { width: 28 } : {}}
-                  transition={{
-                    duration: 0.9,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  style={{
-                    height: 2,
-                    background: "var(--brand-green)",
-                    borderRadius: 2,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "0.62rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.35em",
-                    color: "var(--brand-green)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Trusted By
-                </span>
-              </div>
 
               {/* Heading */}
               <h2

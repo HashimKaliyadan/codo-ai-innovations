@@ -26,7 +26,7 @@ export default function FloatingLinesLayer() {
       <motion.div
         initial={false}
         animate={{ opacity }}
-        transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.1, ease: "linear" }}
         onAnimationStart={() => {
           if (opacity > 0) setIsRenderEnabled(true);
         }}

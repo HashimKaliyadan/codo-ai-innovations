@@ -12,6 +12,7 @@ import { getResponsiveFont, getResponsiveSpacing } from "@/lib/responsive";
 const menuLinks = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
+  { label: "Services", href: "/services" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Blog", href: "/blog" },
   { label: "Careers", href: "/careers" },

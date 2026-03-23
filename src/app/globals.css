@@ -44,3 +44,17 @@ input:-webkit-autofill:active {
   caret-color: rgba(255, 255, 255, 0.88);
   transition: background-color 9999s ease-in-out 0s; /* delays Chrome's color takeover forever */
 }
+
+/* ── Instant glassmorphism ──
+   Force GPU compositing layers for every element that uses
+   backdrop-filter so the blur is ready on the very first paint. */
+[style*="backdrop-filter"],
+[style*="backdropFilter"],
+.backdrop-blur-2xl,
+.backdrop-blur-xl,
+.backdrop-blur-lg {
+  will-change: backdrop-filter;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

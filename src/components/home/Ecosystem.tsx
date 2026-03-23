@@ -96,9 +96,9 @@ function ElevatedCard(props: CardProps) {
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 48 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: props.delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
       className="flex-1 w-full min-w-0 relative"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -295,61 +295,73 @@ export default function EcosystemSection() {
 
         {/* ── Header Block ── */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-          className="flex flex-col items-center text-center rounded-[24px]"
+          initial={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0 }}
+          className="rounded-[2rem] p-8 md:p-12 mb-12"
           style={{
-            marginBottom: "2.5rem",
-            padding: "clamp(2rem, 5vw, 3.5rem) 2rem",
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid var(--glass-border)",
             position: "relative",
             overflow: "hidden",
           }}
         >
-          {/* Eyebrow */}
-          <div className="flex items-center gap-[12px] mb-[1.5rem]">
-            <motion.div
-              initial={{ width: 0 }}
-              whileInView={{ width: 40 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-              style={{ height: 2, background: "#00e87a", borderRadius: 2 }}
-            />
-            <span
-              style={{
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.35em",
-                color: "#00e87a",
-                textTransform: "uppercase",
-              }}
-            >
-              The Ecosystem
-            </span>
-            <motion.div
-              initial={{ width: 0 }}
-              whileInView={{ width: 40 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-              style={{ height: 2, background: "#00e87a", borderRadius: 2 }}
-            />
-          </div>
-
-          {/* Heading */}
-          <h2
+          {/* ── ECOSYSTEM watermark ── */}
+          <div
+            aria-hidden="true"
             style={{
-              fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
-              fontWeight: 900,
-              lineHeight: 1.04,
-              letterSpacing: "-0.03em",
-              color: "#ffffff",
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              pointerEvents: "none",
+              zIndex: 1,
             }}
           >
-            One Company.<br />
-            <span style={{ color: "#00e87a" }}>Two Powerful Arms.</span>
-          </h2>
+            <span
+              style={{
+                fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
+                fontWeight: 900,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                fontFamily: "'DM Sans', sans-serif",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0,200,140,0.072) 45%, rgba(255,255,255,0.022) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                WebkitTextStroke: "1px rgba(255,255,255,0.06)",
+                filter: "blur(0.3px)",
+                transform: "translateY(4%)",
+              }}
+            >
+              ECOSYSTEM
+            </span>
+          </div>
+
+
+          {/* ── Heading ── */}
+          <div className="relative z-10">
+            <h2
+              style={{
+                fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
+                fontWeight: 900,
+                lineHeight: 1.05,
+                letterSpacing: "-0.03em",
+                color: "var(--text-primary)",
+                margin: 0,
+              }}
+            >
+              One Company.<br />
+              <span style={{ color: "#00e87a" }}>Two Powerful Arms.</span>
+            </h2>
+          </div>
         </motion.div>
 
         {/* ── Interactive Cards Grid ── */}

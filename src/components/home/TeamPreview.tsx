@@ -90,15 +90,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -141,15 +140,108 @@ export default function TeamSection() {
       className="relative w-full"
       style={{
         padding:
-          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem)",
+          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
         fontFamily: "'DM Sans', sans-serif",
         overflow: "hidden",
       }}
     >
       <div className="mx-auto max-w-[1320px]">
+
+        {/* ── Header Block ── */}
+        <Reveal delay={0.02}>
+          <div
+            className="rounded-[2rem] p-8 md:p-12 mb-12"
+            style={{
+              background: "var(--glass-bg)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--glass-border)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Ambient glow — top right */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -80,
+                right: -40,
+                width: 320,
+                height: 320,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 12%, transparent) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* ── OUR TEAM watermark ── */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  whiteSpace: "nowrap",
+                  userSelect: "none",
+                  background:
+                    "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0,200,140,0.072) 45%, rgba(255,255,255,0.022) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  WebkitTextStroke: "1px rgba(255,255,255,0.06)",
+                  filter: "blur(0.3px)",
+                  transform: "translateY(4%)",
+                }}
+              >
+                OUR TEAM
+              </span>
+            </div>
+
+            {/* ── Heading ── */}
+            <div className="relative z-10">
+              <h2
+                style={{
+                  fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.03em",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                The Minds{" "}
+                <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
+                  Behind
+                </span>
+                <br />
+                the{" "}
+                <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
+                  Magic.
+                </span>
+              </h2>
+            </div>
+          </div>
+        </Reveal>
+
         <Reveal delay={0.06}>
           <div
-            className="rounded-3xl"
+            className="rounded-[2rem] p-8 md:p-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
@@ -157,7 +249,6 @@ export default function TeamSection() {
               border: "1px solid var(--glass-border)",
               position: "relative",
               overflow: "hidden",
-              padding: "clamp(2rem, 5vw, 3.5rem)",
             }}
           >
             {/* ── Per-member radial glow — cross-fades on change ── */}
@@ -181,59 +272,11 @@ export default function TeamSection() {
 
             <div style={{ position: "relative", zIndex: 1 }}>
 
-              {/* ── Header row ── */}
+              {/* ── Nav arrows ── */}
               <div
-                className="flex items-end justify-between flex-wrap"
-                style={{ marginBottom: "clamp(2rem, 4vw, 3rem)", gap: "1.5rem" }}
+                className="flex justify-end"
+                style={{ marginBottom: "clamp(1.5rem, 3vw, 2rem)", gap: "0.5rem" }}
               >
-                {/* Left — eyebrow + heading */}
-                <div>
-                  <div
-                    className="flex items-center"
-                    style={{ gap: "0.75rem", marginBottom: "1rem" }}
-                  >
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={inView ? { width: 28 } : {}}
-                      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                      style={{
-                        height: 2,
-                        background: "var(--brand-green)",
-                        borderRadius: 2,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: "0.62rem",
-                        fontWeight: 700,
-                        letterSpacing: "0.35em",
-                        color: "var(--brand-green)",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Our Team
-                    </span>
-                  </div>
-
-                  <h2
-                    style={{
-                      fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                      fontWeight: 900,
-                      lineHeight: 1.05,
-                      letterSpacing: "-0.03em",
-                      color: "var(--text-primary)",
-                      margin: 0,
-                    }}
-                  >
-                    The Minds Behind{" "}
-                    <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
-                      the Magic.
-                    </span>
-                  </h2>
-                </div>
-
-                {/* Right — nav arrows */}
-                <div className="flex" style={{ gap: "0.5rem" }}>
                   {([-1, 1] as const).map((dir) => (
                     <button
                       key={dir}
@@ -280,7 +323,6 @@ export default function TeamSection() {
                     </button>
                   ))}
                 </div>
-              </div>
 
               {/* ── Accordion strip ── */}
               <div

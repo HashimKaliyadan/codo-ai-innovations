@@ -90,15 +90,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] as any, delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -113,15 +112,14 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
 
-  /* Live tilt while hovering (front face only) */
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (flipped) return;
     const el = cardRef.current;
     if (!el) return;
     const { left, top, width, height } = el.getBoundingClientRect();
-    const px = (e.clientX - left) / width - 0.5;   // -0.5 → +0.5
+    const px = (e.clientX - left) / width - 0.5;
     const py = (e.clientY - top) / height - 0.5;
-    setTilt({ x: -py * 14, y: px * 14 });             // max ±7 deg
+    setTilt({ x: -py * 14, y: px * 14 });
   };
 
   const handleMouseEnter = () => {
@@ -134,34 +132,22 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
     setTilt({ x: 0, y: 0 });
   };
 
-  /* Accent gradient string */
-  const grad = `linear-gradient(135deg, ${service.accentFrom}, ${service.accentTo})`;
-
   return (
     <Reveal delay={delay} style={{ height: "100%" }}>
-      {/* ── Outer perspective wrapper ── */}
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={{
-          perspective: "1100px",
-          height: "100%",
-          cursor: "pointer",
-        }}
+        style={{ perspective: "1100px", height: "100%", cursor: "pointer" }}
       >
-        {/* ── Rotating inner scene ── */}
         <motion.div
           animate={{
             rotateY: flipped ? 180 : tilt.y,
             rotateX: flipped ? 0 : tilt.x,
           }}
           transition={{
-            rotateY: {
-              duration: 0.7,
-              ease: [0.4, 0, 0.2, 1],
-            },
+            rotateY: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
             rotateX: {
               duration: flipped ? 0.7 : 0.12,
               ease: flipped ? [0.4, 0, 0.2, 1] : "linear",
@@ -174,10 +160,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
             transformStyle: "preserve-3d",
           }}
         >
-
-          {/* ════════════════════════════
-              FRONT — image + index badge
-          ════════════════════════════ */}
+          {/* FRONT */}
           <div
             style={{
               position: "absolute",
@@ -190,15 +173,12 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               border: "1px solid var(--glass-border, rgba(255,255,255,0.08))",
             }}
           >
-            {/* Full-bleed image */}
             <Image
               src={service.image}
               alt={service.name}
               fill
               style={{ objectFit: "cover", objectPosition: "center" }}
             />
-
-            {/* Bottom gradient — title always readable */}
             <div
               aria-hidden
               style={{
@@ -209,10 +189,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
                 zIndex: 1,
               }}
             />
-
-
-
-            {/* Service name — bottom left */}
             <div style={{ position: "absolute", bottom: "1.4rem", left: "1.4rem", zIndex: 3 }}>
               <p
                 style={{
@@ -228,10 +204,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               >
                 {service.name}
               </p>
-
             </div>
-
-            {/* Subtle shimmer vignette overlay */}
             <div
               aria-hidden
               style={{
@@ -245,9 +218,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
             />
           </div>
 
-          {/* ════════════════════════════
-              BACK — content
-          ════════════════════════════ */}
+          {/* BACK */}
           <div
             style={{
               position: "absolute",
@@ -266,8 +237,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               padding: "clamp(1.4rem, 3vw, 2rem)",
             }}
           >
-
-            {/* Top row — index + stat */}
             <div
               style={{
                 display: "flex",
@@ -276,7 +245,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
                 marginBottom: "1.4rem",
               }}
             >
-              {/* Stat pill */}
               <div style={{ textAlign: "right", marginLeft: "auto" }}>
                 <p
                   style={{
@@ -307,7 +275,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               </div>
             </div>
 
-            {/* Service name */}
             <h3
               style={{
                 margin: "0 0 0.75rem",
@@ -322,7 +289,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               {service.name}
             </h3>
 
-            {/* Description */}
             <p
               style={{
                 margin: "0 0 auto",
@@ -335,7 +301,6 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               {service.description}
             </p>
 
-            {/* Highlight tags */}
             <div
               style={{
                 display: "flex",
@@ -363,7 +328,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
                   {h}
                 </span>
               ))}
-          </div>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -387,7 +352,7 @@ export default function ServicesSection() {
     >
       <div className="mx-auto max-w-[1320px]">
 
-        {/* ── Header Block — Glassmorphism Box ── */}
+        {/* ── Header Block ── */}
         <Reveal delay={0}>
           <div
             className="rounded-[2rem] p-8 md:p-12 mb-12"
@@ -400,35 +365,67 @@ export default function ServicesSection() {
               overflow: "hidden",
             }}
           >
-            {/* Ambient glows */}
-            <div aria-hidden="true" style={{ position: "absolute", top: -80, right: -40, width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 12%, transparent) 0%, transparent 70%)", pointerEvents: "none" }} />
-            
-            <div className="relative z-10">
-              {/* ── Section eyebrow ── */}
-              <div className="mb-8 flex items-center gap-3">
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 28,
-                    height: 2,
-                    background: "var(--brand-green)",
-                    borderRadius: 2,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "0.65rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.35em",
-                    color: "var(--brand-green)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  What We Build
-                </span>
-              </div>
+            {/* Ambient glow — top right */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -80,
+                right: -40,
+                width: 320,
+                height: 320,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 12%, transparent) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
 
-              {/* ── Heading Row ── */}
+            {/* ── ECOSYSTEM watermark ── */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  whiteSpace: "nowrap",
+                  userSelect: "none",
+                  /*
+                   * Ghost effect: the text is transparent, filled only with
+                   * a very faint gradient that mixes the brand-green tint and
+                   * white so it reads on dark glass without demanding attention.
+                   */
+                  background:
+                    "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0,200,140,0.072) 45%, rgba(255,255,255,0.022) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  /* Hairline stroke adds just enough presence */
+                  WebkitTextStroke: "1px rgba(255,255,255,0.06)",
+                  filter: "blur(0.3px)",
+                  transform: "translateY(4%)",   /* optically centred behind heading */
+                }}
+              >
+                SERVICES
+              </span>
+            </div>
+
+            {/* ── Heading ── */}
+            <div className="relative z-10">
               <h2
                 style={{
                   fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
@@ -448,12 +445,12 @@ export default function ServicesSection() {
           </div>
         </Reveal>
 
-        {/* ── Cards grid — equal-height rows via grid ── */}
+        {/* ── Cards grid ── */}
         <div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
           style={{
             gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
-            gridAutoRows: "420px",  /* fixed height so flip looks stable */
+            gridAutoRows: "420px",
           }}
         >
           {services.map((service, i) => (

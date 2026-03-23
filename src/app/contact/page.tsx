@@ -198,9 +198,9 @@ export default function ContactPage() {
           {/* Header Section */}
           <section className="mb-14 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <motion.h1
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0 }}
               className="font-bold leading-[0.93] tracking-tight text-[clamp(36px,7vw,80px)]"
             >
               Let&apos;s build something
@@ -208,9 +208,9 @@ export default function ContactPage() {
 
             {/* Box 3: Availability Badge moved to Header */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.6 }}
+              transition={{ duration: 0 }}
               className="rounded-[22px] border px-5 py-4 flex items-center gap-4 w-fit"
               style={{
                 background: "rgba(0,182,99,0.045)",
@@ -243,9 +243,9 @@ export default function ContactPage() {
               
               {/* Box 1: Contact Details */}
               <motion.div
-                initial={{ opacity: 0, x: -24 }}
+                initial={{ opacity: 1, x: 0 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0 }}
                 className="rounded-[22px] border p-7"
                 style={{
                   background: "var(--glass-bg)",
@@ -293,9 +293,9 @@ export default function ContactPage() {
 
               {/* Box 2: Lazy Map */}
               <motion.div
-                initial={{ opacity: 0, x: -24 }}
+                initial={{ opacity: 1, x: 0 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0 }}
                 className="rounded-[22px] border overflow-hidden relative"
                 style={{
                   height: 200,
@@ -311,9 +311,9 @@ export default function ContactPage() {
 
             {/* Right Side: The Contact Form Component */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0 }}
               className="lg:col-span-8"
             >
               <ContactForm />

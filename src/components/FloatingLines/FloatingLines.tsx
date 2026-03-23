@@ -247,20 +247,22 @@ export default function FloatingLines({
     const mesh = new Mesh(geometry, material);
     scene.add(mesh);
 
+    const updateSize = () => {
+      if (!containerRef.current || !rendererRef.current) return;
+      const el = containerRef.current;
+      const width = el.clientWidth || 1;
+      const height = el.clientHeight || 1;
+      rendererRef.current.setSize(width, height, false);
+      uniforms.iResolution.value.set(rendererRef.current.domElement.width, rendererRef.current.domElement.height, 1);
+    };
+
     let resizeTimeout: NodeJS.Timeout;
     const setSize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (!containerRef.current || !rendererRef.current) return;
-        const el = containerRef.current;
-        const width = el.clientWidth || 1;
-        const height = el.clientHeight || 1;
-        rendererRef.current.setSize(width, height, false);
-        uniforms.iResolution.value.set(rendererRef.current.domElement.width, rendererRef.current.domElement.height, 1);
-      }, 150);
+      resizeTimeout = setTimeout(updateSize, 150);
     };
 
-    setSize();
+    updateSize();
     const ro = new ResizeObserver(setSize);
     ro.observe(containerRef.current);
 

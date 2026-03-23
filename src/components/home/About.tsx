@@ -1,8 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useInView, motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { useRef, useState, useCallback } from "react";
+import {
+  useInView,
+  useScroll,
+  useTransform,
+  motion,
+  AnimatePresence,
+  LayoutGroup,
+} from "framer-motion";
+import type { Easing } from "framer-motion";
 import Image from "next/image";
+
+/* ─────────────────────────────────────────────
+   Shared easing — typed, extracted once
+───────────────────────────────────────────── */
+const EASE: Easing = [0.22, 1, 0.36, 1];
 
 /* ─────────────────────────────────────────────
    Types
@@ -42,14 +55,15 @@ const divisions: DivisionData[] = [
   },
 ];
 
-const highlights = [
-  { icon: "⚡", text: "AI-first engineering" },
-  { icon: "🎓", text: "Industry-led curriculum" },
-  { icon: "🌐", text: "Global-ready products" },
-];
 
 /* ─────────────────────────────────────────────
-   Scroll-reveal wrapper
+   Shared spacing token — single source of truth
+───────────────────────────────────────────── */
+const GAP = "clamp(0.75rem, 1.5vw, 1.2rem)";
+const CARD_PAD = "clamp(1.75rem, 3.5vw, 2.5rem)";
+
+/* ─────────────────────────────────────────────
+   Scroll-reveal wrapper with scale + y
 ───────────────────────────────────────────── */
 function Reveal({
   children,
@@ -63,15 +77,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] as any, delay }}
+      initial={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -79,7 +92,7 @@ function Reveal({
 }
 
 /* ─────────────────────────────────────────────
-   Shared card hover animation helper
+   Shared card hover props
 ───────────────────────────────────────────── */
 function cardHoverProps(isHovered: boolean) {
   return {
@@ -89,9 +102,11 @@ function cardHoverProps(isHovered: boolean) {
         ? "0 28px 72px -12px rgba(0,0,0,0.42), 0 0 0 1px color-mix(in srgb, var(--brand-green) 22%, transparent)"
         : "0 6px 28px -8px rgba(0,0,0,0.22), 0 0 0 1px var(--glass-border)",
     },
-    transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] as any },
+    transition: { duration: 0.42, ease: EASE },
   };
 }
+
+
 
 /* ─────────────────────────────────────────────
    Main Component
@@ -100,41 +115,114 @@ export default function AboutSection() {
   const [active, setActive] = useState<Division>("agency");
   const [hovered, setHovered] = useState<"top" | "bottom" | "right" | null>(null);
 
-  const current = divisions.find((d) => d.id === active)!;
+  const current = divisions.find((d) => d.id === active) ?? divisions[0];
+
+  /* ── Parallax refs ── */
+  const sectionRef = useRef(null);
+  const imageCardRef = useRef(null);
+
+  /* Section-level scroll — drives the ABOUT watermark drift */
+  const { scrollYProgress: sectionProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  /* Image card scroll — drives the photo parallax */
+  const { scrollYProgress: imageProgress } = useScroll({
+    target: imageCardRef,
+    offset: ["start end", "end start"],
+  });
+
+  const watermarkY = useTransform(sectionProgress, [0, 1], [0, -50]);
+  const photoY = useTransform(imageProgress, [0, 1], [-48, 48]);
 
   return (
     <section
+      ref={sectionRef}
       aria-label="About CODO AI Innovations"
       className="relative z-10 w-full"
       style={{
-        padding: "clamp(3rem, 8vw, 6rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
+        padding: `clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem)`,
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
       <div className="mx-auto max-w-[1320px]">
 
-        {/* ── Section eyebrow ── */}
-        <Reveal delay={0} className="mb-10 flex items-center gap-3">
-          <span
+        {/* ── Header Block ── */}
+        <Reveal delay={0.05}>
+          <div
+            className="rounded-[2rem]"
             style={{
-              display: "inline-block",
-              width: 28,
-              height: 2,
-              background: "var(--brand-green)",
-              borderRadius: 2,
-            }}
-          />
-          <span
-            style={{
-              fontSize: "0.65rem",
-              fontWeight: 700,
-              letterSpacing: "0.35em",
-              color: "var(--brand-green)",
-              textTransform: "uppercase",
+              background: "var(--glass-bg)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--glass-border)",
+              padding: CARD_PAD,
+              /* ✅ FIX: use the same GAP token, not hardcoded mb-12 */
+              marginBottom: GAP,
+              position: "relative",
+              overflow: "hidden",
+              willChange: "transform",
             }}
           >
-            About CODO AI Innovations
-          </span>
+            {/* ── ABOUT watermark — counter-scroll parallax ── */}
+            <motion.div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 1,
+                y: watermarkY,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  whiteSpace: "nowrap",
+                  userSelect: "none",
+                  background:
+                    "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0, 232, 122, 0.072) 45%, rgba(255,255,255,0.022) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  WebkitTextStroke: "1px rgba(255,255,255,0.06)",
+                  filter: "blur(0.3px)",
+                  transform: "translateY(4%)",
+                }}
+              >
+                ABOUT
+              </span>
+            </motion.div>
+
+            {/* ── Heading ── */}
+            <div className="relative z-10">
+              <h2
+                style={{
+                  fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)",
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.03em",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                Where AI Meets
+                <br />
+                <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
+                  Human Ambition.
+                </span>
+              </h2>
+            </div>
+          </div>
         </Reveal>
 
         {/*
@@ -147,23 +235,24 @@ export default function AboutSection() {
           │ (Carousel)   │              │
           └──────────────┴──────────────┘
 
-          Mobile: stacks vertically (card1 → card2 → card3)
+          Mobile: Text → Carousel → Image (image pushed last)
         */}
         <div
           className="flex flex-col md:grid"
           style={{
             gridTemplateColumns: "1fr 1fr",
             gridTemplateRows: "auto auto",
-            gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
+            gap: GAP,
           }}
         >
 
           {/* ════════════════════════════════
-              CARD 1 — Text Only
-              top-left
+              CARD 1 — Text + Highlights
+              top-left | mobile: order-1
           ════════════════════════════════ */}
           <Reveal
-            delay={0.1}
+            delay={0.12}
+            className="order-1 md:order-none"
             style={{ gridColumn: "1", gridRow: "1" }}
           >
             <motion.div
@@ -175,10 +264,11 @@ export default function AboutSection() {
                 background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                padding: "clamp(1.75rem, 3.5vw, 2.5rem)",
+                padding: CARD_PAD,
                 border: "1px solid var(--glass-border)",
                 overflow: "hidden",
                 position: "relative",
+                willChange: "transform",
               }}
             >
               {/* Corner glow */}
@@ -194,33 +284,13 @@ export default function AboutSection() {
                   background:
                     "radial-gradient(circle, color-mix(in srgb, var(--brand-green) 10%, transparent) 0%, transparent 70%)",
                   pointerEvents: "none",
+                  zIndex: 0,
                 }}
               />
 
-              <div className="flex flex-col gap-5 h-full" style={{ zIndex: 1 }}>
-
-                {/* Heading */}
-                <h2
-                  style={{
-                    fontSize: "clamp(1.8rem, 3.5vw, 3rem)",
-                    fontWeight: 900,
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.03em",
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  Where{" "}
-                  <span style={{ color: "var(--brand-green)" }}>AI</span>{" "}
-                  Meets
-                  <br />
-                  Human{" "}
-                  <span style={{ color: "var(--brand-green)", fontStyle: "italic" }}>
-                    Ambition.
-                  </span>
-                </h2>
-
+              <div className="flex flex-col gap-6 h-full" style={{ zIndex: 1 }}>
                 {/* Body */}
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-5">
                   <p
                     style={{
                       fontSize: "clamp(0.85rem, 1.4vw, 1rem)",
@@ -232,10 +302,10 @@ export default function AboutSection() {
                     <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                       CODO AI Innovations
                     </strong>{" "}
-                    is a technology-first parent company engineering the future
-                    through AI, software and human capital. We operate at the intersection of cutting-edge
-                    artificial intelligence and real-world product delivery, building systems that scale and
-                    teams that lead.
+                    is a technology-first parent company engineering the future through AI,
+                    software and human capital. We operate at the intersection of cutting-edge
+                    artificial intelligence and real-world product delivery, building systems
+                    that scale and teams that lead.
                   </p>
 
                   <p
@@ -251,16 +321,16 @@ export default function AboutSection() {
                     Through{" "}
                     <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                       CODO Agency
-                    </strong>
-                    {" "}we design and deliver AI-powered digital products from
-                    intelligent web platforms to custom mobile applications and automation systems.
+                    </strong>{" "}
+                    we design and deliver AI-powered digital products from intelligent web
+                    platforms to custom mobile applications and automation systems.
                     <br />
                     Through{" "}
                     <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                       CODO Academy
-                    </strong>
-                    {" "}we train the next generation of engineers, designers and
-                    AI practitioners bridging the gap between industry demand and human potential.
+                    </strong>{" "}
+                    we train the next generation of engineers, designers and AI practitioners
+                    bridging the gap between industry demand and human potential.
                   </p>
                 </div>
 
@@ -271,13 +341,15 @@ export default function AboutSection() {
           {/* ════════════════════════════════
               CARD 3 — Image
               right column, spans both rows
+              ✅ mobile: order-3 (pushed last)
           ════════════════════════════════ */}
           <Reveal
-            delay={0.18}
-            className="h-full"
+            delay={0.2}
+            className="order-3 md:order-none h-full"
             style={{ gridColumn: "2", gridRow: "1 / span 2" }}
           >
             <motion.div
+              ref={imageCardRef}
               onHoverStart={() => setHovered("right")}
               onHoverEnd={() => setHovered(null)}
               {...cardHoverProps(hovered === "right")}
@@ -287,13 +359,23 @@ export default function AboutSection() {
                 overflow: "hidden",
                 border: "1px solid var(--glass-border)",
                 minHeight: "clamp(480px, 65vw, 740px)",
+                willChange: "transform",
               }}
             >
-              {/* Photo */}
+              {/* ✅ Photo with scroll-driven parallax */}
               <motion.div
                 className="absolute inset-0"
+                style={{
+                  scale: hovered === "right" ? 1.045 : 1,
+                  y: photoY,
+                  /* extend height slightly so parallax doesn't reveal edges */
+                  top: "-6%",
+                  bottom: "-6%",
+                  left: 0,
+                  right: 0,
+                }}
                 animate={{ scale: hovered === "right" ? 1.045 : 1 }}
-                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] as any }}
+                transition={{ duration: 0.65, ease: EASE }}
               >
                 <Image
                   src="/images/codo-mockup.png"
@@ -311,14 +393,12 @@ export default function AboutSection() {
                   position: "absolute",
                   inset: 0,
                   background:
-                    "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 48%, transparent 100%)",
+                    "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
                   zIndex: 1,
                   pointerEvents: "none",
                   borderRadius: "inherit",
                 }}
               />
-
-
 
               {/* Bottom overlay content */}
               <div
@@ -342,9 +422,7 @@ export default function AboutSection() {
                 >
                   Building the
                   <br />
-                  <span style={{ color: "var(--brand-green)" }}>
-                    Intelligent Future.
-                  </span>
+                  <span style={{ color: "var(--brand-green)" }}>Intelligent Future.</span>
                 </h3>
                 <p
                   style={{
@@ -354,8 +432,8 @@ export default function AboutSection() {
                     maxWidth: "38ch",
                   }}
                 >
-                  Two divisions. One mission — engineering what's next through
-                  relentless innovation and purposeful education.
+                  Two divisions. One mission — engineering what's next through relentless
+                  innovation and purposeful education.
                 </p>
 
                 <div
@@ -397,12 +475,19 @@ export default function AboutSection() {
           </Reveal>
 
           {/* ════════════════════════════════
-              CARD 2 — Division Carousel (Moved from Top)
-              bottom-left
+              CARD 2 — Division Carousel
+              bottom-left | mobile: order-2
           ════════════════════════════════ */}
           <Reveal
-            delay={0.26}
-            style={{ gridColumn: "1", gridRow: "2", display: "flex", flexDirection: "column", height: "100%" }}
+            delay={0.28}
+            className="order-2 md:order-none"
+            style={{
+              gridColumn: "1",
+              gridRow: "2",
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            }}
           >
             <motion.div
               onHoverStart={() => setHovered("bottom")}
@@ -414,11 +499,12 @@ export default function AboutSection() {
                   "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                padding: "clamp(1.5rem, 3vw, 2.25rem)",
+                padding: CARD_PAD,
                 border:
                   "1px solid color-mix(in srgb, var(--brand-green) 18%, var(--glass-border))",
                 overflow: "hidden",
                 position: "relative",
+                willChange: "transform",
               }}
             >
               {/* Bottom-right glow */}
@@ -438,7 +524,6 @@ export default function AboutSection() {
               />
 
               <div style={{ zIndex: 1, position: "relative" }}>
-                {/* Division Carousel */}
                 <LayoutGroup>
                   <div className="w-full">
                     {/* Tab pills */}
@@ -449,7 +534,8 @@ export default function AboutSection() {
                       style={{
                         gap: "0.4rem",
                         marginBottom: "1.25rem",
-                        background: "color-mix(in srgb, var(--text-primary) 5%, transparent)",
+                        background:
+                          "color-mix(in srgb, var(--text-primary) 5%, transparent)",
                         borderRadius: "100px",
                         padding: "4px",
                         width: "fit-content",
@@ -507,6 +593,7 @@ export default function AboutSection() {
                     </div>
 
                     {/* Animated stat panel */}
+                    {/* ✅ minHeight is now a floor only — height:auto lets content grow */}
                     <div
                       style={{
                         borderRadius: "18px",
@@ -517,8 +604,9 @@ export default function AboutSection() {
                         padding: "1.25rem 1.5rem",
                         overflow: "hidden",
                         minHeight: "clamp(150px, 16vw, 175px)",
+                        height: "auto",
                         display: "flex",
-                        alignItems: "center"
+                        alignItems: "center",
                       }}
                     >
                       <AnimatePresence mode="wait">
@@ -527,10 +615,7 @@ export default function AboutSection() {
                           initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
                           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                           exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-                          transition={{
-                            duration: 0.32,
-                            ease: [0.22, 1, 0.36, 1] as any,
-                          }}
+                          transition={{ duration: 0.32, ease: EASE }}
                           className="flex items-start justify-between gap-4 flex-wrap w-full"
                         >
                           <div>
@@ -568,6 +653,7 @@ export default function AboutSection() {
                               {current.detail}
                             </div>
                           </div>
+
                           <p
                             style={{
                               fontSize: "0.82rem",

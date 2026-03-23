@@ -30,15 +30,14 @@ function Reveal({
   style?: React.CSSProperties;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
   return (
     <motion.div
       ref={ref}
       className={className}
       style={style}
-      initial={{ opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }}
     >
       {children}
     </motion.div>
@@ -107,14 +106,14 @@ export default function CTASection() {
       className="relative w-full"
       style={{
         padding:
-          "clamp(3rem, 8vw, 6rem) clamp(1.25rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem)",
+          "clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.25rem, 5vw, 3.5rem) clamp(0.75rem, 1.5vw, 1.2rem)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
       <div className="mx-auto max-w-[1320px]">
         <Reveal delay={0.06}>
           <div
-            className="rounded-3xl"
+            className="rounded-[2rem] p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
@@ -122,7 +121,6 @@ export default function CTASection() {
               border: "1px solid var(--glass-border)",
               position: "relative",
               overflow: "hidden",
-              padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)",
             }}
           >
             {/* ── Floating background orbs ── */}
@@ -176,71 +174,13 @@ export default function CTASection() {
             <div
               style={{ position: "relative", zIndex: 1, textAlign: "center" }}
             >
-              {/* Eyebrow */}
-              <motion.div
-                className="no-transition"
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.6,
-                  ease: [0.25, 0.1, 0.25, 1],
-                }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.65rem",
-                  marginBottom: "2rem",
-                }}
-              >
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={inView ? { width: 28 } : {}}
-                  transition={{
-                    duration: 0.9,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  style={{
-                    height: 2,
-                    background: "var(--brand-green)",
-                    borderRadius: 2,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "0.62rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.35em",
-                    color: "var(--brand-green)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Let&apos;s Build Together
-                </span>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={inView ? { width: 28 } : {}}
-                  transition={{
-                    duration: 0.9,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  style={{
-                    height: 2,
-                    background: "var(--brand-green)",
-                    borderRadius: 2,
-                  }}
-                />
-              </motion.div>
 
               {/* Headline */}
               <motion.h2
                 className="no-transition"
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  delay: 0.1,
-                }}
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0 }}
                 style={{
                   fontSize: getResponsiveFont(36, 72),
                   fontWeight: 900,
@@ -267,13 +207,9 @@ export default function CTASection() {
               {/* Subtitle */}
               <motion.p
                 className="no-transition"
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  delay: 0.2,
-                }}
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0 }}
                 style={{
                   fontSize: getResponsiveFont(15, 19),
                   lineHeight: 1.7,
@@ -292,13 +228,9 @@ export default function CTASection() {
               {/* ── Dual CTA Buttons ── */}
               <motion.div
                 className="no-transition"
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  delay: 0.3,
-                }}
+                initial={{ opacity: 1, y: 0, scale: 1 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0 }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -390,13 +322,9 @@ export default function CTASection() {
               {/* ── Trust Indicators ── */}
               <motion.div
                 className="no-transition"
-                initial={{ opacity: 0, y: 16 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  delay: 0.45,
-                }}
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0 }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -456,9 +384,9 @@ export default function CTASection() {
               {/* ── Availability Badge ── */}
               <motion.div
                 className="no-transition"
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ duration: 1, delay: 0.6 }}
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0 }}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

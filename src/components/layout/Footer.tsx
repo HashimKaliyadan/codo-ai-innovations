@@ -124,11 +124,11 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-3.5">
               {[
-                { label: "Web Development", path: "/#services" },
-                { label: "Software Eng", path: "/#services" },
-                { label: "Mobile Apps", path: "/#services" },
-                { label: "AI Solutions", path: "/#services" },
-                { label: "Our Portfolio", path: "/#portfolio" },
+                { label: "Web Development", path: "/services" },
+                { label: "Software Eng", path: "/services" },
+                { label: "Mobile Apps", path: "/services" },
+                { label: "AI Solutions", path: "/services" },
+                { label: "Our Portfolio", path: "/portfolio" },
               ].map((link, i) => (
                 <li key={i}>
                   <Link href={link.path} className="group inline-flex items-center gap-1.5 text-[0.95rem] text-[var(--text-secondary)] hover:text-white hover:translate-x-1 transition-all duration-300">
@@ -240,22 +240,7 @@ export default function Footer() {
           </div>
         </Reveal>
 
-        {/* ── Gigantic Background Text (Optional style choice) ──────────── */}
-        <Reveal delay={0.55}>
-          <div className="text-center w-full overflow-hidden flex justify-center pb-8 pt-4">
-              <span style={{
-                  fontSize: "clamp(4rem, 16vw, 20rem)",
-                  fontWeight: 900,
-                  color: "rgba(255,255,255,0.015)",
-                  lineHeight: 0.8,
-                  letterSpacing: "-0.05em",
-                  pointerEvents: "none",
-                  userSelect: "none"
-              }}>
-                  CODO
-              </span>
-          </div>
-        </Reveal>
+
       </div>
     </footer>
   );
