@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
+import { useTransitionParams } from "@/components/transition/TransitionProvider";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -213,15 +214,19 @@ export default function Navbar() {
   const router = useRouter();
   const isDark = true; // Project is now dark mode only
   const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
+  const { navigateTo } = useTransitionParams();
 
   const handleActionClick = useCallback(() => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    
+    // Start the full page transition wipe
+    navigateTo("/contact");
+
     setTimeout(() => {
       setIsSubmitting(false);
-      router.push("/contact");
     }, 800);
-  }, [isSubmitting, router]);
+  }, [isSubmitting, navigateTo]);
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
 

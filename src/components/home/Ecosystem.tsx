@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useInView, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 
 /* ─────────────────────────────────────────────
    Animated Stat Counter Hook

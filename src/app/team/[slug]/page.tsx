@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { employees, DEPARTMENT_COLORS } from "@/data/employees";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { ArrowLeft, Mail, Github, Linkedin, Briefcase, Calendar } from "lucide-react";
 
 export function generateStaticParams() {

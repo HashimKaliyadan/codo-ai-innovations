@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Mail, Check } from "lucide-react";
 import { Employee, DEPARTMENT_COLORS } from "@/data/employees";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 
 /**
  * Employee card — links directly to their detailed profile page.

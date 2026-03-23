@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 
 /* ─────────────────────────────────────────────
    Types & Data

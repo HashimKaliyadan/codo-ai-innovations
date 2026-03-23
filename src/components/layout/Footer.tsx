@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { motion, useInView } from "framer-motion";
 import { ArrowUpRight, Linkedin, Twitter, Mail, ArrowUp } from "lucide-react";
 import { getResponsiveSpacing } from "@/lib/responsive";
@@ -126,9 +126,9 @@ export default function Footer() {
               {[
                 { label: "Web Development", path: "/services" },
                 { label: "Software Eng", path: "/services" },
-                { label: "Mobile Apps", path: "/services" },
                 { label: "AI Solutions", path: "/services" },
                 { label: "Our Portfolio", path: "/portfolio" },
+                { label: "Our Blog", path: "/blog" },
               ].map((link, i) => (
                 <li key={i}>
                   <Link href={link.path} className="group inline-flex items-center gap-1.5 text-[0.95rem] text-[var(--text-secondary)] hover:text-white hover:translate-x-1 transition-all duration-300">

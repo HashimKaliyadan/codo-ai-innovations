@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { getResponsiveFont } from "@/lib/responsive";
-import Link from "next/link";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 
 /* ─────────────────────────────────────────────
    Trust stats

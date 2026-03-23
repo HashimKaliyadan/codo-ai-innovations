@@ -58,3 +58,13 @@ input:-webkit-autofill:active {
   backface-visibility: hidden;
   transform: translateZ(0);
 }
+
+/* ── Page Transition Logo Pulse ── */
+@keyframes pulseLogo {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4)); }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+.logo-pulse {
+  animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

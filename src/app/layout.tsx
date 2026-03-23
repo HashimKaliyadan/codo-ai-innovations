@@ -16,6 +16,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { FloatingLinesController } from "@/components/FloatingLinesController";
 import FloatingLinesLayer from "@/components/FloatingLinesLayer";
+import { TransitionProvider } from "@/components/transition/TransitionProvider";
+import { TransitionOverlay } from "@/components/transition/TransitionOverlay";
 
 export default function RootLayout({
   children,
@@ -27,12 +29,15 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} font-sans antialiased`}
       >
-        <FloatingLinesController>
-          <FloatingLinesLayer />
-          <Navbar />
-          {children}
-          <Footer />
-        </FloatingLinesController>
+        <TransitionProvider>
+          <TransitionOverlay />
+          <FloatingLinesController>
+            <FloatingLinesLayer />
+            <Navbar />
+            {children}
+            <Footer />
+          </FloatingLinesController>
+        </TransitionProvider>
       </body>
     </html>
   );
