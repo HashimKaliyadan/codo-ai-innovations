@@ -14,6 +14,12 @@ export interface Project {
   longDescription: string;
   liveUrl?: string;
   gallery: string[];
+  challenges: string;
+  features: string[];
+  developedBy: string[]; // Employee slugs
+  outcomes?: { value: number; suffix: string; prefix: string; label: string; sublabel: string }[];
+  testimonial?: { quote: string; author: string; role: string };
+  palette?: { hex: string; name: string }[];
 }
 
 export const projects: Project[] = [
@@ -39,6 +45,24 @@ export const projects: Project[] = [
       "/images/portfolio/europecalling-crm.png",
       "/images/portfolio/europecalling-crm.png",
     ],
+    challenges: "The primary challenge was handling the high volume of unstructured CV data across multiple languages while maintaining sub-second matching accuracy. We had to build a custom processing layer for PDF/Docx extraction that could feed into our OpenAI-powered scoring engine without hitting rate limits.",
+    features: ["AI-Powered Candidate Ranking", "Real-time Pipeline Analytics", "Automated Interview Scheduling", "Multi-Language Support (8+ Languages)"],
+    developedBy: ["mohammed-rashid", "arjun-menon", "vishnu-dev"],
+    outcomes: [
+      { value: 98, suffix: "%", prefix: "", label: "Matching Accuracy", sublabel: "vs. Manual" },
+      { value: 60, suffix: "%", prefix: "", label: "Time Saved", sublabel: "Per Hire" },
+      { value: 12, suffix: "k", prefix: "", label: "Active CVs", sublabel: "Processed Daily" },
+    ],
+    testimonial: {
+      quote: "CODO's CRM has transformed how we hire across Europe. The AI matching is terrifyingly accurate and has cut our screening time by more than half.",
+      author: "Marcus Thorne",
+      role: "Head of Talent"
+    },
+    palette: [
+      { hex: "#005a42", name: "Deep Jungle" },
+      { hex: "#003366", name: "Recruit Blue" },
+      { hex: "#22c55e", name: "Success Green" },
+    ]
   },
   {
     slug: "evoka-learning",
@@ -61,6 +85,19 @@ export const projects: Project[] = [
       "/images/portfolio/evoka-learning.png",
       "/images/portfolio/evoka-learning.png",
     ],
+    challenges: "Developing a real-time collaborative whiteboarding experience on mobile that felt as fluid as a desktop app was a massive hurdle. Synchronising state across thousands of concurrent users during live sessions required a highly optimized WebSocket architecture.",
+    features: ["Adaptive Learning Engine", "Interactive Live Classrooms", "Predictive Performance Analytics", "Offline Learning Mode"],
+    developedBy: ["sneha-pillai", "vishnu-dev", "arjun-menon"],
+    outcomes: [
+      { value: 85, suffix: "%", prefix: "", label: "Completion Rate", sublabel: "Course Average" },
+      { value: 4.8, suffix: "", prefix: "", label: "App Store Rating", sublabel: "User Love" },
+      { value: 10, suffix: "k+", prefix: "", label: "Active Learners", sublabel: "Monthly" },
+    ],
+    palette: [
+      { hex: "#001f3f", name: "Midnight Navy" },
+      { hex: "#1a3c5e", name: "Oceanic Blue" },
+      { hex: "#22c55e", name: "Growth Green" },
+    ]
   },
   {
     slug: "albedo-erp",
@@ -83,6 +120,19 @@ export const projects: Project[] = [
       "/images/portfolio/albedo-erp.png",
       "/images/portfolio/albedo-erp.png",
     ],
+    challenges: "Merging five legacy datasets with inconsistent schemas into a unified Postgres database without losing historical audit trails. We built a multi-stage migration pipeline that validated data integrity at every step of the process.",
+    features: ["Unified Admissions Pipeline", "Multi-Campus Financial Tracking", "Automated Payroll Engine", "Parent Engagement Portal"],
+    developedBy: ["arjun-menon", "rahul-krishnan", "priya-nair"],
+    outcomes: [
+      { value: 40, suffix: "%", prefix: "", label: "Reduced Overhead", sublabel: "Admin Tasks" },
+      { value: 12, suffix: "", prefix: "", label: "Campuses Unified", sublabel: "One Source" },
+      { value: 100, suffix: "%", prefix: "", label: "Fee Collection", sublabel: "Transparency" },
+    ],
+    palette: [
+      { hex: "#1a3c5e", name: "Structure Blue" },
+      { hex: "#003366", name: "Elite Blue" },
+      { hex: "#22c55e", name: "Brand Green" },
+    ]
   },
   {
     slug: "codo-ai-assistant",
@@ -105,5 +155,18 @@ export const projects: Project[] = [
       "/images/portfolio/codo-ai-assistant.png",
       "/images/portfolio/codo-ai-assistant.png",
     ],
+    challenges: "Fine-tuning the LLM to understand CODO's specific internal terminology and codebase context without security leaks. We implemented a RAG (Retrieval Augmented Generation) architecture with strict vector store access controls.",
+    features: ["Context-Aware Code Assistance", "Internal Knowledge Retrieval", "Automated Status Reporting", "Conversational DB Interface"],
+    developedBy: ["faisal-rahman", "arjun-menon", "mohammed-rashid"],
+    outcomes: [
+      { value: 60, suffix: "%", prefix: "", label: "Workflow Boost", sublabel: "Time Saved" },
+      { value: 500, suffix: "ms", prefix: "", label: "Response Time", sublabel: "Intelligent Search" },
+      { value: 95, suffix: "%", prefix: "", label: "Team Adoption", sublabel: "Within 1 Month" },
+    ],
+    palette: [
+      { hex: "#005a42", name: "AI Depth" },
+      { hex: "#001f3f", name: "Logic Blue" },
+      { hex: "#22c55e", name: "Codo Green" },
+    ]
   },
 ];
