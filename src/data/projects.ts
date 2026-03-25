@@ -166,7 +166,7 @@ export const projects: Project[] = [
     palette: [
       { hex: "#005a42", name: "AI Depth" },
       { hex: "#001f3f", name: "Logic Blue" },
-      { hex: "#22c55e", name: "Codo Green" },
+      { hex: "#22c55e", name: "CODO Green" },
     ]
   },
 ];

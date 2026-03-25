@@ -103,7 +103,7 @@ function LazyMap() {
       {loaded && (
         <>
           <iframe
-            title="Codo Academy Location"
+            title="CODO Academy Location"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.5!2d76.0745!3d11.0610!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDAzJzM5LjYiTiA3NsKwMDQnMjguMiJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin&q=Paravath+Arcade,+Varangode,+Malappuram,+Kerala+676519"
             width="100%"
             height="100%"
@@ -186,7 +186,7 @@ export default function ContactPage() {
         </div>
 
         <div className="max-w-[1400px] mx-auto px-6 relative z-10">
-          
+
           {/* Header Section */}
           <section className="mb-14 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <motion.h1
@@ -229,10 +229,10 @@ export default function ContactPage() {
 
           {/* Core Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-            
+
             {/* Left Sidebar */}
             <aside className="lg:col-span-4 flex flex-col gap-5">
-              
+
               {/* Box 1: Contact Details */}
               <motion.div
                 initial={{ opacity: 1, x: 0 }}

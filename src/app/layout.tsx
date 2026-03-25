@@ -8,7 +8,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Codo AI Innovations",
+  title: "CODO AI Innovations",
   description: "Transforming businesses through innovative AI solutions.",
 };
 
