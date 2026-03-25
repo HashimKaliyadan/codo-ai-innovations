@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 
 /* ─────────────────────────────────────────────
    Data
@@ -22,7 +22,7 @@ const clients = [
 ───────────────────────────────────────────── */
 function Reveal({
   children,
-  delay = 0,
+
   className,
   style,
 }: {
@@ -163,7 +163,6 @@ function MarqueeRow({
 ───────────────────────────────────────────── */
 export default function ClientsSection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
 
   return (
     <section

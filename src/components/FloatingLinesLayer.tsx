@@ -45,7 +45,6 @@ export default function FloatingLinesLayer() {
           parallax={true}
           backgroundColor={isDark ? "#0A0A0B" : "#F0F3FF"}
           linesGradient={["#00203F", "#00B663"]} // Brand Blue to Green
-          opacity={isRenderEnabled ? 1 : 0}
         />
       </motion.div>
     </div>

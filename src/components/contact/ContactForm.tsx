@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, CheckCircle2, ChevronDown, Sparkles, X, AlertCircle } from "lucide-react";
+import { CheckCircle2, X, AlertCircle } from "lucide-react";
 import { z } from "zod";
 
 // ─── Zod Schema ────────────────────────────────────────────────────────────────
@@ -21,8 +21,9 @@ const contactSchema = z.object({
   service: z.string().min(1, "Please select a service"),
   message: z
     .string()
-    .min(10, "Message must be at least 10 characters")
-    .max(500, "Message must be under 500 characters"),
+    .max(500, "Message must be under 500 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
 type FormFields = {
@@ -283,8 +284,7 @@ export default function ContactForm() {
   const requiredFilled =
     form.name.trim().length >= 2 &&
     form.email.includes("@") &&
-    form.service.length > 0 &&
-    form.message.trim().length >= 10;
+    form.service.length > 0;
   const hasErrors = Object.values(errors).some(Boolean);
   const canSubmit = requiredFilled && !hasErrors;
 
@@ -332,7 +332,13 @@ export default function ContactForm() {
     setIsSubmitting(true);
     try {
       await new Promise<void>((resolve, reject) => {
-        setTimeout(() => { Math.random() > 0.05 ? resolve() : reject(new Error("Network error")); }, 1800);
+        setTimeout(() => { 
+          if (Math.random() > 0.05) {
+            resolve();
+          } else {
+            reject(new Error("Network error"));
+          }
+        }, 1800);
       });
       setIsSubmitting(false);
       setShowModal(true);

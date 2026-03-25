@@ -274,15 +274,13 @@ export default function ContactPage() {
                     Business Hours
                   </h4>
                   {[
-                    { day: "Mon – Fri", hours: "9:00 AM – 6:00 PM" },
-                    { day: "Saturday", hours: "10:00 AM – 4:00 PM" },
-                    { day: "Sunday", hours: "Closed", muted: true },
-                  ].map(({ day, hours, muted }) => (
+                    { day: "Mon – Sat", hours: "9:00 AM – 6:00 PM" },
+                  ].map(({ day, hours }) => (
                     <div key={day} className="flex justify-between items-center py-1.5">
                       <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{day}</span>
                       <span
                         className="text-sm font-semibold"
-                        style={{ color: muted ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.8)" }}
+                        style={{ color: "rgba(255,255,255,0.8)" }}
                       >
                         {hours}
                       </span>

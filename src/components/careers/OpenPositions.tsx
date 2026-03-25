@@ -1,194 +1,436 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Briefcase } from "lucide-react";
-import { OPEN_POSITIONS, Job, JobDepartment } from "@/data/jobs";
+import { useRef, useState, useMemo } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { Search, ArrowRight, MapPin, Briefcase } from "lucide-react";
+import { OPEN_POSITIONS, JobDepartment } from "@/data/jobs";
 
-const CATEGORIES: ("All" | JobDepartment)[] = [
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+const DEPARTMENTS: ("All" | JobDepartment)[] = [
   "All",
   "Engineering",
   "Design",
   "Product",
   "Operations",
-  "Management",
 ];
 
 export default function OpenPositions() {
-  const [activeTab, setActiveTab] = useState<"All" | JobDepartment>("All");
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-6% 0px" });
 
-  const filteredJobs = useMemo(() => {
-    if (activeTab === "All") return OPEN_POSITIONS;
-    return OPEN_POSITIONS.filter((job) => job.department === activeTab);
-  }, [activeTab]);
+  const [search, setSearch] = useState("");
+  const [activeDept, setActiveDept] = useState<string>("All");
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  const filtered = useMemo(() => {
+    return OPEN_POSITIONS.filter((job) => {
+      const matchesDept = activeDept === "All" || job.department === activeDept;
+      if (!matchesDept) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        job.title.toLowerCase().includes(q) ||
+        job.department.toLowerCase().includes(q) ||
+        job.location.toLowerCase().includes(q)
+      );
+    });
+  }, [search, activeDept]);
 
   return (
-    <section style={{ padding: "clamp(60px, 10vw, 120px) 0", position: "relative" }}>
-      <div className="max-w-[1000px] mx-auto px-6">
-        
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "clamp(3rem, 5vw, 4rem)" }}>
-          <p
-            style={{
-              fontSize: "0.7rem",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.25em",
-              color: "var(--brand-green)",
-              marginBottom: "1rem",
-            }}
-          >
-            Now Hiring
-          </p>
-          <h2
-            style={{
-              fontSize: "clamp(32px, 4vw, 48px)",
-              fontWeight: 900,
-              letterSpacing: "-0.03em",
-              color: "var(--text-primary)",
-              lineHeight: 1.15,
-            }}
-          >
-            Open Positions Available
-          </h2>
-          <p
-            style={{
-              fontSize: "clamp(15px, 1.5vw, 17px)",
-              color: "rgba(255,255,255,0.5)",
-              marginTop: "1.25rem",
-              lineHeight: 1.6,
-            }}
-          >
-            Join us for exciting opportunities in a team that values growth and innovation.
-          </p>
-        </div>
+    <section
+      ref={ref}
+      style={{
+        background: "#000",
+        padding: "clamp(5rem, 10vh, 8rem) 0",
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      {/* Hairline top border */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "rgba(255,255,255,0.05)",
+        }}
+      />
 
-        {/* Filter Tabs */}
-        <div 
-          style={{ 
-            display: "flex", 
-            justifyContent: "center", 
-            gap: "0.5rem", 
-            flexWrap: "wrap", 
-            marginBottom: "3rem" 
+      {/* Ambient glow */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "-10%",
+          left: "-5%",
+          width: "60vw",
+          height: "80vh",
+          background:
+            "radial-gradient(ellipse 60% 60% at 20% 30%, color-mix(in srgb, var(--brand-green) 4%, transparent), transparent)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "0 clamp(1.5rem, 4vw, 4rem)",
+        }}
+      >
+        {/* ── Header: two-column layout matching TeamGrid ── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "2.5rem",
+            marginBottom: "clamp(3rem, 6vh, 5rem)",
           }}
+          className="lg:grid-cols-12"
         >
-          {CATEGORIES.map((category) => {
-            const isActive = activeTab === category;
-            return (
-              <button
-                key={category}
-                onClick={() => setActiveTab(category)}
+          {/* Left: label + headline */}
+          <div className="lg:col-span-5">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: EASE }}
+              style={{
+                fontSize: "0.62rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.3em",
+                color: "var(--brand-green)",
+                marginBottom: "1.25rem",
+              }}
+            >
+              Now Hiring
+            </motion.p>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.08 }}
+              style={{
+                fontSize: "clamp(2rem, 3.5vw, 3rem)",
+                fontWeight: 900,
+                lineHeight: 1.08,
+                letterSpacing: "-0.035em",
+                color: "#fff",
+                margin: 0,
+              }}
+            >
+              Find your role
+              <br />
+              <span style={{ color: "var(--brand-green)" }}>at CODO.</span>
+            </motion.h2>
+          </div>
+
+          {/* Right: description + controls */}
+          <div
+            className="lg:col-span-7"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              gap: "1.5rem",
+            }}
+          >
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
+              style={{
+                fontSize: "0.9rem",
+                lineHeight: 1.75,
+                color: "rgba(255,255,255,0.35)",
+                maxWidth: "52ch",
+              }}
+            >
+              We're looking for exceptional people who want to do the best work of their
+              careers. Explore current openings across Engineering, Design, Product, and Operations.
+            </motion.p>
+
+            {/* ── Controls row ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: EASE, delay: 0.22 }}
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              {/* Search input */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <Search
+                  size={13}
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    color: searchFocused ? "var(--brand-green)" : "rgba(255,255,255,0.22)",
+                    transition: "color 0.25s ease",
+                    pointerEvents: "none",
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search roles..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  style={{
+                    width: 188,
+                    height: 36,
+                    paddingLeft: 34,
+                    paddingRight: 14,
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid ${searchFocused ? "rgba(0,255,136,0.28)" : "rgba(255,255,255,0.07)"}`,
+                    color: "#fff",
+                    fontSize: "0.78rem",
+                    outline: "none",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "border-color 0.25s ease",
+                  }}
+                />
+              </div>
+
+              {/* Department pills */}
+              <div
                 style={{
-                  padding: "0.6rem 1.25rem",
-                  borderRadius: "999px",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  transition: "all 0.3s ease",
-                  border: isActive ? "1px solid var(--brand-green)" : "1px solid rgba(255,255,255,0.08)",
-                  background: isActive ? "var(--brand-green)" : "transparent",
-                  color: isActive ? "#000" : "rgba(255,255,255,0.6)",
-                  cursor: "pointer",
+                  display: "flex",
+                  gap: 3,
+                  padding: "4px",
+                  borderRadius: "10px",
+                  background: "rgba(255,255,255,0.025)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  flexWrap: "wrap",
                 }}
-                className={isActive ? "" : "hover:text-white hover:border-white/20"}
               >
-                {category}
-              </button>
-            );
-          })}
+                {DEPARTMENTS.map((dept) => {
+                  const active = activeDept === dept;
+                  return (
+                    <button
+                      key={dept}
+                      onClick={() => setActiveDept(dept)}
+                      style={{
+                        padding: "5px 13px",
+                        borderRadius: "7px",
+                        fontSize: "0.62rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                        border: "none",
+                        fontFamily: "'DM Sans', sans-serif",
+                        transition: "all 0.25s ease",
+                        background: active ? "rgba(0,255,136,0.08)" : "transparent",
+                        color: active ? "var(--brand-green)" : "rgba(255,255,255,0.3)",
+                        boxShadow: active ? "0 0 0 1px rgba(0,255,136,0.2)" : "none",
+                      }}
+                    >
+                      {dept}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
         </div>
 
-        {/* Jobs List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {/* Hairline divider before list */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: 1 } : {}}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+          style={{
+            height: "1px",
+            background: "rgba(255,255,255,0.05)",
+            transformOrigin: "left",
+            marginBottom: "clamp(2rem, 4vh, 3rem)",
+          }}
+        />
+
+        {/* ── Job rows ── */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <AnimatePresence mode="popLayout">
-            {filteredJobs.map((job, i) => (
+            {filtered.map((job, i) => (
               <motion.div
                 key={job.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
+                transition={{ duration: 0.5, delay: i * 0.04 }}
+                className="group"
                 style={{
-                  background: "var(--glass-bg)",
-                  border: "1px solid var(--glass-border)",
-                  backdropFilter: "blur(16px)",
-                  borderRadius: "1rem",
-                  padding: "1.5rem 2rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1.5rem",
+                  position: "relative",
+                  padding: "1.75rem 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  cursor: "pointer",
+                  transition: "background 0.3s",
                 }}
-                className="md:flex-row md:items-center md:justify-between hover-card"
               >
-                <div>
-                  <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
-                    {job.title}
-                  </h3>
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" }}>
-                      <Briefcase size={14} />
-                      {job.experience}
+                {/* Left hover bar */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: "2px",
+                    borderRadius: "1px",
+                    transition: "background 0.35s ease",
+                  }}
+                  className="bg-transparent group-hover:bg-[var(--brand-green)]"
+                />
+
+                {/* Hover tint */}
+                <div
+                  className="opacity-0 group-hover:opacity-100"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(90deg, rgba(0,255,136,0.03) 0%, transparent 60%)",
+                    transition: "opacity 0.35s ease",
+                    pointerEvents: "none",
+                  }}
+                />
+
+                <div
+                  className="flex flex-col md:flex-row md:items-center justify-between gap-4 pl-6"
+                  style={{ position: "relative", zIndex: 1 }}
+                >
+                  {/* Left: Title + meta */}
+                  <div>
+                    <h3
+                      className="group-hover:!text-white"
+                      style={{
+                        fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
+                        fontWeight: 700,
+                        letterSpacing: "-0.015em",
+                        color: "rgba(255,255,255,0.6)",
+                        transition: "color 0.35s ease",
+                        lineHeight: 1.3,
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      {job.title}
+                    </h3>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+                      <span
+                        style={{
+                          padding: "3px 10px",
+                          borderRadius: "5px",
+                          fontSize: "0.58rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          background: "rgba(0,255,136,0.06)",
+                          color: "var(--brand-green)",
+                          border: "1px solid rgba(0,255,136,0.15)",
+                        }}
+                      >
+                        {job.department}
+                      </span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem", color: "rgba(255,255,255,0.3)" }}>
+                        <Briefcase size={12} />
+                        {job.experience}
+                      </span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem", color: "rgba(255,255,255,0.3)" }}>
+                        <MapPin size={12} />
+                        {job.location}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.65rem",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.2)",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        {job.type}
+                      </span>
                     </div>
-                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
-                    <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" }}>{job.type}</span>
-                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
-                    <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" }}>{job.location}</span>
+                  </div>
+
+                  {/* Right: Apply link */}
+                  <div
+                    className="group-hover:!text-white"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.25)",
+                      transition: "color 0.35s ease",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Apply
+                    <ArrowRight size={14} />
                   </div>
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    padding: "0.75rem 1.5rem",
-                    borderRadius: "999px",
-                    border: "1px solid var(--brand-green)",
-                    color: "var(--brand-green)",
-                    background: "transparent",
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    alignSelf: "flex-start",
-                  }}
-                  className="apply-btn md:self-center hover:bg-green-500 hover:text-black"
-                >
-                  Apply Now <ArrowRight size={16} />
-                </motion.button>
               </motion.div>
             ))}
           </AnimatePresence>
 
-          {filteredJobs.length === 0 && (
+          {/* Empty state */}
+          {filtered.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
               style={{
                 textAlign: "center",
-                padding: "4rem 0",
-                color: "rgba(255,255,255,0.4)",
+                padding: "5rem 1rem",
               }}
             >
-              <p style={{ fontSize: "1.1rem" }}>No open positions found in this category.</p>
-              <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>Check back later or try another filter!</p>
+              <p
+                style={{
+                  fontSize: "1rem",
+                  color: "rgba(255,255,255,0.4)",
+                  marginBottom: "0.5rem",
+                  fontWeight: 600,
+                }}
+              >
+                No openings found.
+              </p>
             </motion.div>
           )}
         </div>
-      </div>
 
-      <style>{`
-        .hover-card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .hover-card:hover {
-          transform: translateY(-2px);
-          border-color: rgba(255,255,255,0.15);
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-      `}</style>
+        {/* Result count */}
+        {filtered.length > 0 && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            style={{
+              marginTop: "clamp(2rem, 4vh, 3rem)",
+              fontSize: "0.62rem",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.15)",
+              textAlign: "right",
+            }}
+          >
+            {filtered.length} {filtered.length === 1 ? "position" : "positions"}
+            {activeDept !== "All" ? ` · ${activeDept}` : ""}
+          </motion.p>
+        )}
+      </div>
     </section>
   );
 }

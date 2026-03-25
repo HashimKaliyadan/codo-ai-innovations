@@ -549,7 +549,6 @@ function StackedCarousel() {
 ───────────────────────────────────────────── */
 export default function PortfolioSection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
 
   return (
     <section

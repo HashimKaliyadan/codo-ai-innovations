@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { useTransitionParams } from "@/components/transition/TransitionProvider";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MEDIA_QUERIES } from "@/lib/constants";
@@ -211,7 +211,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const isDark = true; // Project is now dark mode only
   const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
   const { navigateTo } = useTransitionParams();

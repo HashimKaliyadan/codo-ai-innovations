@@ -3,136 +3,84 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
-import { ArrowRight } from "lucide-react";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
+import { ArrowUpRight } from "lucide-react";
 
 export default function JoinCTA() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const inView = useInView(ref, { once: true, margin: "-8% 0px" });
 
   return (
-    <section ref={ref} style={{ padding: "clamp(40px, 6vw, 80px) 0" }}>
-      <div className="max-w-[1320px] mx-auto px-6">
+    <section 
+      ref={ref} 
+      className="py-32 relative overflow-hidden" 
+      style={{ 
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        fontFamily: "'DM Sans', sans-serif"
+      }}
+    >
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-16 relative text-center">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: EASE }}
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: "1.5rem",
-            padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 4vw, 4rem)",
-            background: "linear-gradient(135deg, #0d1117 0%, #111827 50%, #0d1117 100%)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            textAlign: "center",
-          }}
+           initial={{ opacity: 0, y: 48 }}
+           animate={inView ? { opacity: 1, y: 0 } : {}}
+           transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Ambient gradient orbs */}
-          <div
-            aria-hidden
+          <p
             style={{
-              position: "absolute",
-              top: "-80px",
-              left: "-60px",
-              width: "300px",
-              height: "300px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 60%)",
-              filter: "blur(40px)",
-              pointerEvents: "none",
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "var(--brand-green)",
+              marginBottom: "1.5rem",
             }}
-          />
-          <div
-            aria-hidden
+          >
+            CODO AI Innovations — Join the Mission
+          </p>
+          <h2
             style={{
-              position: "absolute",
-              bottom: "-80px",
-              right: "-60px",
-              width: "300px",
-              height: "300px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 60%)",
-              filter: "blur(40px)",
-              pointerEvents: "none",
+              fontSize: "clamp(3rem, 8vw, 7rem)",
+              fontWeight: 900,
+              letterSpacing: "-0.04em",
+              lineHeight: 0.95,
+              color: "#fff",
+              marginBottom: "2rem",
             }}
-          />
-
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <p
+          >
+            Ready to build what's
+            <br />
+            <span style={{ color: "var(--brand-green)" }}>next?</span>
+          </h2>
+          <p
+            style={{
+              fontSize: "clamp(1rem, 1.2vw, 1.1rem)",
+              color: "rgba(255,255,255,0.4)",
+              lineHeight: 1.7,
+              maxWidth: "48ch",
+              margin: "0 auto 3rem",
+            }}
+          >
+            Join a collective of elite engineers, designers, and strategists building the next generation of AI-powered products. We don't just follow the curve; we define it.
+          </p>
+          <Link
+            href="/careers"
+            className="group inline-flex items-center gap-3"
+            style={{ textDecoration: "none" }}
+          >
+            <span
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full transition-all duration-300"
               style={{
-                fontSize: "0.7rem",
-                fontWeight: 800,
-                textTransform: "uppercase",
-                letterSpacing: "0.25em",
-                color: "var(--brand-green)",
-                marginBottom: "1.25rem",
-              }}
-            >
-              Join the Team
-            </p>
-
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                fontWeight: 900,
-                letterSpacing: "-0.03em",
-                color: "var(--text-primary)",
-                lineHeight: 1.1,
-                marginBottom: "1rem",
-              }}
-            >
-              Want to build the future
-              <br />
-              with us?
-            </h2>
-
-            <p
-              style={{
-                fontSize: "clamp(14px, 1.5vw, 17px)",
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,0.45)",
-                maxWidth: "480px",
-                margin: "0 auto 2rem",
-              }}
-            >
-              We&apos;re hiring across Engineering, Design, and Product. Come
-              build AI-powered products that make a real difference.
-            </p>
-
-            <Link
-              href="/careers"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.85rem 2rem",
-                borderRadius: "999px",
                 background: "var(--brand-green)",
-                color: "#fff",
+                color: "#000",
+                fontSize: "0.9rem",
                 fontWeight: 800,
-                fontSize: "0.8rem",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.05em",
                 textTransform: "uppercase",
-                textDecoration: "none",
-                boxShadow: "0 8px 30px rgba(34,197,94,0.25)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 12px 40px rgba(34,197,94,0.35)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 30px rgba(34,197,94,0.25)";
               }}
             >
-              View Open Positions
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+              See Open Careers
+              <ArrowUpRight size={18} strokeWidth={2.5} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
+          </Link>
         </motion.div>
       </div>
     </section>

@@ -279,7 +279,6 @@ function ElevatedCard(props: CardProps) {
 ───────────────────────────────────────────── */
 export default function EcosystemSection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-10% 0px" });
 
   return (
     <section

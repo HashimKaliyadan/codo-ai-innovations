@@ -95,7 +95,6 @@ type FloatingLinesProps = {
   parallaxStrength?: number;
   mixBlendMode?: React.CSSProperties['mixBlendMode'];
   backgroundColor?: string;
-  opacity?: number;
 };
 
 export default function FloatingLines({
@@ -114,8 +113,7 @@ export default function FloatingLines({
   parallax = true,
   parallaxStrength = 0.2,
   mixBlendMode = 'screen',
-  backgroundColor = '#0A0A0B',
-  opacity = 1
+  backgroundColor = '#0A0A0B'
 }: FloatingLinesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -142,6 +140,7 @@ export default function FloatingLines({
   const currentBgColorRef = useRef<Vector3>(hexToVec3(backgroundColor));
 
   const rendererRef = useRef<WebGLRenderer | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const uniformsRef = useRef<any>(null);
   const clockRef = useRef<Clock>(new Clock());
   const rafRef = useRef<number>(0);
@@ -345,7 +344,7 @@ export default function FloatingLines({
     <div
       ref={containerRef}
       className="w-full h-full relative overflow-hidden"
-      style={{ mixBlendMode } as any}
+      style={{ mixBlendMode } as React.CSSProperties}
     />
   );
 }

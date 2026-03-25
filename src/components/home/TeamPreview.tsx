@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
-import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ─────────────────────────────────────────────
    Types & Data
@@ -109,7 +108,6 @@ function Reveal({
 ───────────────────────────────────────────── */
 export default function TeamSection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-8% 0px" });
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 

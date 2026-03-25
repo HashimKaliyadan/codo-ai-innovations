@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
@@ -9,6 +10,7 @@
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.2);
   --text-primary: #ededed;
+  --font-syne: 'Syne', sans-serif;
 }
 
 @theme inline {

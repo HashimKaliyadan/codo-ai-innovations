@@ -139,4 +139,18 @@ export const employees: Employee[] = [
     github: "https://github.com",
     qrUrl: "https://codoai.in/team/vishnu-dev",
   },
+  {
+    id: "CODO-2025-009",
+    slug: "meera-iyer",
+    name: "Meera Iyer",
+    role: "AI Ethics Researcher",
+    department: "Product",
+    email: "meera@codoai.in",
+    bio: "Focuses on responsible AI deployment and bias mitigation. Ensures our models conform to the highest ethical and safety standards across all projects.",
+    joinedYear: 2025,
+    photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop",
+    skills: ["AI Ethics", "Research", "Compliance"],
+    linkedin: "https://linkedin.com",
+    qrUrl: "https://codoai.in/team/meera-iyer",
+  },
 ];

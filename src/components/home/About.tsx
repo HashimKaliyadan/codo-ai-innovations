@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
+
 import {
-  useInView,
   useScroll,
   useTransform,
   motion,
@@ -67,7 +67,6 @@ const CARD_PAD = "clamp(1.75rem, 3.5vw, 2.5rem)";
 ───────────────────────────────────────────── */
 function Reveal({
   children,
-  delay = 0,
   className,
   style,
 }: {

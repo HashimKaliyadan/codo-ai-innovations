@@ -1,19 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState, useMemo, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
 import { Search } from "lucide-react";
 import { employees, DEPARTMENTS, type Employee } from "@/data/employees";
 import EmployeeCard from "./EmployeeCard";
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 export default function TeamGrid() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-6% 0px" });
+
   const [search, setSearch] = useState("");
   const [activeDept, setActiveDept] = useState<string>("All");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(8);
 
   const filtered = useMemo(() => {
     return employees.filter((e: Employee) => {
-      const matchesDept =
-        activeDept === "All" || e.department === activeDept;
+      const matchesDept = activeDept === "All" || e.department === activeDept;
       if (!matchesDept) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
@@ -26,160 +32,346 @@ export default function TeamGrid() {
     });
   }, [search, activeDept]);
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(8);
+  }, [search, activeDept]);
+
   return (
-    <section style={{ padding: "clamp(60px, 8vw, 100px) 0" }}>
-      <div className="max-w-[1320px] mx-auto px-6">
-        {/* Header row */}
+    <section
+      ref={ref}
+      style={{
+        background: "#000",
+        padding: "clamp(5rem, 10vh, 8rem) 0",
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      {/* Hairline top border — same as ValuesSection */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "rgba(255,255,255,0.05)",
+        }}
+      />
+
+      {/* Section-level ambient glow — mirrors ValuesSection top-left quadrant */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "-10%",
+          left: "-5%",
+          width: "60vw",
+          height: "80vh",
+          background:
+            "radial-gradient(ellipse 60% 60% at 20% 30%, color-mix(in srgb, var(--brand-green) 4%, transparent), transparent)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "0 clamp(1.5rem, 4vw, 4rem)",
+        }}
+      >
+        {/* ── Header: two-column layout matching ValuesSection ── */}
         <div
-          className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "2.5rem",
+            marginBottom: "clamp(3rem, 6vh, 5rem)",
+          }}
+          className="lg:grid-cols-12"
         >
-          {/* Left: Title */}
-          <div>
-            <p
+          {/* Left: label + headline */}
+          <div className="lg:col-span-5">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: EASE }}
               style={{
-                fontSize: "0.7rem",
-                fontWeight: 800,
+                fontSize: "0.62rem",
+                fontWeight: 700,
                 textTransform: "uppercase",
-                letterSpacing: "0.25em",
+                letterSpacing: "0.3em",
                 color: "var(--brand-green)",
-                marginBottom: "0.75rem",
+                marginBottom: "1.25rem",
               }}
             >
               Our Team
-            </p>
-            <h2
+            </motion.p>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.08 }}
               style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
+                fontSize: "clamp(2rem, 3.5vw, 3rem)",
                 fontWeight: 900,
-                letterSpacing: "-0.03em",
-                color: "var(--text-primary)",
-                lineHeight: 1.1,
+                lineHeight: 1.08,
+                letterSpacing: "-0.035em",
+                color: "#fff",
+                margin: 0,
               }}
             >
               Meet the people
-            </h2>
+              <br />
+              <span style={{ color: "var(--brand-green)" }}>behind the work.</span>
+            </motion.h2>
           </div>
 
-          {/* Right: Search + Filters */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            {/* Search */}
-            <div
+          {/* Right: description + controls */}
+          <div
+            className="lg:col-span-7"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              gap: "1.5rem",
+            }}
+          >
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
               style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
+                fontSize: "0.9rem",
+                lineHeight: 1.75,
+                color: "rgba(255,255,255,0.35)",
+                maxWidth: "52ch",
               }}
             >
-              <Search
-                size={14}
-                style={{
-                  position: "absolute",
-                  left: 12,
-                  color: "rgba(255,255,255,0.3)",
-                  pointerEvents: "none",
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Search team..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: 200,
-                  height: 38,
-                  paddingLeft: 34,
-                  paddingRight: 12,
-                  borderRadius: "10px",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "var(--text-primary)",
-                  fontSize: "0.8rem",
-                  outline: "none",
-                  transition: "border-color 0.2s",
-                }}
-                onFocus={(e) =>
-                  (e.target.style.borderColor = "rgba(34,197,94,0.4)")
-                }
-                onBlur={(e) =>
-                  (e.target.style.borderColor = "rgba(255,255,255,0.08)")
-                }
-              />
-            </div>
+              A collective of engineers, designers, and strategists — each bringing
+              their craft to the products we ship together under CODO AI Innovations.
+            </motion.p>
 
-            {/* Department tabs */}
-            <div
+            {/* ── Controls row ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: EASE, delay: 0.22 }}
               style={{
                 display: "flex",
-                gap: 4,
-                padding: 4,
-                borderRadius: "12px",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.06)",
                 flexWrap: "wrap",
+                alignItems: "center",
+                gap: "10px",
               }}
             >
-              {DEPARTMENTS.map((dept) => (
-                <button
-                  key={dept}
-                  onClick={() => setActiveDept(dept)}
+              {/* Search input */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <Search
+                  size={13}
                   style={{
-                    padding: "6px 14px",
-                    borderRadius: "8px",
-                    fontSize: "0.7rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.04em",
-                    cursor: "pointer",
-                    border: "none",
-                    transition: "all 0.25s ease",
-                    background:
-                      activeDept === dept
-                        ? "rgba(34,197,94,0.12)"
-                        : "transparent",
-                    color:
-                      activeDept === dept
-                        ? "var(--brand-green)"
-                        : "rgba(255,255,255,0.4)",
+                    position: "absolute",
+                    left: 12,
+                    color: searchFocused ? "var(--brand-green)" : "rgba(255,255,255,0.22)",
+                    transition: "color 0.25s ease",
+                    pointerEvents: "none",
                   }}
-                >
-                  {dept}
-                </button>
-              ))}
-            </div>
+                />
+                <input
+                  type="text"
+                  placeholder="Search team..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  style={{
+                    width: 188,
+                    height: 36,
+                    paddingLeft: 34,
+                    paddingRight: 14,
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid ${searchFocused ? "rgba(0,255,136,0.28)" : "rgba(255,255,255,0.07)"}`,
+                    color: "#fff",
+                    fontSize: "0.78rem",
+                    outline: "none",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "border-color 0.25s ease",
+                  }}
+                />
+              </div>
+
+              {/* Department tabs — same pill-strip pattern as HeroSection nav */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 3,
+                  padding: "4px",
+                  borderRadius: "10px",
+                  background: "rgba(255,255,255,0.025)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  flexWrap: "wrap",
+                }}
+              >
+                {DEPARTMENTS.map((dept) => {
+                  const active = activeDept === dept;
+                  return (
+                    <button
+                      key={dept}
+                      onClick={() => setActiveDept(dept)}
+                      style={{
+                        padding: "5px 13px",
+                        borderRadius: "7px",
+                        fontSize: "0.62rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                        border: "none",
+                        fontFamily: "'DM Sans', sans-serif",
+                        transition: "all 0.25s ease",
+                        background: active ? "rgba(0,255,136,0.08)" : "transparent",
+                        color: active ? "var(--brand-green)" : "rgba(255,255,255,0.3)",
+                        boxShadow: active ? "0 0 0 1px rgba(0,255,136,0.2)" : "none",
+                      }}
+                    >
+                      {dept}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Cards grid */}
+        {/* Hairline divider before grid — like the top rule above ValueRow list */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: 1 } : {}}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+          style={{
+            height: "1px",
+            background: "rgba(255,255,255,0.05)",
+            transformOrigin: "left",
+            marginBottom: "clamp(2.5rem, 5vh, 4rem)",
+          }}
+        />
+
+        {/* ── Cards grid ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          style={{ gap: "1.5rem" }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+            gap: "clamp(1.5rem, 2.5vw, 2rem)",
+          }}
         >
-          {filtered.map((emp, i) => (
+          {filtered.slice(0, visibleCount).map((emp, i) => (
             <EmployeeCard key={emp.id} employee={emp} index={i} />
           ))}
         </div>
 
-        {/* Empty state */}
+        {/* ── Show More Button ── */}
+        {filtered.length > visibleCount && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "3rem",
+            }}
+          >
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 8)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(0, 255, 136, 0.05)";
+                e.currentTarget.style.borderColor = "rgba(0, 255, 136, 0.4)";
+                e.currentTarget.style.color = "var(--brand-green)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.color = "#fff";
+              }}
+              style={{
+                padding: "12px 28px",
+                borderRadius: "100px",
+                background: "transparent",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#fff",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                fontFamily: "'DM Sans', sans-serif",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+              }}
+            >
+              Show More Team
+            </button>
+          </motion.div>
+        )}
+
+        {/* ── Empty state ── */}
         {filtered.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
             style={{
               textAlign: "center",
-              padding: "4rem 1rem",
-              color: "rgba(255,255,255,0.35)",
+              padding: "5rem 1rem",
             }}
           >
-            <p style={{ fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+            <p
+              style={{
+                fontSize: "1rem",
+                color: "rgba(255,255,255,0.4)",
+                marginBottom: "0.5rem",
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 600,
+              }}
+            >
               No team members found.
             </p>
-            <p style={{ fontSize: "0.85rem" }}>
+            <p
+              style={{
+                fontSize: "0.82rem",
+                color: "rgba(255,255,255,0.2)",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
               Maybe they&apos;re building something amazing 🚀
             </p>
           </motion.div>
         )}
-      </div>
 
-      {/* No QR Spotlight CSS here anymore */}
+        {/* Result count — editorial detail at bottom */}
+        {filtered.length > 0 && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            style={{
+              marginTop: "clamp(2rem, 4vh, 3rem)",
+              fontSize: "0.62rem",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.15)",
+              fontFamily: "'DM Sans', sans-serif",
+              textAlign: "right",
+            }}
+          >
+            {filtered.length} {filtered.length === 1 ? "member" : "members"}
+            {activeDept !== "All" ? ` · ${activeDept}` : ""}
+          </motion.p>
+        )}
+      </div>
     </section>
   );
 }

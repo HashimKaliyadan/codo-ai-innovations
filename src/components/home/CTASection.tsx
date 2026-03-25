@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { getResponsiveFont } from "@/lib/responsive";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
@@ -20,7 +20,7 @@ const trustStats = [
 ───────────────────────────────────────────── */
 function Reveal({
   children,
-  delay = 0,
+
   className,
   style,
 }: {
@@ -95,7 +95,6 @@ function FloatingOrb({
 ───────────────────────────────────────────── */
 export default function CTASection() {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-10% 0px" });
   const [primaryHovered, setPrimaryHovered] = useState(false);
   const [secondaryHovered, setSecondaryHovered] = useState(false);
 
