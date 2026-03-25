@@ -148,7 +148,7 @@ export default function TeamSection() {
         {/* ── Header Block ── */}
         <Reveal delay={0.02}>
           <div
-            className="rounded-[2rem] p-8 md:p-12 mb-12"
+            className="rounded-2xl p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
@@ -239,7 +239,7 @@ export default function TeamSection() {
 
         <Reveal delay={0.06}>
           <div
-            className="rounded-[2rem] p-8 md:p-12"
+            className="rounded-2xl p-8 md:p-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
@@ -349,7 +349,7 @@ export default function TeamSection() {
                       style={{
                         position: "relative",
                         overflow: "hidden",
-                        borderRadius: "18px",
+                        borderRadius: "16px",
                         cursor: "pointer",
                         minWidth: 0,
                         border: isActive

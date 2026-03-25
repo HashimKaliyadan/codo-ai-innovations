@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { useTransitionParams } from "@/components/transition/TransitionProvider";
 import Image from "next/image";
@@ -66,8 +66,12 @@ function MobileMenu({
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
           }}
+          onClick={onClose}
         >
-          {/* Top bar: logo + close */}
+          {/* Inner wrapper to prevent clicks on content from accidentally closing if needed, 
+              though in this case clicking anywhere closing the menu is fine. */}
+          <div className="flex flex-col h-full w-full" onClick={(e) => e.stopPropagation()}>
+            {/* Top bar: logo + close */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
             <Image
               src={isDark ? "/logos/logo-white.svg" : "/logos/logo.svg"}
@@ -149,6 +153,7 @@ function MobileMenu({
           >
             Book a Call
           </Link>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -229,8 +234,30 @@ export default function Navbar() {
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
 
+  useEffect(() => {
+    // Only lock scroll on mobile/responsive views as requested. 
+    // This prevents the "layout jump" on desktop where the scrollbar disappears.
+    if (isOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, isMobile]);
+
   return (
     <>
+      {/* Invisible overlay for desktop to close menu on outside click */}
+      {isOpen && !isMobile && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={closeMenu} 
+          aria-hidden="true"
+        />
+      )}
+
       {/* Mobile full-screen overlay */}
       {isMobile && (
         <MobileMenu isOpen={isOpen} onClose={closeMenu} pathname={pathname} isDark={isDark} />

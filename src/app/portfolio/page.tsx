@@ -540,7 +540,7 @@ export default function PortfolioPage() {
       <CustomCursor accentColor={accent} disabled={isTouch} />
 
       <main
-        className="relative min-h-screen"
+        className="relative min-h-screen overflow-x-hidden"
         style={{
           background: "#000",
           fontFamily: "'DM Sans', sans-serif",
@@ -578,7 +578,7 @@ export default function PortfolioPage() {
               top: "-10%",
               left: "50%",
               transform: "translateX(-50%)",
-              width: "100vw",
+              width: "100%",
               height: "70vh",
               background:
                 "radial-gradient(ellipse 60% 60% at 50% 30%, color-mix(in srgb, var(--brand-green) 6%, transparent), transparent)",

@@ -11,14 +11,14 @@ const CONTACT_DETAILS = [
   {
     icon: Mail,
     label: "Email us at",
-    value: "info@codoacademy.com",
-    href: "mailto:info@codoacademy.com",
+    value: "info@codoai.in",
+    href: "mailto:info@codoai.in",
   },
   {
     icon: Phone,
     label: "Call our office",
-    value: "+91 808 699 5559",
-    href: "tel:+918086995559",
+    value: "+91 8848676627",
+    href: "tel:+918848676627",
   },
   {
     icon: MapPin,
@@ -145,23 +145,15 @@ function LazyMap() {
 export default function ContactPage() {
   return (
     <>
-      {/* Global CSS for scrollbars and animations */}
+      {/* Global CSS for animations */}
       <style>{`
         @keyframes codo-shimmer { to { background-position: 200% center; } }
         @keyframes codo-wave {
           0%, 100% { height: 4px; }
           50%       { height: 14px; }
         }
-        .codo-scrollbar::-webkit-scrollbar { width: 4px; }
-        .codo-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .codo-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(0,182,99,0.4);
-          border-radius: 99px;
-        }
-        .codo-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(0,182,99,0.75);
-        }
       `}</style>
+
 
       <main
         className="min-h-[100dvh] pt-28 pb-24 relative font-sans overflow-hidden"

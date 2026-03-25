@@ -150,15 +150,15 @@ export default function AboutSection() {
         {/* ── Header Block ── */}
         <Reveal delay={0.05}>
           <div
-            className="rounded-[2rem]"
+            className="rounded-2xl"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
               border: "1px solid var(--glass-border)",
               padding: CARD_PAD,
-              /* ✅ FIX: use the same GAP token, not hardcoded mb-12 */
-              marginBottom: GAP,
+              /* ✅ FIX: use the gap-6 equivalent */
+              marginBottom: "1.5rem",
               position: "relative",
               overflow: "hidden",
               willChange: "transform",
@@ -237,12 +237,7 @@ export default function AboutSection() {
           Mobile: Text → Carousel → Image (image pushed last)
         */}
         <div
-          className="flex flex-col md:grid"
-          style={{
-            gridTemplateColumns: "1fr 1fr",
-            gridTemplateRows: "auto auto",
-            gap: GAP,
-          }}
+          className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-6"
         >
 
           {/* ════════════════════════════════
@@ -251,14 +246,13 @@ export default function AboutSection() {
           ════════════════════════════════ */}
           <Reveal
             delay={0.12}
-            className="order-1 md:order-none"
-            style={{ gridColumn: "1", gridRow: "1" }}
+            className="order-1 md:order-none md:col-span-6"
           >
             <motion.div
               onHoverStart={() => setHovered("top")}
               onHoverEnd={() => setHovered(null)}
               {...cardHoverProps(hovered === "top")}
-              className="rounded-3xl flex flex-col h-full"
+              className="rounded-2xl flex flex-col h-full"
               style={{
                 background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
@@ -344,15 +338,14 @@ export default function AboutSection() {
           ════════════════════════════════ */}
           <Reveal
             delay={0.2}
-            className="order-3 md:order-none h-full"
-            style={{ gridColumn: "2", gridRow: "1 / span 2" }}
+            className="order-3 md:order-none h-full md:col-span-6 md:row-span-2"
           >
             <motion.div
               ref={imageCardRef}
               onHoverStart={() => setHovered("right")}
               onHoverEnd={() => setHovered(null)}
               {...cardHoverProps(hovered === "right")}
-              className="rounded-3xl h-full"
+              className="rounded-2xl h-full"
               style={{
                 position: "relative",
                 overflow: "hidden",
@@ -479,20 +472,13 @@ export default function AboutSection() {
           ════════════════════════════════ */}
           <Reveal
             delay={0.28}
-            className="order-2 md:order-none"
-            style={{
-              gridColumn: "1",
-              gridRow: "2",
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-            }}
+            className="order-2 md:order-none md:col-span-6 flex flex-col h-full"
           >
             <motion.div
               onHoverStart={() => setHovered("bottom")}
               onHoverEnd={() => setHovered(null)}
               {...cardHoverProps(hovered === "bottom")}
-              className="rounded-3xl flex flex-col justify-center h-full flex-1"
+              className="rounded-2xl flex flex-col justify-center h-full flex-1"
               style={{
                 background:
                   "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",

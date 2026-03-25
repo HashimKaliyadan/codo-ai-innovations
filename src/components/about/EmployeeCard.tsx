@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { type Employee } from "@/data/employees";
+import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -34,11 +35,12 @@ export default function EmployeeCard({ employee, index }: Props) {
         transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
         transform: hovered ? "translateY(-6px)" : "none",
         boxShadow: hovered 
-          ? "0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 255, 136, 0.08)" 
-          : "0 10px 30px rgba(0, 0, 0, 0.3)",
+          ? "0 10px 40px rgba(0, 255, 136, 0.15)" 
+          : "0 8px 24px rgba(0, 255, 136, 0.05)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
+      <Link href={`/team/${employee.slug}`} style={{ display: "block", textDecoration: "none" }}>
       {/* ── Image Section ── */}
       <div
         style={{
@@ -209,6 +211,7 @@ export default function EmployeeCard({ employee, index }: Props) {
           ))}
         </div>
       </div>
+      </Link>
     </motion.div>
   );
 }

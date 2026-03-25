@@ -165,7 +165,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
             style={{
               position: "absolute",
               inset: 0,
-              borderRadius: "24px",
+              borderRadius: "16px",
               overflow: "hidden",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -223,7 +223,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
             style={{
               position: "absolute",
               inset: 0,
-              borderRadius: "24px",
+              borderRadius: "16px",
               overflow: "hidden",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -355,7 +355,7 @@ export default function ServicesSection() {
         {/* ── Header Block ── */}
         <Reveal delay={0}>
           <div
-            className="rounded-[2rem] p-8 md:p-12 mb-12"
+            className="rounded-2xl p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
@@ -447,18 +447,18 @@ export default function ServicesSection() {
 
         {/* ── Cards grid ── */}
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+          className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6"
           style={{
-            gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
             gridAutoRows: "420px",
           }}
         >
           {services.map((service, i) => (
-            <FlipCard
-              key={service.id}
-              service={service}
-              delay={0.15 + i * 0.1}
-            />
+            <div key={service.id} className="md:col-span-6 lg:col-span-3 h-[420px]">
+              <FlipCard
+                service={service}
+                delay={0.15 + i * 0.1}
+              />
+            </div>
           ))}
         </div>
 

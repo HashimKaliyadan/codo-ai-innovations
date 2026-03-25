@@ -79,7 +79,7 @@ export default function StatsCounter() {
             justifyContent: "center",
             gap: 0,
             padding: "clamp(2rem, 4vw, 3.5rem) 0",
-            borderRadius: "1.5rem",
+            borderRadius: "16px",
             background: "var(--glass-bg)",
             border: "1px solid var(--glass-border)",
             backdropFilter: "blur(16px)",

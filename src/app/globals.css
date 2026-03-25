@@ -70,3 +70,46 @@ input:-webkit-autofill:active {
 .logo-pulse {
   animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* ── Custom Slim Scrollbar ── */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  border: 3px solid #000;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-green);
+}
+
+/* Slim scrollbar class for inner elements (textareas, etc.) */
+.codo-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.codo-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.codo-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0,182,99,0.4);
+  border-radius: 99px;
+}
+.codo-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-green);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+

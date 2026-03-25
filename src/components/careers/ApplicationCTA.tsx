@@ -73,7 +73,7 @@ export default function ApplicationCTA() {
             }}
           >
             <a
-              href="mailto:careers@codoai.com?subject=Career Application"
+              href="mailto:info@codoai.in?subject=Career Application"
               className="group inline-flex items-center gap-3"
               style={{ textDecoration: "none" }}
             >

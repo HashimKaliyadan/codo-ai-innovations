@@ -97,7 +97,7 @@ function MarqueeRow({
             style={{
               flexShrink: 0,
               padding: "0.75rem 1.75rem",
-              borderRadius: "14px",
+              borderRadius: "16px",
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               backdropFilter: "blur(10px)",
@@ -182,7 +182,7 @@ export default function ClientsSection() {
         ═══════════════════════════════════════════ */}
         <Reveal delay={0.06}>
           <div
-            className="rounded-[2rem] p-8 md:p-12"
+            className="rounded-2xl p-8 md:p-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",

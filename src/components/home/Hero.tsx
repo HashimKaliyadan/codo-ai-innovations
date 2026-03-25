@@ -22,7 +22,6 @@ const CTAClass = [
   "backdrop-blur-2xl",
   "text-white/75 hover:text-white",
   "hover:bg-white/5",
-  "shadow-lg",
   "transition-all duration-200",
   "cursor-pointer",
 ].join(" ");

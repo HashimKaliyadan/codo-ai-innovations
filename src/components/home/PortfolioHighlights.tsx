@@ -129,7 +129,7 @@ function peekClip(stripPx: number, hInsetPc: number) {
   Full visible clip — used when a card is the front card.
   No inset, full height, rounded on all corners.
 */
-const FULL_CLIP = "inset(0% 0% 0px 0% round 24px)";
+const FULL_CLIP = "inset(0% 0% 0px 0% round 16px)";
 
 /*
   Off-screen clip — used for cards that are fully hidden (neither peeking nor front).
@@ -234,7 +234,7 @@ function CardContent({ project }: { project: Project }) {
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: "24px",
+        borderRadius: "16px",
         overflow: "hidden",
         background: project.gradient,
         border: "1px solid rgba(255,255,255,0.1)",
@@ -564,7 +564,7 @@ export default function PortfolioSection() {
         {/* ── Header Block ── */}
         <Reveal delay={0}>
           <div
-            className="rounded-[2rem] p-8 md:p-12 mb-12"
+            className="rounded-2xl p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
@@ -647,21 +647,16 @@ export default function PortfolioSection() {
         </Reveal>
 
         <div
-          className="flex flex-col md:grid"
-          style={{
-            gridTemplateColumns: "1fr 1.2fr",
-            gridTemplateRows: "auto auto",
-            gap: "clamp(0.75rem, 1.5vw, 1.2rem)",
-          }}
+          className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6"
         >
 
           {/* ════════════════════════════════
               BOX 1 — Introduction
               top-left
           ════════════════════════════════ */}
-          <Reveal delay={0.1} style={{ gridColumn: "1", gridRow: "1" }}>
+          <Reveal delay={0.1} className="md:col-span-6">
             <div
-              className="rounded-[2rem] p-8 md:p-12 flex flex-col h-full"
+              className="rounded-2xl p-8 md:p-12 flex flex-col h-full"
               style={{
                 background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
@@ -704,9 +699,9 @@ export default function PortfolioSection() {
               BOX 2 — Tech Stack & Metrics
               bottom-left
           ════════════════════════════════ */}
-          <Reveal delay={0.18} style={{ gridColumn: "1", gridRow: "2", display: "flex", flexDirection: "column", height: "100%" }}>
+          <Reveal delay={0.18} className="md:col-span-6 flex flex-col h-full">
             <div
-              className="rounded-[2rem] p-8 md:p-12 flex flex-col justify-center h-full flex-1"
+              className="rounded-2xl p-8 md:p-12 flex flex-col justify-center h-full flex-1"
               style={{
                 background: "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",
                 backdropFilter: "blur(16px)",
@@ -781,9 +776,9 @@ export default function PortfolioSection() {
               BOX 3 — Sliding Stacked Carousel
               right column, spans both rows
           ════════════════════════════════ */}
-          <Reveal delay={0.26} className="h-full" style={{ gridColumn: "2", gridRow: "1 / span 2" }}>
+          <Reveal delay={0.26} className="md:col-span-12">
             <div
-              className="rounded-[2rem] p-8 md:p-12 h-full flex flex-col"
+              className="rounded-2xl p-8 md:p-12 w-full flex flex-col py-16"
               style={{
                 position: "relative",
                 background: "var(--glass-bg)",

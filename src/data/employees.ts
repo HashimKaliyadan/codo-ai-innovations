@@ -18,9 +18,9 @@ export interface Employee {
 
 export const DEPARTMENT_COLORS: Record<Employee["department"], string> = {
   Engineering: "#22c55e",
-  Design: "#3b82f6",
-  Product: "#a855f7",
-  Operations: "#f59e0b",
+  Design: "#22c55e",
+  Product: "#22c55e",
+  Operations: "#22c55e",
 };
 
 export const DEPARTMENTS = ["All", "Engineering", "Design", "Product", "Operations"] as const;

@@ -99,7 +99,7 @@ function ElevatedCard(props: CardProps) {
       initial={{ opacity: 1, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0 }}
-      className="flex-1 w-full min-w-0 relative"
+      className="md:col-span-6 w-full relative"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -113,19 +113,19 @@ function ElevatedCard(props: CardProps) {
           scale,
           transformStyle: "preserve-3d",
         }}
-        className="w-full h-full relative rounded-[28px]"
+        className="w-full h-full relative rounded-2xl"
       >
 
 
         {/* Static Subtle Border */}
         <div
-          className="absolute inset-0 rounded-[28px] border z-10 pointer-events-none transition-colors duration-400"
+          className="absolute inset-0 rounded-2xl border z-10 pointer-events-none transition-colors duration-400"
           style={{ borderColor: isHovered ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.08)" }}
         />
 
         {/* ── INNER CARD CONTAINER ── */}
         <div
-          className="relative rounded-[27px] overflow-hidden flex flex-col w-full h-full"
+          className="relative rounded-2xl overflow-hidden flex flex-col w-full h-full"
           style={{
             background: "rgba(255,255,255,0.04)",
             backdropFilter: "blur(20px)",
@@ -297,7 +297,7 @@ export default function EcosystemSection() {
           initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0 }}
-          className="rounded-[2rem] p-8 md:p-12 mb-12"
+          className="rounded-2xl p-8 md:p-12 mb-12"
           style={{
             background: "var(--glass-bg)",
             backdropFilter: "blur(16px)",
@@ -364,7 +364,7 @@ export default function EcosystemSection() {
         </motion.div>
 
         {/* ── Interactive Cards Grid ── */}
-        <div className="flex flex-col md:flex-row" style={{ gap: "1.4rem" }}>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           <ElevatedCard
             type="academy"
             label="Academy"

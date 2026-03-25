@@ -124,7 +124,7 @@ function ValueRow({
           style={{
             width: 42,
             height: 42,
-            borderRadius: "10px",
+            borderRadius: "12px",
             background: hovered ? "rgba(0,255,136,0.08)" : "rgba(255,255,255,0.03)",
             border: `1px solid ${hovered ? "rgba(0,255,136,0.2)" : "rgba(255,255,255,0.06)"}`,
             display: "flex",

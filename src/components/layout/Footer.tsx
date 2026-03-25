@@ -3,8 +3,38 @@
 import { useRef, useState } from "react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { motion, useInView } from "framer-motion";
-import { ArrowUpRight, Linkedin, Twitter, Mail, ArrowUp } from "lucide-react";
+import { ArrowUpRight, Mail, ArrowUp, Youtube, Instagram, Facebook, Linkedin, Github } from "lucide-react";
 import { getResponsiveSpacing } from "@/lib/responsive";
+
+/* ─────────────────────────────────────────────
+   Custom SVGs for remaining icons
+───────────────────────────────────────────── */
+const XIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
+
+const PinterestIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M8 20l4-9" />
+    <path d="M10.7 14c.4.9 2 2.6 3.6 1.5 1.5-1 2.2-4.5-1-6-3.8-1.8-8.8.7-6.8 5.4" />
+  </svg>
+);
+
+const BehanceIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 7h6a4 4 0 0 1 0 8H4M4 11h6M14 11h6a4 4 0 0 1 0 8h-6M14 7h6" />
+  </svg>
+);
+
+const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
 
 /* ─────────────────────────────────────────────
    Scroll-reveal wrapper
@@ -51,6 +81,18 @@ export default function Footer() {
 
   const currentYear = new Date().getFullYear();
 
+  const socialLinks = [
+    { name: "YouTube", icon: <Youtube size={18} />, href: "https://youtube.com" },
+    { name: "Instagram", icon: <Instagram size={18} />, href: "https://instagram.com" },
+    { name: "Facebook", icon: <Facebook size={18} />, href: "https://facebook.com" },
+    { name: "LinkedIn", icon: <Linkedin size={18} />, href: "https://linkedin.com" },
+    { name: "X", icon: <XIcon />, href: "https://x.com" },
+    { name: "Pinterest", icon: <PinterestIcon />, href: "https://pinterest.com" },
+    { name: "Behance", icon: <BehanceIcon />, href: "https://behance.net" },
+    { name: "GitHub", icon: <Github size={18} />, href: "https://github.com" },
+    { name: "WhatsApp", icon: <WhatsAppIcon />, href: "https://whatsapp.com" },
+  ];
+
   return (
     <footer
       style={{
@@ -90,7 +132,7 @@ export default function Footer() {
         }}
       />
 
-      <div className="mx-auto max-w-[1320px] px-6 relative z-10 w-full">
+      <div className="mx-auto max-w-[1400px] px-6 relative z-10 w-full">
         
         {/* ── Top Half: Grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 md:pb-24 border-b border-[rgba(255,255,255,0.05)]">
@@ -102,33 +144,39 @@ export default function Footer() {
                 CODO
               </span>
             </Link>
-            <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, fontSize: "0.95rem", maxWidth: "300px" }}>
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, fontSize: "0.95rem", maxWidth: "340px" }}>
               A collective of elite engineers, designers, and strategists building AI-powered digital products that scale.
             </p>
-            <div className="flex items-center gap-4 mt-2">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-[var(--text-secondary)] hover:text-white transition-colors p-2.5 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] hover:border-[var(--brand-green)] hover:bg-[rgba(0,135,100,0.1)] hover:-translate-y-1 transform duration-300">
-                <Linkedin size={18} />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-[var(--text-secondary)] hover:text-white transition-colors p-2.5 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] hover:border-[var(--brand-green)] hover:bg-[rgba(0,135,100,0.1)] hover:-translate-y-1 transform duration-300">
-                <Twitter size={18} />
-              </a>
+            
+            {/* Social Icons Wrapped */}
+            <div className="flex flex-wrap items-center gap-2.5 mt-2 max-w-[340px]">
+              {socialLinks.map((social) => (
+                <a 
+                  key={social.name}
+                  href={social.href} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  aria-label={social.name}
+                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-2.5 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] hover:border-[var(--brand-green)] hover:bg-[rgba(0,135,100,0.1)] hover:-translate-y-1 transform duration-300"
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </Reveal>
 
           {/* Links: Agency Services */}
-          <Reveal delay={0.15} className="lg:col-span-2">
+          <Reveal delay={0.15} className="lg:col-span-2 lg:col-start-6">
             <h4 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "var(--text-primary)", fontWeight: 800, marginBottom: "1.75rem" }}>
               Agency
             </h4>
             <ul className="flex flex-col gap-3.5">
               {[
-                { label: "Web Development", path: "/services" },
-                { label: "Software Eng", path: "/services" },
-                { label: "AI Solutions", path: "/services" },
-                { label: "Our Portfolio", path: "/portfolio" },
-                { label: "Our Blog", path: "/blog" },
+                { label: "Software Development", path: "/services/software-development" },
+                { label: "Website Development", path: "/services/website-development" },
+                { label: "IOS & Android Development", path: "/services/ios-android-development" },
+                { label: "Logo Branding", path: "/services/logo-branding" },
+                { label: "Performance Marketing", path: "/services/performance-marketing" },
               ].map((link, i) => (
                 <li key={i}>
                   <Link href={link.path} className="group inline-flex items-center gap-1.5 text-[0.95rem] text-[var(--text-secondary)] hover:text-white hover:translate-x-1 transition-all duration-300">
@@ -148,8 +196,10 @@ export default function Footer() {
             <ul className="flex flex-col gap-3.5">
               {[
                 { label: "CODO Academy", path: "https://www.codoacademy.com/", external: true },
-                { label: "Career Info", path: "https://www.codoacademy.com/" },
-                { label: "Mentorship", path: "https://www.codoacademy.com/" },
+                { label: "CODO Agency", path: "https://codai.cloud/", external: true },
+                { label: "BugRicer", path: "https://bugricer.com/", external: true },
+                { label: "Notify", path: "https://notify.bugricer.com/", external: true },
+                { label: "PageNow", path: "https://pagenow.in/", external: true },
               ].map((link, i) => (
                 <li key={i}>
                   {link.external ? (
@@ -169,46 +219,23 @@ export default function Footer() {
           </Reveal>
 
           {/* Contact Col */}
-          <Reveal delay={0.35} className="lg:col-span-4">
+          <Reveal delay={0.35} className="lg:col-span-2">
             <h4 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "var(--text-primary)", fontWeight: 800, marginBottom: "1.75rem" }}>
               Get in Touch
             </h4>
             <div className="flex flex-col gap-5">
-              <a href="mailto:hello@codo.ai" className="group flex items-center gap-3 text-[1.15rem] font-medium text-white hover:text-[var(--brand-green)] transition-colors w-fit">
-                <div className="p-2 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] group-hover:border-[var(--brand-green)] group-hover:bg-[rgba(0,135,100,0.1)] transition-colors">
-                  <Mail size={18} className="text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] transition-colors" />
+              <a href="mailto:info@codoai.in" className="group flex items-center gap-3 text-[1.05rem] font-medium text-white hover:text-[var(--brand-green)] transition-colors w-fit">
+                <div className="p-2 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] group-hover:border-[var(--brand-green)] group-hover:bg-[rgba(0,135,100,0.1)] transition-colors flex shrink-0">
+                  <Mail size={16} className="text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] transition-colors" />
                 </div>
-                hello@codo.ai
+                info@codoai.in
               </a>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.6 }}>
-                Kozhikode, Kerala
-                <br />India
+                +91 8848676627<br /><br />
+                2nd Floor, Paravath Arcade,<br />
+                Varangode, Malappuram,<br />
+                Kerala 676519
               </p>
-              
-              {/* Start a Conversation Button */}
-              <Link href="/contact" className="mt-2 inline-block w-fit">
-                <div
-                  onMouseEnter={() => setButtonHovered(true)}
-                  onMouseLeave={() => setButtonHovered(false)}
-                  className="cursor-pointer inline-flex items-center justify-center"
-                  style={{
-                    background: buttonHovered ? "var(--text-primary)" : "var(--brand-green)",
-                    color: buttonHovered ? "var(--background)" : "white",
-                    padding: "0.9rem 2rem",
-                    borderRadius: "999px",
-                    fontWeight: 800,
-                    fontSize: "0.85rem",
-                    letterSpacing: "0.05em",
-                    boxShadow: buttonHovered 
-                      ? "0 10px 30px rgba(255,255,255,0.1)" 
-                      : "0 8px 25px rgba(0, 135, 100, 0.25)",
-                    transform: buttonHovered ? "translateY(-2px)" : "translateY(0)",
-                    transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
-                  }}
-                >
-                  Start a Conversation
-                </div>
-              </Link>
             </div>
           </Reveal>
         </div>

@@ -112,7 +112,7 @@ export default function CTASection() {
       <div className="mx-auto max-w-[1320px]">
         <Reveal delay={0.06}>
           <div
-            className="rounded-[2rem] p-8 md:p-12 mb-12"
+            className="rounded-2xl p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
@@ -251,7 +251,7 @@ export default function CTASection() {
                         : "var(--brand-green)",
                       color: primaryHovered ? "var(--background)" : "white",
                       padding: "1.1rem 2.75rem",
-                      borderRadius: "999px",
+                      borderRadius: "16px",
                       fontWeight: 800,
                       fontSize: "0.88rem",
                       letterSpacing: "0.05em",
@@ -290,7 +290,7 @@ export default function CTASection() {
                         ? "var(--text-primary)"
                         : "var(--text-secondary)",
                       padding: "1.1rem 2.75rem",
-                      borderRadius: "999px",
+                      borderRadius: "16px",
                       fontWeight: 800,
                       fontSize: "0.88rem",
                       letterSpacing: "0.05em",
@@ -391,7 +391,7 @@ export default function CTASection() {
                   alignItems: "center",
                   gap: "0.6rem",
                   padding: "0.5rem 1.25rem",
-                  borderRadius: "999px",
+                  borderRadius: "16px",
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.08)",
                   fontSize: "0.78rem",
