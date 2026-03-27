@@ -18,8 +18,10 @@ export default function EmployeeCard({ employee, index }: Props) {
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.3 } }}
       transition={{ duration: 0.6, ease: EASE, delay: index * 0.05 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

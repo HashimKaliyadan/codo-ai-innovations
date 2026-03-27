@@ -1,13 +1,13 @@
-# Codo AI Innovations
+# CODO AI Innovations
 
-A modern, high-performance frontend landing page built for **Codo AI Innovations**. The application features a sleek design, smooth scrolling, and interactive elements.
+A modern, high-performance frontend landing page built for **CODO AI Innovations**. The application features a sleek design, smooth scrolling, and interactive elements.
 
 ## Tech Stack
 
 - **Framework**: [Next.js](https://nextjs.org/) (App Router)
 - **UI & Styling**: [React](https://react.dev/), [Tailwind CSS v4](https://tailwindcss.com/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **3D Graphics**: [Three.js](https://threejs.org/)
+- **3D Graphics**: [Three.js] (https://threejs.org/)
 - **Smooth Scrolling**: [Lenis](https://lenis.studiofreight.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 

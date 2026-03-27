@@ -15,14 +15,14 @@ import { ArrowUpRight } from "lucide-react";
 
 /* ─── Shared constants ─────────────────────────────────────────────── */
 const ACCENTS = [
-  "#a8ff78",
-  "#4facfe",
-  "#f7971e",
-  "#f093fb",
-  "#43e97b",
-  "#ff6b6b",
-  "#78ffd6",
-  "#c471ed",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
+  "#22c55e",
 ];
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -293,7 +293,7 @@ function ProjectCard({
             style={{
               fontSize: "clamp(4.25rem, 10vw, 8.5rem)",
               fontWeight: 900,
-              fontFamily: "var(--font-syne, 'Syne', sans-serif)",
+              fontFamily: "'DM Sans', sans-serif",
               color: "rgba(255,255,255,0.035)",
             }}
           >
@@ -382,7 +382,7 @@ function ProjectCard({
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.58)",
-                  fontFamily: "var(--font-syne, 'Syne', sans-serif)",
+                  fontFamily: "'DM Sans', sans-serif",
                 }}
                 animate={{
                   opacity: hovered && interactive ? 1 : 0.82,
@@ -409,7 +409,7 @@ function ProjectCard({
                           textTransform: "uppercase",
                           borderColor: "rgba(255,255,255,0.1)",
                           color: "rgba(255,255,255,0.42)",
-                          fontFamily: "var(--font-syne, 'Syne', sans-serif)",
+                          fontFamily: "'DM Sans', sans-serif",
                         }}
                       >
                         {tag}
@@ -424,7 +424,7 @@ function ProjectCard({
                       lineHeight: 1.08,
                       letterSpacing: "-0.03em",
                       color: "var(--text-primary)",
-                      fontFamily: "var(--font-syne, 'Syne', sans-serif)",
+                      fontFamily: "'DM Sans', sans-serif",
                       margin: 0,
                     }}
                     className="truncate"
@@ -434,8 +434,10 @@ function ProjectCard({
                 </div>
 
                 <motion.div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border sm:h-11 sm:w-11"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11"
                   style={{
+                    borderWidth: "1px",
+                    borderStyle: "solid",
                     borderColor: "rgba(255,255,255,0.12)",
                     color: "rgba(255,255,255,0.4)",
                     marginTop: "auto",
@@ -660,7 +662,7 @@ export default function PortfolioPage() {
         </section>
 
         {/* ── Category Filters ─────────────────────────────────────────── */}
-        <section
+        {/* <section
           ref={filterRef}
           style={{
             borderTop: "1px solid rgba(255,255,255,0.05)",
@@ -681,7 +683,6 @@ export default function PortfolioPage() {
                 padding: "clamp(1.5rem, 3vh, 2.5rem) 0",
               }}
             >
-              {/* Filter pills */}
               <div
                 style={{
                   display: "flex",
@@ -721,7 +722,6 @@ export default function PortfolioPage() {
                 })}
               </div>
 
-              {/* Count */}
               <span
                 style={{
                   fontSize: "0.62rem",
@@ -736,7 +736,7 @@ export default function PortfolioPage() {
               </span>
             </motion.div>
           </div>
-        </section>
+        </section> */}
 
         {/* ── Project Grid ─────────────────────────────────────────────── */}
         <section className="relative px-5 pb-20 sm:px-7 sm:pb-24 md:px-10 md:pb-28 xl:px-16 xl:pb-36">

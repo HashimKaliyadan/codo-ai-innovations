@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
+import Image from "next/image";
 
 /* ─────────────────────────────────────────────
    Types & Data
@@ -17,56 +18,61 @@ interface Project {
   year: string;
   stat: string;
   statLabel: string;
+  image: string;
 }
 
 const projects: Project[] = [
   {
     id: 1,
-    category: "Web Platform",
+    category: "Travel Platform",
     name: "Europecalling CRM",
     description:
-      "A full-scale recruitment CRM built for European hiring pipelines — featuring AI-powered candidate matching, smart dashboards, and end-to-end workflow automation.",
-    gradient: "linear-gradient(135deg, #005a42 0%, #003366 55%, #001f3f 100%)",
+      "A specialist travel consultancy platform offering custom tour packages, visa guidance, and 24/7 dedicated support across Europe and Eurasia.",
+    gradient: "linear-gradient(135deg, #FFD700 0%, #003366 55%, #000000 100%)",
     tags: ["Next.js", "AI Integration", "CRM"],
     year: "2024",
-    stat: "3×",
-    statLabel: "Faster Hiring",
+    stat: "24/7",
+    statLabel: "Global Support",
+    image: "/images/portfolio/Europecalling-project.png",
   },
   {
     id: 2,
-    category: "Mobile App",
-    name: "Evoka Learning",
+    category: "EdTech Platform",
+    name: "Thazqu Islamic Study",
     description:
-      "A cross-platform mobile learning app delivering personalized AI-driven study paths, live sessions, and progress tracking for students across skill levels.",
-    gradient: "linear-gradient(135deg, #001f3f 0%, #1a3c5e 55%, #005a42 100%)",
-    tags: ["React Native", "AI", "EdTech"],
+      "A modern digital education platform providing structured Quranic studies and Arabic language learning through a personalized one-to-one digital classroom.",
+    gradient: "linear-gradient(135deg, #004D40 0%, #003366 55%, #FFC107 100%)",
+    tags: ["React", "Firebase", "EdTech"],
     year: "2024",
-    stat: "10K+",
-    statLabel: "Active Learners",
+    stat: "5K+",
+    statLabel: "Active Students",
+    image: "/images/portfolio/thazquedu-project.png",
   },
   {
     id: 3,
     category: "Enterprise Software",
     name: "Albedo ERP",
     description:
-      "An enterprise resource planning system tailored for educational institutions — managing admissions, billing, staff, and student performance in one unified platform.",
-    gradient: "linear-gradient(135deg, #1a3c5e 0%, #003366 55%, #005a42 100%)",
-    tags: ["Enterprise", "ERP", "Education"],
+      "A unified enterprise resource planning system for educational institutions, managing admissions, billing, and performance tracking across campuses.",
+    gradient: "linear-gradient(135deg, #6366f1 0%, #003366 55%, #000000 100%)",
+    tags: ["Enterprise", "ERP", "Next.js"],
     year: "2025",
     stat: "100%",
     statLabel: "Unified Ops",
+    image: "/images/portfolio/albedo-project.png",
   },
   {
     id: 4,
-    category: "AI Solution",
-    name: "CODO AI Assistant",
+    category: "Health & Wellness",
+    name: "KUG Oriental Academy",
     description:
-      "An intelligent conversational AI assistant deployed across CODO's internal tools — automating repetitive workflows, surfacing insights, and accelerating team velocity.",
-    gradient: "linear-gradient(135deg, #005a42 0%, #001f3f 70%, #00a855 100%)",
-    tags: ["LLM", "Automation", "AI"],
+      "An ISO-certified institution platform for holistic health education, offering digital curriculum delivery for professional Acupuncture and Ayurveda courses.",
+    gradient: "linear-gradient(135deg, #FFC107 0%, #003366 55%, #004D40 100%)",
+    tags: ["Health Tech", "Education", "React"],
     year: "2025",
-    stat: "60%",
-    statLabel: "Less Manual Work",
+    stat: "98%",
+    statLabel: "Placement Rate",
+    image: "/images/portfolio/Kug-project.png",
   },
 ];
 
@@ -236,7 +242,7 @@ function CardContent({ project }: { project: Project }) {
         height: "100%",
         borderRadius: "16px",
         overflow: "hidden",
-        background: project.gradient,
+        background: "rgba(0,0,0,0.8)", // Dark backdrop for text readability
         border: "1px solid rgba(255,255,255,0.1)",
         display: "flex",
         flexDirection: "column",
@@ -245,6 +251,22 @@ function CardContent({ project }: { project: Project }) {
         position: "relative",
       }}
     >
+      {/* Background Image */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          opacity: 0.6, // Balanced for visibility and text readability
+        }}
+      >
+        <Image
+          src={project.image}
+          alt={project.name}
+          fill
+          className="object-cover transition-transform duration-700 hover:scale-110"
+        />
+      </div>
       {/* Noise texture */}
       <div
         aria-hidden="true"
@@ -272,7 +294,7 @@ function CardContent({ project }: { project: Project }) {
       />
 
       {/* Top row */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
         <div
           style={{
             display: "inline-flex",
@@ -320,6 +342,7 @@ function CardContent({ project }: { project: Project }) {
           top: "2rem", left: "50%",
           transform: "translateX(-50%)",
           opacity: 0.45,
+          zIndex: 1,
         }}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -328,7 +351,7 @@ function CardContent({ project }: { project: Project }) {
       </div>
 
       {/* Bottom content */}
-      <div>
+      <div style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "0.65rem" }}>
           <span style={{ fontSize: "2.4rem", fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: "-0.04em" }}>
             {project.stat}

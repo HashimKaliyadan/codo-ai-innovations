@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { useTransitionParams } from "@/components/transition/TransitionProvider";
 import Image from "next/image";
@@ -34,12 +34,56 @@ const WaveLoader = () => (
   </div>
 );
 
-// ─── Mobile full-screen overlay menu ──────────────────────────────────────────
+// ─── Mobile bottom-sheet drawer menu ──────────────────────────────────────────
+const NAV_ICONS: Record<string, React.JSX.Element> = {
+  "/": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M2 7L8 2L14 7V14H10V10H6V14H2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    </svg>
+  ),
+  "/about": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M2 14C2 11.2 4.7 9 8 9C11.3 9 14 11.2 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  "/services": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="2" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="9" y="2" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="2" y="9" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="9" y="9" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  ),
+  "/portfolio": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M5 4V3C5 2.4 5.4 2 6 2H10C10.6 2 11 2.4 11 3V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  "/blog": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M2 2H14V12H2V2Z" rx="1.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M5 6H11M5 9H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  "/careers": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M2 14L5.5 8L8 11L10.5 6.5L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  "/contact": (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M2 3H14V11H2V3Z" rx="1" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M2 3L8 8.5L14 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+};
+
 function MobileMenu({
   isOpen,
   onClose,
   pathname,
-  isDark,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -49,112 +93,164 @@ function MobileMenu({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          key="mobile-menu"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            display: "flex",
-            flexDirection: "column",
-            padding: "1.5rem",
-            background: "rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-          }}
-          onClick={onClose}
-        >
-          {/* Inner wrapper to prevent clicks on content from accidentally closing if needed, 
-              though in this case clicking anywhere closing the menu is fine. */}
-          <div className="flex flex-col h-full w-full" onClick={(e) => e.stopPropagation()}>
-            {/* Top bar: logo + close */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
-            <Image
-              src={isDark ? "/logos/logo-white.svg" : "/logos/logo.svg"}
-              alt="CODO"
-              width={100}
-              height={28}
-              className="h-8 w-auto object-contain"
-            />
-            <button
-              onClick={onClose}
-              className="w-11 h-11 flex items-center justify-center rounded-2xl border"
-              style={{ background: "rgba(255, 255, 255, 0.1)", borderColor: "rgba(255, 255, 255, 0.2)", color: "var(--text-primary)" }}
-              aria-label="Close menu"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Nav links */}
-          <nav style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.25rem" }}>
-            {menuLinks.map((link, i) => {
-              const isActive = pathname === link.href;
-              return (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.3, ease: "easeOut" }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={onClose}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "1rem 1.25rem",
-                      borderRadius: "1rem",
-                      fontSize: "1.5rem",
-                      fontWeight: 800,
-                      letterSpacing: "-0.01em",
-                      textTransform: "uppercase",
-                      color: isActive ? "var(--text-primary)" : "color-mix(in srgb, var(--text-primary) 45%, transparent)",
-                      background: isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
-                      transition: "color 0.2s",
-                    }}
-                  >
-                    {link.label}
-                    {isActive && (
-                      <span
-                        style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--brand-green)", flexShrink: 0 }}
-                      />
-                    )}
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </nav>
-
-          {/* Bottom CTA */}
-          <Link
-            href="/contact"
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="mobile-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "3.25rem",
-              borderRadius: "1rem",
-              background: "var(--brand-green)",
-              color: "#fff",
-              fontWeight: 800,
-              fontSize: "0.875rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
+              position: "fixed",
+              inset: 0,
+              zIndex: 100,
+              background: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+            }}
+          />
+
+          {/* Bottom sheet */}
+          <motion.div
+            key="mobile-sheet"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 101,
+              borderTopLeftRadius: "24px",
+              borderTopRightRadius: "24px",
+              background: "rgba(12, 12, 14, 0.96)",
+              backdropFilter: "blur(32px)",
+              WebkitBackdropFilter: "blur(32px)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderBottom: "none",
+              paddingBottom: "env(safe-area-inset-bottom, 1.5rem)",
             }}
           >
-            Book a Call
-          </Link>
-          </div>
-        </motion.div>
+            {/* Drag handle */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "1rem 0 0.5rem" }}>
+              <div style={{ width: "32px", height: "4px", borderRadius: "99px", background: "rgba(255,255,255,0.12)" }} />
+            </div>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.5rem 1rem" }}>
+              <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                Navigation
+              </span>
+              <button
+                onClick={onClose}
+                aria-label="Close menu"
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.5)",
+                  cursor: "pointer",
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav style={{ padding: "0 1rem 1.25rem" }}>
+              {menuLinks.map((link, i) => {
+                const isActive = pathname === link.href;
+                return (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.25, ease: "easeOut" }}
+                  >
+                    <Link
+                      href={link.href}
+                      onClick={onClose}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        padding: "0.8rem 1rem",
+                        borderRadius: "12px",
+                        marginBottom: "2px",
+                        color: isActive ? "#fff" : "rgba(255,255,255,0.45)",
+                        background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        letterSpacing: "-0.01em",
+                        transition: "all 0.2s",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <span style={{
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: isActive ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)",
+                        color: isActive ? "var(--brand-green)" : "rgba(255,255,255,0.35)",
+                        flexShrink: 0,
+                        transition: "all 0.2s",
+                      }}>
+                        {NAV_ICONS[link.href] ?? null}
+                      </span>
+                      <span style={{ flex: 1 }}>{link.label}</span>
+                      {isActive && (
+                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--brand-green)", flexShrink: 0 }} />
+                      )}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </nav>
+
+            {/* Bottom CTA */}
+            <div style={{ padding: "0 1rem 1.25rem" }}>
+              <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "1rem" }} />
+              <Link
+                href="/contact"
+                onClick={onClose}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  height: "3rem",
+                  borderRadius: "12px",
+                  background: "var(--brand-green)",
+                  color: "#000",
+                  fontWeight: 800,
+                  fontSize: "0.8rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                }}
+              >
+                Book a Call
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );

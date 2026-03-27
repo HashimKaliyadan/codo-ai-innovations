@@ -15,36 +15,72 @@ interface TeamMember {
 
 const team: TeamMember[] = [
   {
-    name: "Mohammed Rashid",
+    name: "Mohammed Ajmal NK",
     role: "Founder & CEO",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+    image: "/team/mohammed-ajmal.jpg",
     glow: "rgba(0, 200, 120, 0.22)",
   },
   {
-    name: "Sneha Pillai",
-    role: "UI/UX Design Director",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
-    glow: "rgba(60, 160, 255, 0.22)",
+    name: "Aboobacker Fahise",
+    role: "Application Developer",
+    image: "/team/aboobacker-fahise.jpg",
+    glow: "rgba(60, 160, 255, 0.18)",
   },
   {
-    name: "Eileen O'Mara",
-    role: "Head of Global Sales",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop",
-    glow: "rgba(160, 100, 255, 0.22)",
+    name: "Mohammed Ajmal P",
+    role: "Project Coordinator & Tester",
+    image: "/team/mohammed-ajmal-p.jpg",
+    glow: "rgba(255, 160, 40, 0.15)",
   },
   {
-    name: "Arjun Menon",
-    role: "Lead Engineer",
-    image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=2070&auto=format&fit=crop",
-    glow: "rgba(0, 200, 120, 0.18)",
+    name: "Jubairiya",
+    role: "Digital Marketing Executive",
+    image: "/team/jubairiya.jpg",
+    glow: "rgba(255, 100, 160, 0.18)",
   },
   {
-    name: "Faisal Rahman",
-    role: "AI Engineer",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop",
-    glow: "rgba(255, 160, 40, 0.20)",
+    name: "Ayshath Lubaba K A",
+    role: "Fullstack Developer",
+    image: "/team/ayshath-lubaba.jpg",
+    glow: "rgba(0, 200, 120, 0.15)",
   },
-];
+  {
+    name: "Sinan Paravath",
+    role: "Full-Stack Python Developer",
+    image: "/team/sinan-paravath.jpg",
+    glow: "rgba(0, 200, 120, 0.12)",
+  },
+  {
+    name: "Muhammed Irshad K",
+    role: "Full Stack Developer",
+    image: "/team/muhammed-irshad.jpg",
+    glow: "rgba(60, 160, 255, 0.12)",
+  },
+  {
+    name: "Sareefa TP",
+    role: "Full Stack Developer",
+    image: "/team/sareefa-tp.jpg",
+    glow: "rgba(0, 200, 120, 0.12)",
+  },
+  {
+    name: "Jidhin T",
+    role: "Full Stack Developer",
+    image: "/team/jidhin-t.jpg",
+    glow: "rgba(255, 160, 40, 0.10)",
+  },
+  {
+    name: "Abdul Basith",
+    role: "Frontend Developer",
+    image: "/team/abdul-basith.jpg",
+    glow: "rgba(60, 160, 255, 0.10)",
+  },
+  {
+    name: "Mohammed Hashim",
+    role: "Python Full-stack Developer",
+    image: "/team/mohammed-hashim.jpg",
+    glow: "rgba(255, 160, 40, 0.08)",
+  },
+].slice(0, 6);
 
 /* ─────────────────────────────────────────────
    Spring presets

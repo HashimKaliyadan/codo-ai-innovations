@@ -3,7 +3,7 @@ import { employees, DEPARTMENT_COLORS } from "@/data/employees";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import {
   ArrowLeft, Mail, Github, Linkedin, Twitter,
-  Globe, Download, Briefcase, Calendar, MapPin, Layers,
+  Globe, Download, Briefcase, Calendar, MapPin, Layers, BookOpen, Award
 } from "lucide-react";
 
 export function generateStaticParams() {
@@ -20,254 +20,448 @@ export default async function EmployeeProfilePage({
   if (!employee) notFound();
 
   const accent = DEPARTMENT_COLORS[employee.department];
-
-  /* ---------- derived helpers ---------- */
   const emp = employee as unknown as Record<string, unknown>;
 
   const socials = [
-    emp.website  && { icon: <Globe size={15} />,    href: emp.website as string,  label: "Website"  },
-    emp.twitter  && { icon: <Twitter size={15} />,  href: emp.twitter as string,  label: "Twitter"  },
-    emp.github   && { icon: <Github size={15} />,   href: emp.github as string,   label: "GitHub"   },
-    emp.linkedin && { icon: <Linkedin size={15} />, href: emp.linkedin as string, label: "LinkedIn" },
+    emp.website && { icon: <Globe size={13} />, href: emp.website as string, label: "Website" },
+    emp.twitter && { icon: <Twitter size={13} />, href: emp.twitter as string, label: "Twitter" },
+    emp.github && { icon: <Github size={13} />, href: emp.github as string, label: "GitHub" },
+    emp.linkedin && { icon: <Linkedin size={13} />, href: emp.linkedin as string, label: "LinkedIn" },
   ].filter(Boolean) as { icon: React.ReactNode; href: string; label: string }[];
 
   const meta = [
-    { icon: <Briefcase size={13} />, label: "Department", value: employee.department },
-    { icon: <Calendar size={13} />,  label: "Joined",     value: String(employee.joinedYear) },
-    { icon: <MapPin size={13} />,    label: "Location",   value: (emp.location as string) ?? "Remote" },
-    { icon: <Layers size={13} />,    label: "Status",     value: (emp.status as string)  ?? "Full-time" },
+    { icon: <Briefcase size={10} />, label: "Dept", value: employee.department },
+    { icon: <Calendar size={10} />, label: "Since", value: String(employee.joinedYear) },
+    { icon: <MapPin size={10} />, label: "Location", value: (emp.location as string) ?? "Remote" },
+    { icon: <Layers size={10} />, label: "Status", value: (emp.status as string) ?? "Full-time" },
   ];
 
   const services = (emp.services ?? []) as { icon: React.ReactNode; title: string; description?: string }[];
+  
+  // Dummy data for new sections to make the profile look fuller
+  // In a real app, this would come from the employee data object
+  const experience = [
+    { role: "Current Position", company: "CODO AI Innovations", period: `${employee.joinedYear} - Present` },
+    { role: "Previous Role", company: "Tech Solutions Inc.", period: "2019 - 2022" },
+  ];
+  
+  const education = [
+    { degree: "Bachelor of Technology", institution: "University of Engineering", year: "2019" },
+    { degree: "Advanced Certification", institution: "Tech Institute", year: "2021" },
+  ];
+
+  const employeeIndex = employees.findIndex((e) => e.slug === slug) + 1;
 
   return (
     <main
       style={{
-        display: "flex",
         height: "100dvh",
         maxHeight: "100dvh",
         overflow: "hidden",
-        background: "#000",
+        background: "#060606",
         fontFamily: "'DM Sans', sans-serif",
         position: "relative",
       }}
     >
-      {/* ---- inline hover styles (Server Component safe) ---- */}
+      {/* ────────────────────────────────────────
+          GLOBAL KEYFRAMES & UTILITY CLASSES
+      ──────────────────────────────────────── */}
       <style>{`
-        .emp-social { display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);transition:all .22s ease;text-decoration:none }
-        .emp-social:hover { background:${accent}18;border-color:${accent}45;color:${accent};transform:translateY(-2px) }
-        .emp-cta-primary { display:flex;align-items:center;justify-content:center;gap:7px;height:40px;border-radius:11px;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;background:${accent};color:#000;text-decoration:none;transition:opacity .2s,transform .2s }
-        .emp-cta-primary:hover { opacity:0.84;transform:translateY(-1px) }
-        .emp-cta-secondary { display:flex;align-items:center;justify-content:center;gap:7px;height:40px;border-radius:11px;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);text-decoration:none;transition:all .2s }
-        .emp-cta-secondary:hover { border-color:${accent}40;color:${accent};transform:translateY(-1px) }
-        .emp-skill { padding:6px 13px;border-radius:99px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.62);transition:all .2s;cursor:default }
-        .emp-skill:hover { background:${accent}14;border-color:${accent}35;color:${accent} }
-        .emp-svc-card { padding:1.15rem;border-radius:13px;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:9px;transition:border-color .25s }
-        .emp-svc-card:hover { border-color:${accent}32 }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes grain {
+          0%,100%{transform:translate(0,0)}
+          10%{transform:translate(-2%,-3%)}20%{transform:translate(3%,1%)}
+          30%{transform:translate(-1%,4%)}40%{transform:translate(4%,-2%)}
+          50%{transform:translate(-3%,3%)}60%{transform:translate(2%,-4%)}
+          70%{transform:translate(-4%,1%)}80%{transform:translate(3%,2%)}
+          90%{transform:translate(-2%,-1%)}
+        }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes riseUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes marquee{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes pulse  { 0%,100%{opacity:.4} 50%{opacity:.7} }
+
+        .grain-tex {
+          position:absolute;inset:-50%;width:200%;height:200%;pointer-events:none;
+          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+          opacity:.032;animation:grain 3s steps(1) infinite;
+        }
+        .panel-l { animation: fadeIn  .5s ease forwards; }
+        .panel-r { animation: riseUp  .55s .07s ease both; }
+
+        .social-btn {
+          display:flex;align-items:center;justify-content:center;
+          width:30px;height:30px;border-radius:7px;
+          background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+          color:rgba(255,255,255,.4);text-decoration:none;transition:all .2s;
+        }
+        .social-btn:hover{background:${accent}1a;border-color:${accent}50;color:${accent};transform:translateY(-2px)}
+
+        .chip {
+          display:inline-flex;align-items:center;white-space:nowrap;
+          padding:4px 13px;border-radius:99px;font-size:.63rem;font-weight:600;
+          background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+          color:rgba(255,255,255,.44);transition:all .18s;cursor:default;
+        }
+        .chip:hover{background:${accent}14;border-color:${accent}38;color:${accent}}
+
+        .meta-card{
+          display:flex;flex-direction:column;gap:4px;
+          padding:10px 13px;border-radius:10px;
+          background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.055);
+          transition:border-color .2s;overflow:hidden;
+        }
+        .meta-card:hover{border-color:${accent}30}
+
+        .btn-primary{
+          display:inline-flex;align-items:center;gap:6px;
+          height:37px;padding:0 18px;border-radius:9px;
+          font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+          background:${accent};color:#000;text-decoration:none;transition:all .2s;
+        }
+        .btn-primary:hover{opacity:.82;transform:translateY(-1px)}
+
+        .btn-ghost{
+          display:inline-flex;align-items:center;gap:6px;
+          height:37px;padding:0 15px;border-radius:9px;
+          font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+          background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);
+          color:rgba(255,255,255,.5);text-decoration:none;transition:all .2s;
+        }
+        .btn-ghost:hover{border-color:${accent}40;color:${accent};transform:translateY(-1px)}
+
+        .svc-card{
+          padding:12px 14px;border-radius:11px;
+          background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.055);
+          display:flex;flex-direction:column;gap:7px;transition:border-color .22s;
+        }
+        .svc-card:hover{border-color:${accent}30}
+
+        .mq-wrap{overflow:hidden;position:relative}
+        .mq-wrap::before,.mq-wrap::after{
+          content:'';position:absolute;top:0;bottom:0;width:44px;z-index:2;pointer-events:none;
+        }
+        .mq-wrap::before{left:0;background:linear-gradient(90deg,#060606,transparent)}
+        .mq-wrap::after {right:0;background:linear-gradient(-90deg,#060606,transparent)}
+        .mq-track{display:flex;gap:8px;animation:marquee 22s linear infinite}
+
+        .no-scrollbar{scrollbar-width:none}
+        .no-scrollbar::-webkit-scrollbar{display:none}
+
+        :root {
+          --panel-px: clamp(1.5rem, 4vw, 3rem);
+          --section-gap: clamp(1rem, 2.5vh, 1.6rem);
+          --card-bg: rgba(255, 255, 255, 0.024);
+          --card-border: rgba(255, 255, 255, 0.055);
+        }
       `}</style>
 
-      {/* ═══════════════════════════════════════
-          LEFT SIDEBAR (desktop only)
-      ═══════════════════════════════════════ */}
-      <aside
-        className="hidden lg:flex"
-        style={{
-          width: "clamp(240px, 26vw, 300px)",
-          flexShrink: 0,
-          height: "100dvh",
-          flexDirection: "column",
-          alignItems: "center",
-          background: "rgba(255,255,255,0.015)",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-          padding: "clamp(1.5rem, 3.5vh, 2.25rem) clamp(1rem, 2vw, 1.5rem)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Accent glow */}
-        <div aria-hidden style={{ position: "absolute", top: "7rem", left: "50%", transform: "translateX(-50%)", width: "220px", height: "220px", borderRadius: "50%", background: `radial-gradient(circle, ${accent} 0%, transparent 65%)`, filter: "blur(50px)", opacity: 0.16, pointerEvents: "none" }} />
-
-        {/* Grid texture */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px)", backgroundSize: "24px 24px", pointerEvents: "none" }} />
-
-        {/* Vertical Centering Spacer */}
-        <div style={{ marginTop: "auto" }} />
-
-        {/* Photo */}
-        <div style={{ position: "relative", zIndex: 1, width: "clamp(110px, 12vw, 148px)", height: "clamp(110px, 12vw, 148px)", borderRadius: "18px", overflow: "hidden", border: `2px solid ${accent}40`, boxShadow: `0 0 0 4px ${accent}10, 0 16px 48px rgba(0,0,0,0.65)`, marginBottom: "clamp(1rem, 2.2vh, 1.5rem)", flexShrink: 0 }}>
-          <img src={employee.photo} alt={employee.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
-        </div>
-
-        {/* Name */}
-        <h1 style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.35rem)", fontWeight: 900, letterSpacing: "-0.025em", color: "#fff", textAlign: "center", lineHeight: 1.15, marginBottom: "6px", position: "relative", zIndex: 1 }}>
-          {employee.name}
-        </h1>
-
-        {/* Role */}
-        <span style={{ fontSize: "0.68rem", fontWeight: 700, color: accent, letterSpacing: "0.05em", marginBottom: "clamp(0.8rem, 2vh, 1.3rem)", position: "relative", zIndex: 1, textAlign: "center" }}>
-          {employee.role}
-        </span>
-
-        {/* Dept badge */}
-        <span style={{ display: "inline-block", padding: "4px 10px", borderRadius: "6px", fontSize: "0.56rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.14em", background: `${accent}14`, border: `1px solid ${accent}30`, color: accent, marginBottom: "clamp(1.1rem, 2.8vh, 1.8rem)", position: "relative", zIndex: 1 }}>
-          {employee.department}
-        </span>
-
-        {/* Divider */}
-        <div style={{ width: "100%", height: "1px", background: `linear-gradient(90deg, transparent, ${accent}28, transparent)`, marginBottom: "clamp(1rem, 2.2vh, 1.5rem)", position: "relative", zIndex: 1 }} />
-
-        {/* Socials */}
-        {socials.length > 0 && (
-          <div style={{ display: "flex", gap: "8px", marginBottom: "3rem", position: "relative", zIndex: 1, flexWrap: "wrap", justifyContent: "center" }}>
-            {socials.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="emp-social">
-                {s.icon}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {/* Bottom Spacer to push block up from buttons */}
-        <div style={{ marginBottom: "auto" }} />
-
-        {/* CTAs pinned to bottom */}
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px", position: "relative", zIndex: 1 }}>
-          <div style={{ height: "1px", background: "rgba(255,255,255,0.05)", marginBottom: "4px" }} />
-
-          <Link href="/about" className="emp-cta-secondary">
-            <ArrowLeft size={13} /> Back to Team
-          </Link>
-
-          <a href={`mailto:${employee.email}`} className="emp-cta-primary">
-            <Mail size={13} /> Contact Me
-          </a>
-
-          {(emp.cvUrl as string) && (
-            <a href={emp.cvUrl as string} download className="emp-cta-secondary">
-              <Download size={13} /> Download CV
-            </a>
-          )}
-        </div>
-      </aside>
-
-      {/* ═══════════════════════════════════════
-          RIGHT PANEL — scrollable (desktop)
-      ═══════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════
+          DESKTOP  — 100dvh two-panel grid
+      ══════════════════════════════════════════ */}
       <div
-        className="hidden lg:flex no-scrollbar"
-        style={{ flex: 1, height: "100dvh", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none", msOverflowStyle: "none", position: "relative" }}
+        className="hidden lg:grid"
+        style={{ height: "100dvh", gridTemplateColumns: "37% 63%", position: "relative" }}
       >
-        {/* Vertical Centering Wrapper */}
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100%", padding: "4rem 0" }}>
-          <div style={{ width: "100%", maxWidth: "780px", margin: "0 auto", padding: "0 clamp(2rem, 5vw, 4rem)" }}>
+        {/* Vertical rule between panels */}
+        <div aria-hidden style={{
+          position: "absolute", left: "37%", top: "12%", bottom: "12%",
+          width: "1px", zIndex: 10, pointerEvents: "none",
+          background: `linear-gradient(to bottom, transparent, ${accent}32 28%, ${accent}32 72%, transparent)`,
+        }} />
 
-            {/* About */}
-            <section style={{ marginBottom: "clamp(2rem, 5vh, 3.5rem)" }}>
-              <SectionHeading accent={accent} text="About Me" />
-              <p style={{ fontSize: "1.05rem", lineHeight: 1.85, color: "rgba(255,255,255,0.55)", maxWidth: "100%" }}>
+        {/* ════ LEFT  ─ Photo panel ════ */}
+        <div className="panel-l" style={{ position: "relative", overflow: "hidden" }}>
+          <div className="grain-tex" aria-hidden />
+
+          {/* Photo */}
+          <img
+            src={employee.photo} alt={employee.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
+          />
+
+          {/* Gradient overlays */}
+          <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #060606 0%, rgba(6,6,6,.7) 32%, rgba(6,6,6,.18) 58%, transparent 78%)" }} />
+
+          {/* Top accent line */}
+
+
+
+          {/* ── Bottom identity ── */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "1.75rem 1.75rem 1.6rem" }}>
+            <div aria-hidden style={{
+              position: "absolute", right: "1.25rem", bottom: "1.1rem",
+              fontSize: "7rem", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em",
+              color: "rgba(255,255,255,.015)", userSelect: "none", fontVariantNumeric: "tabular-nums",
+            }}>
+              {String(employeeIndex).padStart(2, "0")}
+            </div>
+
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <h1 style={{ fontSize: "clamp(1.25rem, 2vw, 1.6rem)", fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.1, color: "#fff", marginBottom: "3px" }}>
+                {employee.name}
+              </h1>
+              <p style={{ fontSize: ".68rem", fontWeight: 700, color: accent, letterSpacing: ".025em", marginBottom: "1rem" }}>
+                {employee.role}
+              </p>
+              <div style={{ height: "1px", background: `linear-gradient(90deg, ${accent}38, transparent)`, marginBottom: ".85rem" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* ════ RIGHT  ─ Content panel ════ */}
+        <div
+          className="panel-r"
+          style={{
+            display: "flex", flexDirection: "column", height: "100dvh",
+            position: "relative", overflow: "hidden",
+            padding: "0", // Padding moved to internal containers
+          }}
+        >
+          {/* Dot-grid background */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, pointerEvents: "none",
+            backgroundImage: `radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
+            maskImage: "radial-gradient(ellipse 90% 85% at 50% 50%, black, transparent)",
+          }} />
+
+          {/* ── Fixed Top Nav ── */}
+          <div style={{ 
+            padding: "2.5rem var(--panel-px) 1rem", 
+            flexShrink: 0, position: "relative", zIndex: 10,
+            background: "linear-gradient(to bottom, #060606 70%, transparent)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: ".48rem", fontWeight: 700, color: "rgba(255,255,255,.25)", letterSpacing: ".13em", textTransform: "uppercase" }}>Active Status</span>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: accent, boxShadow: `0 0 8px ${accent}90` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Scrollable Content ── */}
+          <div className="flex-1 overflow-y-auto no-scrollbar" style={{ position: "relative", zIndex: 1, padding: "0 var(--panel-px) 2rem" }}>
+            
+            {/* ── About ── */}
+            <div style={{ marginBottom: "var(--section-gap)" }}>
+              <RowLabel accent={accent} text="About" />
+              <p style={{ fontSize: "clamp(.82rem, 1.05vw, .92rem)", lineHeight: 1.8, color: "rgba(255,255,255,.48)", maxWidth: "540px" }}>
                 {employee.bio}
               </p>
-            </section>
+            </div>
 
-            <HR accent={accent} />
+            <Stripe accent={accent} />
 
-            {/* Personal Info */}
-            <section style={{ marginBottom: "clamp(2rem, 5vh, 3.5rem)" }}>
-              <SectionHeading accent={accent} text="Personal Info" />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "12px" }}>
+            {/* ── Info grid ── */}
+            <div style={{ marginBottom: "var(--section-gap)" }}>
+              <RowLabel accent={accent} text="Personal Details" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
                 {meta.map(({ icon, label, value }) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", borderRadius: "12px", background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.055)" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "6px", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", background: `${accent}14`, color: accent, border: `1px solid ${accent}28`, flexShrink: 0, minWidth: "85px", justifyContent: "center" }}>
+                  <div key={label} className="meta-card" style={{ padding: "12px 14px" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: ".5rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".12em", color: accent, marginBottom: "4px" }}>
                       {icon}{label}
                     </span>
-                    <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ fontSize: ".82rem", fontWeight: 700, color: "rgba(255,255,255,.85)", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {value}
                     </span>
                   </div>
                 ))}
               </div>
-            </section>
-
-          <HR accent={accent} />
-
-          {/* Skills */}
-          <section style={{ marginBottom: services.length > 0 ? "clamp(1.75rem, 4vh, 2.75rem)" : 0 }}>
-            <SectionHeading accent={accent} text="Core Expertise" />
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
-              {employee.skills.map((skill) => (
-                <span key={skill} className="emp-skill">
-                  {skill}
-                </span>
-              ))}
             </div>
-          </section>
 
-          {/* Services (optional) */}
-          {services.length > 0 && (
-            <>
-              <HR accent={accent} />
-              <section>
-                <SectionHeading accent={accent} text="My Services" />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: "10px" }}>
-                  {services.map((svc) => (
-                    <div key={svc.title} className="emp-svc-card">
-                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: `${accent}18`, border: `1px solid ${accent}30`, display: "flex", alignItems: "center", justifyContent: "center", color: accent }}>{svc.icon}</div>
-                      <div>
-                        <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>{svc.title}</p>
-                        {svc.description && <p style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.38)", lineHeight: 1.6 }}>{svc.description}</p>}
+            <Stripe accent={accent} />
+
+            {/* ── Skills ── */}
+            <div style={{ marginBottom: "var(--section-gap)" }}>
+              <RowLabel accent={accent} text="Technical Skills" />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {employee.skills.map((skill) => (
+                  <div key={skill} className="chip" style={{ padding: "6px 14px", fontSize: ".68rem", background: "rgba(255,255,255,.025)" }}>
+                    {skill}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Projects Done ── */}
+            {employee.projects && employee.projects.length > 0 && (
+              <>
+                <Stripe accent={accent} />
+                <div style={{ marginBottom: "var(--section-gap)" }}>
+                  <RowLabel accent={accent} text="Projects Done" />
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {employee.projects.map((proj, idx) => (
+                      <div key={idx} style={{ 
+                        padding: "16px", borderRadius: "14px", 
+                        background: "var(--card-bg)", border: "1px solid var(--card-border)",
+                        display: "flex", gap: "16px", alignItems: "flex-start"
+                      }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "10px", background: `${accent}12`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, flexShrink: 0, border: `1px solid ${accent}20` }}>
+                          <Layers size={16} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ fontSize: ".82rem", fontWeight: 700, color: "#fff", marginBottom: "4px" }}>{proj.title}</h4>
+                          <p style={{ fontSize: ".72rem", color: "rgba(255,255,255,.4)", lineHeight: 1.5 }}>{proj.description}</p>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <Stripe accent={accent} />
+
+            {/* ── Experience ── */}
+            <div style={{ marginBottom: "var(--section-gap)" }}>
+              <RowLabel accent={accent} text="Professional Path" />
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {experience.map((exp, idx) => (
+                  <div key={idx} style={{ 
+                    padding: "14px 18px", borderRadius: "14px", 
+                    background: "var(--card-bg)", border: "1px solid var(--card-border)",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    transition: "border-color 0.2s"
+                  }} className="hover:border-[rgba(255,255,255,0.1)]">
+                    <div>
+                      <h4 style={{ fontSize: ".78rem", fontWeight: 700, color: "#fff", marginBottom: "3px" }}>{exp.role}</h4>
+                      <p style={{ fontSize: ".68rem", color: "rgba(255,255,255,.45)" }}>{exp.company}</p>
                     </div>
+                    <span style={{ fontSize: ".62rem", fontWeight: 700, color: accent, background: `${accent}12`, padding: "5px 12px", borderRadius: "20px", border: `1px solid ${accent}25` }}>
+                      {exp.period}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Stripe accent={accent} />
+
+            {/* ── Education & Certifications ── */}
+            <div style={{ marginBottom: "var(--section-gap)" }}>
+              <RowLabel accent={accent} text="Education" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                {education.map((edu, idx) => (
+                  <div key={idx} style={{ 
+                    padding: "14px", borderRadius: "14px", 
+                    background: "var(--card-bg)", border: "1px solid var(--card-border)",
+                    display: "flex", gap: "14px", alignItems: "center"
+                  }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "10px", background: `${accent}12`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, flexShrink: 0, border: `1px solid ${accent}20` }}>
+                      {idx === 0 ? <BookOpen size={16} /> : <Award size={16} />}
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: ".75rem", fontWeight: 700, color: "#fff", marginBottom: "3px", lineHeight: 1.2 }}>{edu.degree}</h4>
+                      <p style={{ fontSize: ".65rem", color: "rgba(255,255,255,.4)" }}>{edu.institution}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Services (optional) ── */}
+            {services.length > 0 && (
+              <>
+                <Stripe accent={accent} />
+                <div style={{ marginBottom: "var(--section-gap)" }}>
+                  <RowLabel accent={accent} text="Expertise" />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "10px" }}>
+                    {services.map((svc) => (
+                      <div key={svc.title} className="svc-card" style={{ padding: "14px" }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${accent}15`, border: `1px solid ${accent}25`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, marginBottom: "4px" }}>
+                          {svc.icon}
+                        </div>
+                        <div>
+                          <p style={{ fontSize: ".75rem", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>{svc.title}</p>
+                          {svc.description && <p style={{ fontSize: ".65rem", color: "rgba(255,255,255,.35)", lineHeight: 1.5 }}>{svc.description}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* ── Fixed Bottom Bar ── */}
+          <div style={{ 
+            padding: "1.2rem var(--panel-px) 2.2rem",
+            background: "linear-gradient(to top, #060606 80%, transparent)",
+            position: "relative", zIndex: 10, flexShrink: 0
+          }}>
+            <div style={{ height: "1px", background: `linear-gradient(90deg, ${accent}30, rgba(255,255,255,.05) 60%, transparent)`, marginBottom: "1.5rem" }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <a href={`mailto:${employee.email}`} className="btn-primary" style={{ padding: "0 22px" }}>
+                  <Mail size={12} /> Get in Touch
+                </a>
+                <Link href="/about" className="btn-ghost" style={{ padding: "0 14px" }}>
+                  <ArrowLeft size={12} /> Team
+                </Link>
+                {(emp.cvUrl as string) && (
+                  <a href={emp.cvUrl as string} download className="btn-ghost" style={{ padding: "0 14px" }}>
+                    <Download size={12} />
+                  </a>
+                )}
+              </div>
+
+              {socials.length > 0 && (
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {socials.map((s) => (
+                    <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="social-btn" style={{ width: "34px", height: "34px" }}>
+                      {s.icon}
+                    </a>
                   ))}
                 </div>
-              </section>
-            </>
-          )}
-
-        </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════
-          MOBILE — full page stacked layout
-      ═══════════════════════════════════════ */}
-      <div className="lg:hidden no-scrollbar" style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto", background: "#000", scrollbarWidth: "none", msOverflowStyle: "none" }}>
 
-        {/* Empty space for top sticky nav - optional, removing for cleaner look */}
+      {/* ══════════════════════════════════════════
+          MOBILE  — stacked scrollable
+      ══════════════════════════════════════════ */}
+      <div
+        className="lg:hidden no-scrollbar"
+        style={{ position: "fixed", inset: 0, zIndex: 50, overflowY: "auto", background: "#060606" }}
+      >
+        <div className="grain-tex" aria-hidden />
 
-        {/* Hero photo */}
-        <div style={{ position: "relative", height: "38dvh", overflow: "hidden" }}>
+        {/* Hero */}
+        <div style={{ position: "relative", height: "44dvh", overflow: "hidden" }}>
           <img src={employee.photo} alt={employee.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #000 0%, transparent 55%)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${accent}, transparent)` }} />
+          <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #060606 0%, rgba(6,6,6,.45) 50%, transparent 82%)" }} />
+
+            <div style={{ position: "absolute", top: "1.25rem", left: "1.25rem", right: "1.25rem", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+              <Link href="/about" className="btn-ghost" style={{ height: "28px", padding: "0 11px", fontSize: ".52rem" }}>
+                <ArrowLeft size={10} /> Back
+              </Link>
+            </div>
         </div>
 
         {/* Identity */}
-        <div style={{ padding: "1.5rem 1.25rem 0", textAlign: "center" }}>
-          <span style={{ display: "inline-block", padding: "3px 9px", borderRadius: "5px", fontSize: "0.54rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.14em", background: `${accent}14`, border: `1px solid ${accent}28`, color: accent, marginBottom: "10px" }}>{employee.department}</span>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 900, letterSpacing: "-0.03em", color: "#fff", marginBottom: "4px" }}>{employee.name}</h1>
-          <p style={{ fontSize: "0.78rem", fontWeight: 700, color: accent, marginBottom: "1rem" }}>{employee.role}</p>
-
-          {/* Socials */}
-          <div style={{ display: "flex", justifyContent: "center", gap: "7px", marginBottom: "1rem", flexWrap: "wrap" }}>
-            {socials.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="emp-social">
-                {s.icon}
-              </a>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", justifyContent: "center", marginBottom: "2rem", maxWidth: "260px", margin: "0 auto 2rem" }}>
-            <Link href="/about" style={{ display: "inline-flex", alignItems: "center", gap: "6px", height: "40px", padding: "0 18px", borderRadius: "10px", fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", justifyContent: "center" }}>
-              <ArrowLeft size={13} /> Back to Team
-            </Link>
-            <a href={`mailto:${employee.email}`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", height: "40px", padding: "0 18px", borderRadius: "10px", fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", background: accent, color: "#000", textDecoration: "none", justifyContent: "center" }}>
-              <Mail size={13} /> Contact
+        <div style={{ padding: "1.25rem 1.25rem 0", textAlign: "center", position: "relative" }}>
+          <h1 style={{ fontSize: "1.65rem", fontWeight: 900, letterSpacing: "-0.03em", color: "#fff", marginBottom: "3px" }}>{employee.name}</h1>
+          <p style={{ fontSize: ".72rem", fontWeight: 700, color: accent, marginBottom: ".9rem" }}>{employee.role}</p>
+          <div style={{ height: "1px", background: `linear-gradient(90deg, transparent, ${accent}35, transparent)`, marginBottom: ".9rem" }} />
+          {socials.length > 0 && (
+            <div style={{ display: "flex", justifyContent: "center", gap: "7px", marginBottom: "1rem", flexWrap: "wrap" }}>
+              {socials.map((s) => (
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="social-btn">
+                  {s.icon}
+                </a>
+              ))}
+            </div>
+          )}
+          <div style={{ display: "flex", gap: "7px", justifyContent: "center", marginBottom: "1.75rem" }}>
+            <a href={`mailto:${employee.email}`} className="btn-primary" style={{ height: "36px" }}>
+              <Mail size={11} /> Contact
             </a>
             {(emp.cvUrl as string) && (
-              <a href={emp.cvUrl as string} download style={{ display: "inline-flex", alignItems: "center", gap: "6px", height: "40px", padding: "0 18px", borderRadius: "10px", fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", justifyContent: "center" }}>
-                <Download size={13} /> CV
+              <a href={emp.cvUrl as string} download className="btn-ghost" style={{ height: "36px" }}>
+                <Download size={11} /> CV
               </a>
             )}
           </div>
@@ -275,55 +469,77 @@ export default async function EmployeeProfilePage({
 
         {/* Content */}
         <div style={{ padding: "0 1.25rem 4rem" }}>
-          <section style={{ marginBottom: "1.75rem" }}>
-            <SectionHeading accent={accent} text="About Me" />
-            <p style={{ fontSize: "0.87rem", lineHeight: 1.8, color: "rgba(255,255,255,0.48)" }}>{employee.bio}</p>
+          <section style={{ marginBottom: "1.5rem" }}>
+            <RowLabel accent={accent} text="About" />
+            <p style={{ fontSize: ".85rem", lineHeight: 1.82, color: "rgba(255,255,255,.46)" }}>{employee.bio}</p>
           </section>
-          <HR accent={accent} />
-          <section style={{ marginBottom: "1.75rem" }}>
-            <SectionHeading accent={accent} text="Personal Info" />
+          <Stripe accent={accent} />
+          <section style={{ marginBottom: "1.5rem" }}>
+            <RowLabel accent={accent} text="Info" />
             <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
               {meta.map(({ icon, label, value }) => (
-                <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.055)" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "0.58rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: accent }}>{icon}{label}</span>
-                  <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>{value}</span>
+                <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: "9px", background: "rgba(255,255,255,.025)", border: "1px solid rgba(255,255,255,.055)" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: ".52rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".1em", color: accent }}>{icon}{label}</span>
+                  <span style={{ fontSize: ".78rem", fontWeight: 600, color: "rgba(255,255,255,.72)" }}>{value}</span>
                 </div>
               ))}
             </div>
           </section>
-          <HR accent={accent} />
-          <section>
-            <SectionHeading accent={accent} text="Core Expertise" />
+          <Stripe accent={accent} />
+          <section style={{ marginBottom: "1.5rem" }}>
+            <RowLabel accent={accent} text="Technical Skills" />
             <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
               {employee.skills.map((skill) => (
-                <span key={skill} className="emp-skill">
-                  {skill}
-                </span>
+                <div key={skill} className="chip" style={{ background: "rgba(255,255,255,.025)" }}>{skill}</div>
               ))}
             </div>
           </section>
+          {employee.projects && employee.projects.length > 0 && (
+            <>
+              <Stripe accent={accent} />
+              <section style={{ marginBottom: "1.5rem" }}>
+                <RowLabel accent={accent} text="Projects Done" />
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {employee.projects.map((proj, idx) => (
+                    <div key={idx} style={{ padding: "14px", borderRadius: "12px", background: "rgba(255,255,255,.02)", border: "1px solid rgba(255,255,255,.05)", display: "flex", gap: "12px" }}>
+                      <div style={{ width: 32, height: 32, borderRadius: "8px", background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center", color: accent, flexShrink: 0 }}>
+                        <Layers size={14} />
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: ".78rem", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>{proj.title}</h4>
+                        <p style={{ fontSize: ".68rem", color: "rgba(255,255,255,.4)", lineHeight: 1.5 }}>{proj.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </div>
-
     </main>
   );
 }
 
-/* ── Shared helpers ── */
+/* ── Shared sub-components ── */
 
-function SectionHeading({ accent, text }: { accent: string; text: string }) {
-  const parts = text.split(" ");
-  const first = parts[0];
-  const rest = parts.slice(1).join(" ");
+function RowLabel({ accent, text }: { accent: string; text: string }) {
   return (
-    <h2 style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.25rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "#fff", marginBottom: "clamp(0.9rem, 2vh, 1.3rem)" }}>
-      <span style={{ color: accent }}>{first}</span>{rest ? ` ${rest}` : ""}
-    </h2>
+    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+      <div style={{ width: "3px", height: "13px", borderRadius: "2px", background: accent, flexShrink: 0 }} />
+      <span style={{ fontSize: ".49rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".17em", color: "rgba(255,255,255,.3)" }}>
+        {text}
+      </span>
+    </div>
   );
 }
 
-function HR({ accent }: { accent: string }) {
+function Stripe({ accent }: { accent: string }) {
   return (
-    <div style={{ height: "1px", background: `linear-gradient(90deg, ${accent}22, rgba(255,255,255,0.04) 40%, transparent)`, margin: "clamp(1.5rem, 3.5vh, 2.5rem) 0" }} />
+    <div style={{
+      height: "1px",
+      background: `linear-gradient(90deg, ${accent}15, rgba(255,255,255,.02) 50%, transparent)`,
+      margin: "0 0 var(--section-gap)",
+    }} />
   );
 }

@@ -5,12 +5,13 @@ import { motion, useInView } from "framer-motion";
 import { Search } from "lucide-react";
 import { employees, DEPARTMENTS, type Employee } from "@/data/employees";
 import EmployeeCard from "./EmployeeCard";
+import { AnimatePresence } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function TeamGrid() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-6% 0px" });
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-6% 0px" });
 
   const [search, setSearch] = useState("");
   const [activeDept, setActiveDept] = useState<string>("All");
@@ -39,7 +40,7 @@ export default function TeamGrid() {
 
   return (
     <section
-      ref={ref}
+      ref={sectionRef}
       style={{
         background: "#000",
         padding: "clamp(5rem, 10vh, 8rem) 0",
@@ -267,13 +268,15 @@ export default function TeamGrid() {
             gap: "clamp(1.5rem, 2.5vw, 2rem)",
           }}
         >
-          {filtered.slice(0, visibleCount).map((emp, i) => (
-            <EmployeeCard key={emp.id} employee={emp} index={i} />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {filtered.slice(0, visibleCount).map((emp, i) => (
+              <EmployeeCard key={emp.id} employee={emp} index={i} />
+            ))}
+          </AnimatePresence>
         </div>
 
-        {/* ── Show More Button ── */}
-        {filtered.length > visibleCount && (
+        {/* ── Show More/Less Buttons ── */}
+        {(filtered.length > visibleCount || visibleCount > 8) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -281,38 +284,76 @@ export default function TeamGrid() {
             style={{
               display: "flex",
               justifyContent: "center",
+              gap: "1.5rem",
               marginTop: "3rem",
             }}
           >
-            <button
-              onClick={() => setVisibleCount((prev) => prev + 8)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(0, 255, 136, 0.05)";
-                e.currentTarget.style.borderColor = "rgba(0, 255, 136, 0.4)";
-                e.currentTarget.style.color = "var(--brand-green)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
-                e.currentTarget.style.color = "#fff";
-              }}
-              style={{
-                padding: "12px 28px",
-                borderRadius: "100px",
-                background: "transparent",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                color: "#fff",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontFamily: "'DM Sans', sans-serif",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-              }}
-            >
-              Show More Team
-            </button>
+            {filtered.length > visibleCount && (
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 8)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(0, 255, 136, 0.05)";
+                  e.currentTarget.style.borderColor = "rgba(0, 255, 136, 0.4)";
+                  e.currentTarget.style.color = "var(--brand-green)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                style={{
+                  padding: "12px 28px",
+                  borderRadius: "100px",
+                  background: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#fff",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Show More Team
+              </button>
+            )}
+
+            {visibleCount > 8 && (
+              <button
+                onClick={() => {
+                  setVisibleCount(8);
+                  sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 100, 100, 0.05)";
+                  e.currentTarget.style.borderColor = "rgba(255, 100, 100, 0.4)";
+                  e.currentTarget.style.color = "#ff6464";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                style={{
+                  padding: "12px 28px",
+                  borderRadius: "100px",
+                  background: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#fff",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Show Less
+              </button>
+            )}
           </motion.div>
         )}
 
