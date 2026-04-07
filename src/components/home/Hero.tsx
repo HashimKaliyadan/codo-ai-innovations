@@ -120,7 +120,7 @@ export default function Hero() {
                 {phase === 1 && (
                   <motion.img
                     key="hero-logo"
-                    src="/logos/codo.png"
+                    src="/logos/codowhite.png"
                     alt="CODO Logo"
                     initial={{ opacity: 0, scale: 0.4, filter: "blur(10px)" }}
                     animate={{ opacity: 1, scale: 0.8, filter: "blur(0px)" }}
