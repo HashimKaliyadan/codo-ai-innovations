@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
@@ -31,6 +31,15 @@ const CTAClass = [
 const CTALabelClass =
   "text-[0.7rem] sm:text-xs font-black tracking-[0.22em] uppercase whitespace-nowrap transition-transform duration-300 group-hover:-translateX-1";
 
+const HERO_PHASE_TIMINGS = {
+  logo: 500,
+  grid: 1200,
+  row: 1850,
+  text: 2500,
+} as const;
+
+const EASE_SMOOTH: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
@@ -39,12 +48,19 @@ export default function Hero() {
   // 0: Dot Stacked | 1: Logo | 2: 2x2 Grid | 3: Horizontal Row | 4: Morph to Text
   const [phase, setPhase] = useState(0);
 
+  // Fix: prevent browser from restoring scroll position on reload
+  useLayoutEffect(() => {
+    if (typeof window !== "undefined") {
+      window.history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   useEffect(() => {
-    // Orchestrate the timeline of the animation sequence for a buttery smooth and snappy effect
-    const t1 = setTimeout(() => setPhase(1), 400);  // Reveal Logo
-    const t2 = setTimeout(() => setPhase(2), 1200); // Split Logo to 2x2 Grid
-    const t3 = setTimeout(() => setPhase(3), 1800); // Spread into Row
-    const t4 = setTimeout(() => setPhase(4), 2400); // Crossfade morph to Text
+    const t1 = setTimeout(() => setPhase(1), HERO_PHASE_TIMINGS.logo);
+    const t2 = setTimeout(() => setPhase(2), HERO_PHASE_TIMINGS.grid);
+    const t3 = setTimeout(() => setPhase(3), HERO_PHASE_TIMINGS.row);
+    const t4 = setTimeout(() => setPhase(4), HERO_PHASE_TIMINGS.text);
 
     return () => {
       clearTimeout(t1);
@@ -109,7 +125,7 @@ export default function Hero() {
                     initial={{ opacity: 0, scale: 0.4, filter: "blur(10px)" }}
                     animate={{ opacity: 1, scale: 0.8, filter: "blur(0px)" }}
                     exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.8, ease: EASE_SMOOTH }}
                     style={{
                       height: "clamp(60px, 15vw, 180px)",
                       width: "auto",
@@ -124,13 +140,20 @@ export default function Hero() {
                 layout
                 initial={false}
                 style={{
-                  display: phase < 3 ? "grid" : "flex",
-                  gridTemplateColumns: phase === 2 ? "1fr 1fr" : "1fr",
-                  gap: phase === 2 ? "12px" : phase >= 3 ? "clamp(50px, 12vw, 150px)" : "0px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: (phase === 0 || phase >= 2) ? (phase === 4 ? 0 : 1) : 0,
+                  display: "grid",
+                  gridTemplateColumns:
+                    phase >= 3 ? "repeat(4, auto)" : phase === 2 ? "repeat(2, auto)" : "1fr",
+                  gridTemplateRows: phase === 2 ? "repeat(2, auto)" : "1fr",
+                  gap:
+                    phase === 2
+                      ? "clamp(10px, 1.4vw, 18px)"
+                      : phase >= 3
+                        ? "clamp(42px, 9vw, 112px)"
+                        : "0px",
+                  placeItems: "center",
                 }}
+                animate={{ opacity: phase === 1 || phase === 4 ? 0 : 1 }}
+                transition={{ duration: 0.45, ease: EASE_SMOOTH }}
               >
                 {LETTERS.map((l, i) => (
                   <motion.div
@@ -142,12 +165,12 @@ export default function Hero() {
                       opacity: phase === 0 ? 1 : (phase >= 2 && phase < 4 ? 1 : 0),
                     }}
                     transition={{
-                      layout: { type: "spring", stiffness: 250, damping: 22 },
-                      scale: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                      opacity: { duration: 0.3, delay: phase === 4 ? i * 0.05 : 0 },
+                      layout: { type: "spring", stiffness: 165, damping: 20, mass: 0.9 },
+                      scale: { duration: 0.72, ease: EASE_SMOOTH },
+                      opacity: { duration: 0.45, delay: phase === 4 ? i * 0.06 : 0, ease: EASE_SMOOTH },
                     }}
                     style={{
-                      gridArea: phase === 0 ? "1 / 1" : "auto",
+                      gridArea: phase < 2 ? "1 / 1" : "auto",
                       width: "clamp(16px, 2vw, 24px)",
                       height: "clamp(16px, 2vw, 24px)",
                       borderRadius: "50%",
@@ -168,11 +191,12 @@ export default function Hero() {
                   opacity: phase >= 4 ? 1 : 0,
                   filter: phase >= 4 ? "blur(0px)" : "blur(12px)",
                   scale: phase >= 4 ? 1 : 0.6,
+                  y: phase >= 4 ? 0 : 18,
                 }}
                 transition={{
-                  duration: 0.6,
-                  ease: [0.16, 1, 0.3, 1],
-                  delay: phase >= 4 ? i * 0.05 : 0,
+                  duration: 0.75,
+                  ease: EASE_SMOOTH,
+                  delay: phase >= 4 ? 0.08 + i * 0.06 : 0,
                 }}
                 style={{
                   display: "inline-block",
@@ -192,7 +216,7 @@ export default function Hero() {
               y: phase >= 4 ? 0 : 10,
               filter: phase >= 4 ? "blur(0px)" : "blur(4px)",
             }}
-            transition={{ duration: 0.8, delay: phase >= 4 ? 0.2 : 0, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.85, delay: phase >= 4 ? 0.28 : 0, ease: EASE_SMOOTH }}
             style={{
               fontSize: getResponsiveFont(14, 28),
               fontWeight: 500,
@@ -216,11 +240,12 @@ export default function Hero() {
                 opacity: phase >= 4 ? 1 : 0,
                 y: phase >= 4 ? 0 : 20,
               }}
-              transition={{ duration: 0.8, delay: phase >= 4 ? 0.3 : 0, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.85, delay: phase >= 4 ? 0.42 : 0, ease: EASE_SMOOTH }}
             >
               <Link href="/portfolio">
                 <motion.div
                   className={CTAClass}
+                  style={{ willChange: "transform", transform: "translateZ(0)" }}
                   whileHover={{
                     y: -6,
                     scale: 1.05,
@@ -251,7 +276,7 @@ export default function Hero() {
                 opacity: phase >= 4 ? 1 : 0,
                 y: phase >= 4 ? 0 : 20,
               }}
-              transition={{ duration: 0.8, delay: phase >= 4 ? 0.45 : 0, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.85, delay: phase >= 4 ? 0.56 : 0, ease: EASE_SMOOTH }}
             >
               <a
                 href="https://www.codoacademy.com/"
@@ -260,6 +285,7 @@ export default function Hero() {
               >
                 <motion.div
                   className={CTAClass}
+                  style={{ willChange: "transform", transform: "translateZ(0)" }}
                   whileHover={{
                     y: -6,
                     scale: 1.05,

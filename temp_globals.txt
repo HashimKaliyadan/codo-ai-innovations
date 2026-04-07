@@ -1,5 +1,6 @@
-@config "../../tailwind.config.ts";
+﻿@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&display=swap');
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 @font-face {
   font-family: 'Miranda Sans';
@@ -55,7 +56,7 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s; /* delays Chrome's color takeover forever */
 }
 
-/* ── Instant glassmorphism ──
+/* â”€â”€ Instant glassmorphism â”€â”€
    Force GPU compositing layers for every element that uses
    backdrop-filter so the blur is ready on the very first paint. */
 [style*="backdrop-filter"],
@@ -69,7 +70,7 @@ input:-webkit-autofill:active {
   transform: translateZ(0);
 }
 
-/* ── Page Transition Logo Pulse ── */
+/* â”€â”€ Page Transition Logo Pulse â”€â”€ */
 @keyframes pulseLogo {
   0% { transform: scale(0.95); opacity: 0.8; }
   50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4)); }
@@ -79,7 +80,7 @@ input:-webkit-autofill:active {
   animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* ── Custom Slim Scrollbar ── */
+/* â”€â”€ Custom Slim Scrollbar â”€â”€ */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -119,3 +120,4 @@ input:-webkit-autofill:active {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
+
