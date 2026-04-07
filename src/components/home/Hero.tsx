@@ -16,20 +16,20 @@ const LETTERS: { char: string; green: boolean }[] = [
 ];
 
 const CTAClass = [
-  "h-12 px-10",
+  "h-11 px-8 sm:px-10",
   "flex items-center justify-center gap-3",
-  "rounded-full",
-  "bg-transparent",
-  "border border-white/10",
+  "rounded-2xl",
   "backdrop-blur-2xl",
-  "text-white/80 hover:text-white",
+  "text-white font-bold",
   "cursor-pointer",
   "relative overflow-hidden",
   "group",
+  "transition-all duration-300",
+  "shadow-lg",
 ].join(" ");
 
 const CTALabelClass =
-  "text-[0.7rem] sm:text-xs font-black tracking-[0.22em] uppercase whitespace-nowrap transition-transform duration-300 group-hover:-translateX-1";
+  "text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-transform duration-300 group-hover:-translateX-1";
 
 const HERO_PHASE_TIMINGS = {
   logo: 500,
@@ -245,12 +245,16 @@ export default function Hero() {
               <Link href="/portfolio">
                 <motion.div
                   className={CTAClass}
-                  style={{ willChange: "transform", transform: "translateZ(0)" }}
+                  style={{
+                    willChange: "transform",
+                    transform: "translateZ(0)",
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                  }}
                   whileHover={{
                     y: -6,
                     scale: 1.05,
-                    boxShadow: "0 20px 40px rgba(0, 182, 99, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(0, 182, 99, 0.3)",
-                    borderColor: "rgba(0, 182, 99, 0.4)",
+                    border: "1px solid rgba(0, 182, 99, 0.4)",
                   }}
                   whileTap={{ scale: 0.98 }}
                   transition={{
@@ -259,7 +263,9 @@ export default function Hero() {
                     damping: 25,
                   }}
                 >
-                  <span className={CTALabelClass}>Explore Agency</span>
+                  <div className="flex items-center">
+                    <span className={CTALabelClass}>Explore Agency</span>
+                  </div>
                   <motion.div
                     className="absolute right-5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0"
                     transition={{ duration: 0.3 }}
@@ -285,11 +291,15 @@ export default function Hero() {
               >
                 <motion.div
                   className={CTAClass}
-                  style={{ willChange: "transform", transform: "translateZ(0)" }}
+                  style={{
+                    willChange: "transform",
+                    transform: "translateZ(0)",
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                  }}
                   whileHover={{
                     y: -6,
                     scale: 1.05,
-                    boxShadow: "0 20px 40px rgba(255, 255, 255, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2)",
                   }}
                   whileTap={{ scale: 0.98 }}
                   transition={{
@@ -298,7 +308,9 @@ export default function Hero() {
                     damping: 25,
                   }}
                 >
-                  <span className={CTALabelClass}>Explore Academy</span>
+                  <div className="flex items-center">
+                    <span className={CTALabelClass}>Explore Academy</span>
+                  </div>
                   <motion.div
                     className="absolute right-5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0"
                     transition={{ duration: 0.3 }}
