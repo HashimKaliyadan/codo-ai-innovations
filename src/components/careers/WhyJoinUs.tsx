@@ -100,22 +100,7 @@ function ReasonCard({
             pointerEvents: "none",
           }}
         />
-        {/* Number watermark */}
-        <span
-          style={{
-            position: "absolute",
-            top: "1rem",
-            right: "1.25rem",
-            fontSize: "clamp(3rem, 5vw, 4.5rem)",
-            fontWeight: 900,
-            lineHeight: 1,
-            letterSpacing: "-0.05em",
-            color: "rgba(255,255,255,0.06)",
-            userSelect: "none",
-          }}
-        >
-          {reason.number}
-        </span>
+
       </div>
 
       {/* Content section */}

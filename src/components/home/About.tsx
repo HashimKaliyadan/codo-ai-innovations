@@ -132,7 +132,7 @@ export default function AboutSection() {
     offset: ["start end", "end start"],
   });
 
-  const watermarkY = useTransform(sectionProgress, [0, 1], [0, -50]);
+
   const photoY = useTransform(imageProgress, [0, 1], [-48, 48]);
 
   return (
@@ -164,43 +164,7 @@ export default function AboutSection() {
               willChange: "transform",
             }}
           >
-            {/* ── ABOUT watermark — counter-scroll parallax ── */}
-            <motion.div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-                pointerEvents: "none",
-                zIndex: 1,
-                y: watermarkY,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
-                  fontWeight: 900,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  fontFamily: "'DM Sans', sans-serif",
-                  whiteSpace: "nowrap",
-                  userSelect: "none",
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0, 232, 122, 0.072) 45%, rgba(255,255,255,0.022) 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  WebkitTextStroke: "1px rgba(255,255,255,0.06)",
-                  filter: "blur(0.3px)",
-                  transform: "translateY(4%)",
-                }}
-              >
-                ABOUT
-              </span>
-            </motion.div>
+
 
             {/* ── Heading ── */}
             <div className="relative z-10">

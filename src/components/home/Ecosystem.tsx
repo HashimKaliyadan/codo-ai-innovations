@@ -307,42 +307,7 @@ export default function EcosystemSection() {
             overflow: "hidden",
           }}
         >
-          {/* ── ECOSYSTEM watermark ── */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "clamp(4.5rem, 13vw, 10.5rem)",
-                fontWeight: 900,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                fontFamily: "'DM Sans', sans-serif",
-                whiteSpace: "nowrap",
-                userSelect: "none",
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.048) 0%, rgba(0,200,140,0.072) 45%, rgba(255,255,255,0.022) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                WebkitTextStroke: "1px rgba(255,255,255,0.06)",
-                filter: "blur(0.3px)",
-                transform: "translateY(4%)",
-              }}
-            >
-              ECOSYSTEM
-            </span>
-          </div>
+
 
 
           {/* ── Heading ── */}

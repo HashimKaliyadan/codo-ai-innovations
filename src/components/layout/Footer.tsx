@@ -133,10 +133,10 @@ export default function Footer() {
       />
 
       <div className="mx-auto max-w-[1400px] px-6 relative z-10 w-full">
-        
+
         {/* ── Top Half: Grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 md:pb-24 border-b border-[rgba(255,255,255,0.05)]">
-          
+
           {/* Brand Col */}
           <Reveal delay={0.05} className="lg:col-span-4 flex flex-col gap-6">
             <Link href="/" className="inline-block w-fit" aria-label="CODO Home">
@@ -147,15 +147,15 @@ export default function Footer() {
             <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, fontSize: "0.95rem", maxWidth: "340px" }}>
               A collective of elite engineers, designers, and strategists building AI-powered digital products that scale.
             </p>
-            
+
             {/* Social Icons Wrapped */}
             <div className="flex flex-wrap items-center gap-2.5 mt-2 max-w-[340px]">
               {socialLinks.map((social) => (
-                <a 
+                <a
                   key={social.name}
-                  href={social.href} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.name}
                   className="text-[var(--text-secondary)] hover:text-white transition-colors p-2.5 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] hover:border-[var(--brand-green)] hover:bg-[rgba(0,135,100,0.1)] hover:-translate-y-1 transform duration-300"
                 >
@@ -196,7 +196,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-3.5">
               {[
                 { label: "CODO Academy", path: "https://www.codoacademy.com/", external: true },
-                { label: "CODO Agency", path: "https://codai.cloud/", external: true },
+                { label: "CODO Agency", path: "https://codoai.cloud/", external: true },
                 { label: "BugRicer", path: "https://bugricer.com/", external: true },
                 { label: "Notify", path: "https://notify.bugricer.com/", external: true },
                 { label: "PageNow", path: "https://pagenow.in/", external: true },
