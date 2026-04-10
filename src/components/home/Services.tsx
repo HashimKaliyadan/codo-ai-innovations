@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 /* ─────────────────────────────────────────────
    Types & Data
@@ -78,31 +80,7 @@ const services: Service[] = [
 /* ─────────────────────────────────────────────
    Scroll-reveal wrapper
 ───────────────────────────────────────────── */
-function Reveal({
-  children,
-  delay = 0,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const ref = useRef(null);
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={style}
-      initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { Reveal } from "@/components/ui/Reveal";
 
 /* ─────────────────────────────────────────────
    3D Flip Card
@@ -111,6 +89,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
   const [flipped, setFlipped] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (flipped) return;
@@ -227,14 +206,15 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
               overflow: "hidden",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
-              transform: "rotateY(180deg)",
+              transform: "rotateY(180deg) translateZ(0)",
               border: "1px solid var(--glass-border, rgba(255,255,255,0.1))",
               background: "var(--glass-bg, rgba(15,15,20,0.95))",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+              WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
               display: "flex",
               flexDirection: "column",
               padding: "clamp(1.4rem, 3vw, 2rem)",
+              willChange: "transform, opacity",
             }}
           >
             <div
@@ -340,6 +320,7 @@ function FlipCard({ service, delay }: { service: Service; delay: number }) {
    Main Section
 ───────────────────────────────────────────── */
 export default function ServicesSection() {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
   return (
     <section
       aria-label="CODO Agency Services"
@@ -358,11 +339,13 @@ export default function ServicesSection() {
             className="rounded-2xl p-8 md:p-12 mb-12"
             style={{
               background: "var(--glass-bg)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+              WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
               border: "1px solid var(--glass-border)",
               position: "relative",
               overflow: "hidden",
+              willChange: "opacity",
+              transform: "translateZ(0)",
             }}
           >
             {/* Ambient glow — top right */}
@@ -415,7 +398,7 @@ export default function ServicesSection() {
             <div key={service.id} className="md:col-span-6 lg:col-span-3 h-[420px]">
               <FlipCard
                 service={service}
-                delay={0.15 + i * 0.1}
+                delay={0.1 + i * 0.12}
               />
             </div>
           ))}

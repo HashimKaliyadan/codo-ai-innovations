@@ -4,6 +4,9 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import Image from "next/image";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
+import { Reveal } from "@/components/ui/Reveal";
 
 /* ─────────────────────────────────────────────
    Types & Data
@@ -75,35 +78,6 @@ const projects: Project[] = [
     image: "/images/portfolio/Kug-project.png",
   },
 ];
-
-/* ─────────────────────────────────────────────
-   Scroll-reveal wrapper
-───────────────────────────────────────────── */
-function Reveal({
-  children,
-  delay = 0,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const ref = useRef(null);
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={style}
-      initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 /* ─────────────────────────────────────────────
    Layout & animation constants
@@ -234,7 +208,9 @@ function getState(rel: number) {
 /* ─────────────────────────────────────────────
    Card content
 ───────────────────────────────────────────── */
-function CardContent({ project }: { project: Project }) {
+function CardContent({ project, priority = false }: { project: Project; priority?: boolean }) {
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
+
   return (
     <div
       style={{
@@ -264,6 +240,10 @@ function CardContent({ project }: { project: Project }) {
           src={project.image}
           alt={project.name}
           fill
+          priority={priority}
+          placeholder="blur"
+          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+F9PQAJIQN9U9fS3gAAAABJRU5ErkJggg=="
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover transition-transform duration-700 hover:scale-110"
         />
       </div>
@@ -544,7 +524,7 @@ function StackedCarousel() {
                 willChange: "transform, opacity, clip-path",
               }}
             >
-              <CardContent project={project} />
+              <CardContent project={project} priority={relActual === 0} />
             </motion.div>
           );
         })}
@@ -638,10 +618,6 @@ export default function PortfolioSection() {
           className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6"
         >
 
-          {/* ════════════════════════════════
-              BOX 1 — Introduction
-              top-left
-          ════════════════════════════════ */}
           <Reveal delay={0.1} className="md:col-span-6">
             <div
               className="rounded-2xl p-8 md:p-12 flex flex-col h-full"
@@ -683,10 +659,6 @@ export default function PortfolioSection() {
             </div>
           </Reveal>
 
-          {/* ════════════════════════════════
-              BOX 2 — Tech Stack & Metrics
-              bottom-left
-          ════════════════════════════════ */}
           <Reveal delay={0.18} className="md:col-span-6 flex flex-col h-full">
             <div
               className="rounded-2xl p-8 md:p-12 flex flex-col justify-center h-full flex-1"
@@ -760,10 +732,6 @@ export default function PortfolioSection() {
             </div>
           </Reveal>
 
-          {/* ════════════════════════════════
-              BOX 3 — Sliding Stacked Carousel
-              right column, spans both rows
-          ════════════════════════════════ */}
           <Reveal delay={0.26} className="md:col-span-12">
             <div
               className="rounded-2xl p-8 md:p-12 w-full flex flex-col py-16"

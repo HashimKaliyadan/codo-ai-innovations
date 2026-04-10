@@ -36,6 +36,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${dmSans.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <TransitionProvider>
           <TransitionOverlay />

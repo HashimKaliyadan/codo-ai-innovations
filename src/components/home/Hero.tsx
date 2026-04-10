@@ -1,12 +1,16 @@
 "use client";
 
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useLayoutEffect } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MEDIA_QUERIES } from "@/constants/breakpoints";
 import { getResponsiveFont } from "@/lib/responsive";
+import { motion } from "framer-motion";
+
+gsap.registerPlugin(useGSAP);
 
 const LETTERS: { char: string; green: boolean }[] = [
   { char: "C", green: false },
@@ -19,7 +23,6 @@ const CTAClass = [
   "h-11 px-8 sm:px-10",
   "flex items-center justify-center gap-3",
   "rounded-2xl",
-  "backdrop-blur-2xl",
   "text-white font-bold",
   "cursor-pointer",
   "relative overflow-hidden",
@@ -31,22 +34,12 @@ const CTAClass = [
 const CTALabelClass =
   "text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-transform duration-300 group-hover:-translateX-1";
 
-const HERO_PHASE_TIMINGS = {
-  logo: 500,
-  grid: 1200,
-  row: 1850,
-  text: 2500,
-} as const;
-
-const EASE_SMOOTH: [number, number, number, number] = [0.22, 1, 0.36, 1];
+// Using a custom ease comparable to Framer Motion's physical interpolation
+const EASE_SMOOTH = "power3.inOut";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
-
-  // Animation Sequence State
-  // 0: Dot Stacked | 1: Logo | 2: 2x2 Grid | 3: Horizontal Row | 4: Morph to Text
-  const [phase, setPhase] = useState(0);
 
   // Fix: prevent browser from restoring scroll position on reload
   useLayoutEffect(() => {
@@ -56,19 +49,94 @@ export default function Hero() {
     }
   }, []);
 
-  useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), HERO_PHASE_TIMINGS.logo);
-    const t2 = setTimeout(() => setPhase(2), HERO_PHASE_TIMINGS.grid);
-    const t3 = setTimeout(() => setPhase(3), HERO_PHASE_TIMINGS.row);
-    const t4 = setTimeout(() => setPhase(4), HERO_PHASE_TIMINGS.text);
+  useGSAP(() => {
+    // Dynamically calculate coordinate offsets to prevent layout thrashing
+    const getOffsets = () => {
+      const w = window.innerWidth;
+      const g2 = Math.max(10, Math.min(18, w * 0.014));
+      const gRow = Math.max(42, Math.min(112, w * 0.09));
+      const dotSize = Math.max(16, Math.min(24, w * 0.02));
+      
+      const d2 = (g2 + dotSize) / 2;
+      const dRowOffset = gRow + dotSize;
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      return { d2, dRowOffset };
     };
-  }, []);
+
+    const { d2, dRowOffset } = getOffsets();
+    
+    // Set initial states aggressively to prevent FOUC
+    gsap.set(".hero-dot", { scale: 0, opacity: 0, x: 0, y: 0 });
+    gsap.set(".hero-logo", { opacity: 0, scale: 0.4, filter: "blur(10px)" });
+    gsap.set(".hero-letter", { opacity: 0, scale: 0.6, filter: "blur(12px)", y: 18 });
+    gsap.set(".hero-subtitle, .hero-cta-1, .hero-cta-2", { opacity: 0, y: 20, filter: "blur(4px)" });
+    // Remove blur for CTA explicitly
+    gsap.set(".hero-cta-1, .hero-cta-2", { filter: "none" });
+
+    const tl = gsap.timeline({ defaults: { ease: EASE_SMOOTH } });
+
+    // 0: Initial Dot Entrance (0.0s)
+    // Remove stagger so they enter as a perfect single unified dot
+    tl.to(".hero-dot", { 
+      scale: 1, 
+      opacity: 1, 
+      duration: 0.5, 
+      ease: "back.out(1.5)"
+    }, 0);
+
+    // 1: Logo Phase (0.5s start)
+    // Quickly scale/fade out the dots so they don't linger over the logo
+    tl.to(".hero-dot", { scale: 0.5, opacity: 0, duration: 0.25 }, 0.5);
+    tl.to(".hero-logo", { 
+      opacity: 1, 
+      scale: 0.8, 
+      filter: "blur(0px)", 
+      duration: 0.7 
+    }, 0.5);
+
+    // 2: 2x2 Grid Phase (Total Logo Presence: 1.1s, exit starts at exactly 1.5s)
+    // Logo scales up and blurs away
+    tl.to(".hero-logo", { 
+      opacity: 0, 
+      scale: 1.1, 
+      filter: "blur(10px)", 
+      duration: 0.6 
+    }, 1.5);
+    
+    // Dots drop back in (restore scale) and translate mechanically
+    tl.to(".hero-dot", { opacity: 1, scale: 1, duration: 0.45 }, 1.5);
+    // Hardcoded absolute positioning utilizing `x` and `y` natively utilizes the GPU efficiently
+    tl.to(".hero-dot-0", { x: -d2, y: -d2, duration: 0.6 }, 1.5);
+    tl.to(".hero-dot-1", { x: d2, y: -d2, duration: 0.6 }, 1.5);
+    tl.to(".hero-dot-2", { x: -d2, y: d2, duration: 0.6 }, 1.5);
+    tl.to(".hero-dot-3", { x: d2, y: d2, duration: 0.6 }, 1.5);
+
+    // 3: Row Phase (Shifted to 2.0s)
+    tl.to(".hero-dot-0", { x: -1.5 * dRowOffset, y: 0, duration: 0.6 }, 2.0);
+    tl.to(".hero-dot-1", { x: -0.5 * dRowOffset, y: 0, duration: 0.6 }, 2.0);
+    tl.to(".hero-dot-2", { x: 0.5 * dRowOffset, y: 0, duration: 0.6 }, 2.0);
+    tl.to(".hero-dot-3", { x: 1.5 * dRowOffset, y: 0, duration: 0.6 }, 2.0);
+
+    // 4: Text Morph Phase (Shifted to 2.6s)
+    // The dots expand immensely and fade out
+    tl.to(".hero-dot", { 
+      scale: 4, opacity: 0, duration: 0.45, ease: "power2.inOut", stagger: 0.06 
+    }, 2.6);
+
+    // The inner text emerges sharp, creating a visual morph
+    tl.to(".hero-letter", { 
+      opacity: 1, filter: "blur(0px)", scale: 1, y: 0, duration: 0.75, stagger: 0.06 
+    }, 2.6 + 0.08);
+
+    // 5: Support content enters (2.9s)
+    tl.to(".hero-subtitle", { 
+      opacity: 1, y: 0, filter: "blur(0px)", duration: 0.85 
+    }, 2.6 + 0.3);
+
+    tl.to(".hero-cta-1", { opacity: 1, y: 0, duration: 0.85 }, 2.6 + 0.45);
+    tl.to(".hero-cta-2", { opacity: 1, y: 0, duration: 0.85 }, 2.6 + 0.6);
+
+  }, { scope: containerRef }); // Binding context ensures proper cleanup and query selection
 
   return (
     <div
@@ -85,7 +153,7 @@ export default function Hero() {
         <div
           style={{
             textAlign: "center",
-            padding: isMobile ? "0 1.5rem" : "0",
+            padding: isMobile ? "0 1.5rem calc(1.5rem + 80px + env(safe-area-inset-bottom, 0px))" : "0",
           }}
         >
           {/* ─── Wordmark + Dots Animation ──────── */}
@@ -115,108 +183,59 @@ export default function Hero() {
                 zIndex: 10,
               }}
             >
-              {/* ─ (A) The Static Logo Step ─ */}
-              <AnimatePresence>
-                {phase === 1 && (
-                  <motion.img
-                    key="hero-logo"
-                    src="/logos/codowhite.png"
-                    alt="CODO Logo"
-                    initial={{ opacity: 0, scale: 0.4, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, scale: 0.8, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                    transition={{ duration: 0.8, ease: EASE_SMOOTH }}
-                    style={{
-                      height: "clamp(60px, 15vw, 180px)",
-                      width: "auto",
-                      position: "absolute",
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-
-              {/* ─ (B) The Animated Dots Overlay ─ */}
-              <motion.div
-                layout
-                initial={false}
+              <img
+                className="hero-logo"
+                src="/logos/codowhite.png"
+                alt="CODO Logo"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    phase >= 3 ? "repeat(4, auto)" : phase === 2 ? "repeat(2, auto)" : "1fr",
-                  gridTemplateRows: phase === 2 ? "repeat(2, auto)" : "1fr",
-                  gap:
-                    phase === 2
-                      ? "clamp(10px, 1.4vw, 18px)"
-                      : phase >= 3
-                        ? "clamp(42px, 9vw, 112px)"
-                        : "0px",
-                  placeItems: "center",
+                  height: "clamp(60px, 15vw, 180px)",
+                  width: "auto",
+                  position: "absolute",
+                  willChange: "transform, opacity, filter"
                 }}
-                animate={{ opacity: phase === 1 || phase === 4 ? 0 : 1 }}
-                transition={{ duration: 0.45, ease: EASE_SMOOTH }}
-              >
+              />
+
+              {/* Central container to host coordinates for dots */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {LETTERS.map((l, i) => (
-                  <motion.div
+                  <div
                     key={`dot-${i}`}
-                    layout
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{
-                      scale: phase === 0 ? 1 : phase === 4 ? 4 : 1,
-                      opacity: phase === 0 ? 1 : (phase >= 2 && phase < 4 ? 1 : 0),
-                    }}
-                    transition={{
-                      layout: { type: "spring", stiffness: 165, damping: 20, mass: 0.9 },
-                      scale: { duration: 0.72, ease: EASE_SMOOTH },
-                      opacity: { duration: 0.45, delay: phase === 4 ? i * 0.06 : 0, ease: EASE_SMOOTH },
-                    }}
+                    className={`hero-dot hero-dot-${i}`}
                     style={{
-                      gridArea: phase < 2 ? "1 / 1" : "auto",
+                      position: "absolute",
                       width: "clamp(16px, 2vw, 24px)",
                       height: "clamp(16px, 2vw, 24px)",
                       borderRadius: "50%",
                       backgroundColor: l.green ? "#00B663" : "white",
+                      willChange: "transform, opacity",
                     }}
                   />
                 ))}
-              </motion.div>
+              </div>
             </div>
 
             {/* ─── 2. The Final Text Reveal ─── */}
-            {LETTERS.map(({ char, green }, i) => (
-              <motion.span
-                key={`text-${i}`}
-                aria-hidden="true"
-                initial={{ opacity: 0, filter: "blur(12px)", scale: 0.6 }}
-                animate={{
-                  opacity: phase >= 4 ? 1 : 0,
-                  filter: phase >= 4 ? "blur(0px)" : "blur(12px)",
-                  scale: phase >= 4 ? 1 : 0.6,
-                  y: phase >= 4 ? 0 : 18,
-                }}
-                transition={{
-                  duration: 0.75,
-                  ease: EASE_SMOOTH,
-                  delay: phase >= 4 ? 0.08 + i * 0.06 : 0,
-                }}
-                style={{
-                  display: "inline-block",
-                  color: green ? "#00B663" : "white",
-                }}
-              >
-                {char}
-              </motion.span>
-            ))}
+            <div style={{ display: "flex", zIndex: 11, position: "relative" }}>
+              {LETTERS.map(({ char, green }, i) => (
+                <span
+                  key={`text-${i}`}
+                  className="hero-letter"
+                  aria-hidden="true"
+                  style={{
+                    display: "inline-block",
+                    color: green ? "#00B663" : "white",
+                    willChange: "transform, opacity, filter",
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </div>
           </h1>
 
           {/* ─── Subtitle ───────────────────────── */}
-          <motion.p
-            initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-            animate={{
-              opacity: phase >= 4 ? 1 : 0,
-              y: phase >= 4 ? 0 : 10,
-              filter: phase >= 4 ? "blur(0px)" : "blur(4px)",
-            }}
-            transition={{ duration: 0.85, delay: phase >= 4 ? 0.28 : 0, ease: EASE_SMOOTH }}
+          <p
+            className="hero-subtitle"
             style={{
               fontSize: getResponsiveFont(14, 28),
               fontWeight: 500,
@@ -224,24 +243,17 @@ export default function Hero() {
               marginTop: "1.25rem",
               textTransform: "uppercase",
               letterSpacing: "0.32em",
+              willChange: "transform, opacity, filter",
             }}
           >
             AI INNOVATIONS
-          </motion.p>
+          </p>
 
           {/* ─── CTA Buttons ────────────────────── */}
           <div
-            className={`flex gap-5 justify-center mt-12 ${isMobile ? "flex-col items-center" : "flex-row"
-              }`}
+            className={`flex gap-5 justify-center mt-12 ${isMobile ? "flex-col items-center" : "flex-row"}`}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{
-                opacity: phase >= 4 ? 1 : 0,
-                y: phase >= 4 ? 0 : 20,
-              }}
-              transition={{ duration: 0.85, delay: phase >= 4 ? 0.42 : 0, ease: EASE_SMOOTH }}
-            >
+            <div className="hero-cta-1" style={{ willChange: "transform, opacity" }}>
               <Link href="/portfolio">
                 <motion.div
                   className={CTAClass}
@@ -249,6 +261,8 @@ export default function Hero() {
                     willChange: "transform",
                     transform: "translateZ(0)",
                     background: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
                     border: "1px solid rgba(255, 255, 255, 0.2)",
                   }}
                   whileHover={{
@@ -274,16 +288,9 @@ export default function Hero() {
                   </motion.div>
                 </motion.div>
               </Link>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{
-                opacity: phase >= 4 ? 1 : 0,
-                y: phase >= 4 ? 0 : 20,
-              }}
-              transition={{ duration: 0.85, delay: phase >= 4 ? 0.56 : 0, ease: EASE_SMOOTH }}
-            >
+            <div className="hero-cta-2" style={{ willChange: "transform, opacity" }}>
               <a
                 href="https://www.codoacademy.com/"
                 target="_blank"
@@ -295,6 +302,8 @@ export default function Hero() {
                     willChange: "transform",
                     transform: "translateZ(0)",
                     background: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
                     border: "1px solid rgba(255, 255, 255, 0.2)",
                   }}
                   whileHover={{
@@ -319,10 +328,11 @@ export default function Hero() {
                   </motion.div>
                 </motion.div>
               </a>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

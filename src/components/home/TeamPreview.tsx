@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 /* ─────────────────────────────────────────────
    Types & Data
@@ -113,31 +114,7 @@ const AUTOPLAY_MS = 4200;
 /* ─────────────────────────────────────────────
    Scroll-reveal wrapper
 ───────────────────────────────────────────── */
-function Reveal({
-  children,
-  delay = 0,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const ref = useRef(null);
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={style}
-      initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { Reveal } from "@/components/ui/Reveal";
 
 /* ─────────────────────────────────────────────
    Main Section
@@ -379,19 +356,16 @@ export default function TeamSection() {
                           causes a flash on first render.
                           For production, swap to <Image> with priority.
                         */}
-                        <img
+                        <Image
                           src={member.image}
                           alt={`${member.name}, ${member.role}`}
-                          loading={index === 0 ? "eager" : "lazy"}
-                          decoding="async"
-                          fetchPriority={index === 0 ? "high" : "low"}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            objectPosition: "center 20%",
-                            display: "block",
-                          }}
+                          fill
+                          priority={index === 0}
+                          placeholder="blur"
+                          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+F9PQAJIQN9U9fS3gAAAABJRU5ErkJggg=="
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 20vw"
+                          className="object-cover"
+                          style={{ objectPosition: "center 20%" }}
                         />
                       </motion.div>
 

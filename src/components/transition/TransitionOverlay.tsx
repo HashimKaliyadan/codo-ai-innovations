@@ -133,11 +133,10 @@ export function TransitionOverlay() {
           right: 0,
           height: "50%",
           background: "#000",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "flex-end",
           overflow: "hidden",
+          transform: "translateZ(0)",
+          willChange: "transform",
+          backfaceVisibility: "hidden",
         }}
       >
         {/* Logo — top-left of the top panel */}
@@ -155,7 +154,7 @@ export function TransitionOverlay() {
           }}
         >
           <Image
-            src="/logos/logo-white.svg"
+            src="/logos/logo-white.webp"
             alt="CODO AI"
             width={110}
             height={32}
@@ -223,20 +222,18 @@ export function TransitionOverlay() {
           right: 0,
           height: "50%",
           background: "#000",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "flex-end",
           overflow: "hidden",
-          paddingBottom: "clamp(1.5rem, 4vh, 2.5rem)",
-          paddingLeft: "clamp(1.5rem, 5vw, 3.5rem)",
-          paddingRight: "clamp(1.5rem, 5vw, 3.5rem)",
+          transform: "translateZ(0)",
+          willChange: "transform",
+          backfaceVisibility: "hidden",
         }}
       >
-        {/* Bottom metadata row */}
         <div
           style={{
-            width: "100%",
+            position: "absolute",
+            bottom: "clamp(1.5rem, 4vh, 2.5rem)",
+            left: "clamp(1.5rem, 5vw, 3.5rem)",
+            right: "clamp(1.5rem, 5vw, 3.5rem)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -297,17 +294,17 @@ export function TransitionOverlay() {
           </motion.div>
         </div>
 
-        {/* Progress bar */}
         <motion.div
           initial={false}
           animate={{ opacity: isActive ? 1 : 0 }}
           transition={{ duration: 0.3, delay: 0.25 }}
           style={{
-            width: "100%",
+            position: "absolute",
+            bottom: "calc(clamp(1.5rem, 4vh, 2.5rem) - 1.25rem)", // Pinned below the metadata
+            left: "clamp(1.5rem, 5vw, 3.5rem)",
+            right: "clamp(1.5rem, 5vw, 3.5rem)",
             height: "1px",
             background: "rgba(255,255,255,0.08)",
-            marginBottom: "0.85rem",
-            position: "relative",
             overflow: "hidden",
             borderRadius: "1px",
           }}

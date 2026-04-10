@@ -3,6 +3,9 @@
 import { useRef, useState, useEffect } from "react";
 import { useInView, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { TransitionLink as Link } from "@/components/transition/TransitionLink";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
+import { Reveal } from "@/components/ui/Reveal";
 
 /* ─────────────────────────────────────────────
    Animated Stat Counter Hook
@@ -56,6 +59,7 @@ function ElevatedCard(props: CardProps) {
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
 
   // Framer Motion Springs for 3D Tilt
   const x = useMotionValue(0.5);
@@ -94,15 +98,9 @@ function ElevatedCard(props: CardProps) {
   const [ctaHover, setCtaHover] = useState(false);
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0 }}
+    <Reveal
+      delay={props.delay}
       className="md:col-span-6 w-full relative"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       style={{ perspective: "1100px" }}
     >
       {/* ── 3D Card Shell ── */}
@@ -128,9 +126,11 @@ function ElevatedCard(props: CardProps) {
           className="relative rounded-2xl overflow-hidden flex flex-col w-full h-full"
           style={{
             background: "rgba(255,255,255,0.04)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+            WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
             minHeight: "clamp(400px, 50vw, 550px)",
+            willChange: "transform, opacity",
+            transform: "translateZ(0)",
           }}
         >
           {/* Top Line Glow */}
@@ -270,7 +270,7 @@ function ElevatedCard(props: CardProps) {
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </Reveal>
   );
 }
 
@@ -279,6 +279,7 @@ function ElevatedCard(props: CardProps) {
 ───────────────────────────────────────────── */
 export default function EcosystemSection() {
   const sectionRef = useRef(null);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
 
   return (
     <section
@@ -292,19 +293,18 @@ export default function EcosystemSection() {
     >
       <div className="mx-auto max-w-[1240px] relative z-10 w-full">
 
-        {/* ── Header Block ── */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <Reveal
+          delay={0.06}
           className="rounded-2xl p-8 md:p-12 mb-12"
           style={{
             background: "var(--glass-bg)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+            WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
             border: "1px solid var(--glass-border)",
             position: "relative",
             overflow: "hidden",
+            willChange: "opacity",
+            transform: "translateZ(0)",
           }}
         >
 
@@ -326,7 +326,7 @@ export default function EcosystemSection() {
               <span style={{ color: "#00e87a" }}>Two Powerful Arms.</span>
             </h2>
           </div>
-        </motion.div>
+        </Reveal>
 
         {/* ── Interactive Cards Grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

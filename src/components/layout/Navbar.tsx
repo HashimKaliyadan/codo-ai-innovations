@@ -128,9 +128,11 @@ function MobileMenu({
               borderTopLeftRadius: "24px",
               borderTopRightRadius: "24px",
               background: "rgba(12, 12, 14, 0.96)",
-              backdropFilter: "blur(32px)",
-              WebkitBackdropFilter: "blur(32px)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               border: "1px solid rgba(255,255,255,0.08)",
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
               borderBottom: "none",
               paddingBottom: "env(safe-area-inset-bottom, 1.5rem)",
             }}
@@ -255,6 +257,117 @@ function MobileMenu({
     </AnimatePresence>
   );
 }
+// ─── Mobile bottom-bar navigation (Tab Bar) ──────────────────────────────────
+function MobileBottomNav({
+  pathname,
+  onMenuToggle,
+}: {
+  pathname: string;
+  onMenuToggle: () => void;
+}) {
+  const tabs = [
+    { label: "Home", href: "/", icon: NAV_ICONS["/"] },
+    { label: "About", href: "/about", icon: NAV_ICONS["/about"] },
+    { label: "Services", href: "/services", icon: NAV_ICONS["/services"] },
+    { label: "Portfolio", href: "/portfolio", icon: NAV_ICONS["/portfolio"] },
+  ];
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: "rgba(12, 12, 14, 0.82)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        paddingBottom: "env(safe-area-inset-bottom, 1.25rem)",
+        paddingTop: "0.75rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-around",
+        willChange: "transform, opacity",
+        transform: "translateZ(0)",
+      }}
+    >
+      {tabs.map((tab) => {
+        const isActive = pathname === tab.href;
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: isActive ? "var(--brand-green)" : "rgba(255,255,255,0.4)",
+              textDecoration: "none",
+              transition: "all 0.3s ease",
+            }}
+          >
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                background: isActive ? "rgba(0,182,99,0.12)" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {tab.icon}
+            </motion.div>
+            <span style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+              {tab.label}
+            </span>
+          </Link>
+        );
+      })}
+
+      {/* More/Menu button */}
+      <button
+        onClick={onMenuToggle}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "0.4rem",
+          color: "rgba(255,255,255,0.4)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        <motion.div
+          whileTap={{ scale: 0.9 }}
+          style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="4" cy="9" r="1.5" fill="currentColor" />
+            <circle cx="9" cy="9" r="1.5" fill="currentColor" />
+            <circle cx="14" cy="9" r="1.5" fill="currentColor" />
+          </svg>
+        </motion.div>
+        <span style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+          Menu
+        </span>
+      </button>
+    </div>
+  );
+}
 
 // ─── Desktop dropdown menu ─────────────────────────────────────────────────────
 function DesktopMenu({
@@ -276,7 +389,13 @@ function DesktopMenu({
           : "opacity-0 scale-95 max-h-0 p-0 border-none pointer-events-none"
         }
       `}
-      style={{ background: "rgba(255, 255, 255, 0.1)" }}
+      style={{ 
+        background: "rgba(255, 255, 255, 0.1)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        transform: "translateZ(0)",
+        willChange: "transform, opacity"
+      }}
     >
       <ul className="flex flex-col gap-0.5 sm:gap-1">
         {menuLinks.map((link, index) => {
@@ -356,7 +475,10 @@ export default function Navbar() {
 
       {/* Mobile full-screen overlay */}
       {isMobile && (
-        <MobileMenu isOpen={isOpen} onClose={closeMenu} pathname={pathname} isDark={isDark} />
+        <>
+          <MobileMenu isOpen={isOpen} onClose={closeMenu} pathname={pathname} isDark={isDark} />
+          <MobileBottomNav pathname={pathname} onMenuToggle={() => setIsOpen((o) => !o)} />
+        </>
       )}
 
       <nav
@@ -375,14 +497,18 @@ export default function Navbar() {
               style={{
                 background: "rgba(255, 255, 255, 0.1)",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
+                backdropFilter: isMobile ? "blur(12px)" : "blur(20px)",
+                WebkitBackdropFilter: isMobile ? "blur(12px)" : "blur(20px)",
+                transform: "translateZ(0)",
+                willChange: "opacity",
               }}
             >
               <Image
-                src="/logos/logo-white.svg"
+                src="/logos/logo-white.webp"
                 alt="CODO Academy"
                 width={120}
                 height={32}
-                className="h-8 sm:h-10 w-auto object-contain"
+                className="h-7 sm:h-8 w-auto object-contain"
                 priority
               />
             </Link>
@@ -423,38 +549,40 @@ export default function Navbar() {
               )}
 
               {/* Menu toggle button */}
-              <button
-                onClick={() => setIsOpen((o) => !o)}
-                className="h-11 min-w-[110px] sm:min-w-[140px] flex items-center justify-center gap-2 sm:gap-3 text-[var(--text-primary)] rounded-2xl transition-all shadow-lg group cursor-pointer hover:opacity-90 backdrop-blur-2xl"
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                }}
-                aria-label={isOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isOpen}
-              >
-                <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase w-10 sm:w-12 text-center">
-                  {isOpen ? "Close" : "Menu"}
-                </span>
-                <div className="relative w-5 h-1.5 flex items-center justify-center">
-                  <motion.span
-                    animate={{
-                      x: isOpen ? 0 : -4,
-                      backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
-                    }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="w-1.5 h-1.5 rounded-full absolute"
-                  />
-                  <motion.span
-                    animate={{
-                      x: isOpen ? 0 : 4,
-                      backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
-                    }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="w-1.5 h-1.5 rounded-full absolute"
-                  />
-                </div>
-              </button>
+              {!isMobile && (
+                <button
+                  onClick={() => setIsOpen((o) => !o)}
+                  className="h-11 min-w-[110px] sm:min-w-[140px] flex items-center justify-center gap-2 sm:gap-3 text-[var(--text-primary)] rounded-2xl transition-all shadow-lg group cursor-pointer hover:opacity-90 backdrop-blur-2xl"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                  }}
+                  aria-label={isOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={isOpen}
+                >
+                  <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase w-10 sm:w-12 text-center">
+                    {isOpen ? "Close" : "Menu"}
+                  </span>
+                  <div className="relative w-5 h-1.5 flex items-center justify-center">
+                    <motion.span
+                      animate={{
+                        x: isOpen ? 0 : -4,
+                        backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
+                      }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="w-1.5 h-1.5 rounded-full absolute"
+                    />
+                    <motion.span
+                      animate={{
+                        x: isOpen ? 0 : 4,
+                        backgroundColor: isOpen ? "var(--brand-green)" : "var(--text-primary)",
+                      }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="w-1.5 h-1.5 rounded-full absolute"
+                    />
+                  </div>
+                </button>
+              )}
             </div>
 
             {/* Desktop dropdown (only shown outside mobile) */}

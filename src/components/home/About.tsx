@@ -11,6 +11,8 @@ import {
 } from "framer-motion";
 import type { Easing } from "framer-motion";
 import Image from "next/image";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MEDIA_QUERIES } from "@/constants/breakpoints";
 
 /* ─────────────────────────────────────────────
    Shared easing — typed, extracted once
@@ -65,30 +67,7 @@ const CARD_PAD = "clamp(1.75rem, 3.5vw, 2.5rem)";
 /* ─────────────────────────────────────────────
    Scroll-reveal wrapper with scale + y
 ───────────────────────────────────────────── */
-function Reveal({
-  children,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const ref = useRef(null);
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={style}
-      initial={{ opacity: 1, y: 0, scale: 1 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { Reveal } from "@/components/ui/Reveal";
 
 /* ─────────────────────────────────────────────
    Shared card hover props
@@ -113,6 +92,7 @@ function cardHoverProps(isHovered: boolean) {
 export default function AboutSection() {
   const [active, setActive] = useState<Division>("agency");
   const [hovered, setHovered] = useState<"top" | "bottom" | "right" | null>(null);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
 
   const current = divisions.find((d) => d.id === active) ?? divisions[0];
 
@@ -151,18 +131,18 @@ export default function AboutSection() {
         <Reveal delay={0.05}>
           <div
             className="rounded-2xl"
-            style={{
-              background: "var(--glass-bg)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid var(--glass-border)",
-              padding: CARD_PAD,
-              /* ✅ FIX: use the gap-6 equivalent */
-              marginBottom: "1.5rem",
-              position: "relative",
-              overflow: "hidden",
-              willChange: "transform",
-            }}
+              style={{
+                background: "var(--glass-bg)",
+                backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+                WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+                border: "1px solid var(--glass-border)",
+                padding: CARD_PAD,
+                marginBottom: "1.5rem",
+                position: "relative",
+                overflow: "hidden",
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
+              }}
           >
 
 
@@ -219,13 +199,14 @@ export default function AboutSection() {
               className="rounded-2xl flex flex-col h-full"
               style={{
                 background: "var(--glass-bg)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
+                backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+                WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
                 padding: CARD_PAD,
                 border: "1px solid var(--glass-border)",
                 overflow: "hidden",
                 position: "relative",
-                willChange: "transform",
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
               }}
             >
               {/* Corner glow */}
@@ -301,7 +282,7 @@ export default function AboutSection() {
               ✅ mobile: order-3 (pushed last)
           ════════════════════════════════ */}
           <Reveal
-            delay={0.2}
+            delay={0.16}
             className="order-3 md:order-none h-full md:col-span-6 md:row-span-2"
           >
             <motion.div
@@ -435,7 +416,7 @@ export default function AboutSection() {
               bottom-left | mobile: order-2
           ════════════════════════════════ */}
           <Reveal
-            delay={0.28}
+            delay={0.24}
             className="order-2 md:order-none md:col-span-6 flex flex-col h-full"
           >
             <motion.div
@@ -446,14 +427,15 @@ export default function AboutSection() {
               style={{
                 background:
                   "color-mix(in srgb, var(--brand-green) 6%, var(--glass-bg))",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
+                backdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
+                WebkitBackdropFilter: isMobile ? "blur(8px)" : "blur(12px)",
                 padding: CARD_PAD,
                 border:
                   "1px solid color-mix(in srgb, var(--brand-green) 18%, var(--glass-border))",
                 overflow: "hidden",
                 position: "relative",
-                willChange: "transform",
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
               }}
             >
               {/* Bottom-right glow */}
